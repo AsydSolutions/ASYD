@@ -3,7 +3,7 @@ Download and run:
 	git clone https://github.com/Choms/asyd.git
 
 	cd asyd
-        bundle install				# To install sinatra
+	bundle install				# To install sinatra
 
 	ruby app.rb 				# To run the sample
 	
