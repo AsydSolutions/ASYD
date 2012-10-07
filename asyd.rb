@@ -6,7 +6,7 @@ load 'src/helper.rb'
 load 'src/server.rb'
 load 'src/monitor.rb'
 
-monitor
+monitor_all
 
 configure do
   set :public_folder, Proc.new { File.join(root, "static") }
@@ -37,6 +37,7 @@ end
 
 post '/server/add' do
   srv_init(params['name'], params['host'], params['password'])
+  monitor(params['name'])
   serverlist = '/server/list'
   redirect to serverlist 
 end
