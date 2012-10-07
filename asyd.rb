@@ -34,7 +34,7 @@ helpers do
 end
 
 get '/' do
-  erb 'Can you handle a <a href="/secure/place">secret</a>?'
+  erb '- Dashboard -'
 end
 
 get '/server/list' do
