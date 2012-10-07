@@ -15,7 +15,7 @@ def monitor(srv)
     f = File.open(path, "r")
     host = f.gets
     var_name = "$up_" + name
-    Net::SSH.start(host.strip, "root", :keys => "data/private_key") do |ssh|
+    Net::SSH.start(host.strip, "root", :keys => "data/ssh_key") do |ssh|
       while true do
         uptime = ssh.exec!("uptime")
         eval("#{var_name} = uptime")
