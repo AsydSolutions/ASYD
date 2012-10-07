@@ -1,5 +1,6 @@
 require 'net/ssh'
 require 'net/scp'
+require 'FileUtils'
 
 def srv_init(name, host, password)
   Net::SSH.start(host, "root", :password => password) do |ssh|
