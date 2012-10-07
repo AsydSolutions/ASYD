@@ -2,9 +2,11 @@
 
 require 'rubygems'
 require 'sinatra'
-require 'pathname'
-require 'find'
+load 'src/helper.rb'
 load 'src/server.rb'
+load 'src/monitor.rb'
+
+monitor
 
 configure do
   set :public_folder, Proc.new { File.join(root, "static") }
@@ -15,22 +17,6 @@ helpers do
   def username
     session[:identity] ? session[:identity] : 'Hello stranger'
   end
-
-  def get_dirs path
-    dir_array = Array.new
-    Pathname.new(path).children.select do |dir|
-      dir_array << dir.basename
-    end
-    return dir_array
-  end
-
-  def get_files path
-    files_array = Array.new
-    Find.find(path) do |f|
-      files_array << File.basename(f, "*")
-    end
-    return files_array
-  end  
 end
 
 get '/' do
@@ -45,7 +31,8 @@ end
 get '/server/:name' do
   f = File.open("data/servers/"+params[:name]+"/srv.info", "r")
   @host = f.gets
-  erb 'Hostname for <%=params[:name]%> is <%=@host%>'
+  @var_name = "$up_"+params[:name]
+  erb 'Hostname for <%=params[:name]%> is <%=@host%>, uptime: <%=eval("#{@var_name}")%>'
 end
 
 post '/server/add' do
