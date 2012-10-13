@@ -7,6 +7,10 @@ $(function() {
     $("#import").toggle();
   });
 
+  $(".import_key").click(function() {
+    $("#gen").toggle();
+  });
+
   $('.srv').width(
     Math.max.apply(
       Math,
@@ -15,6 +19,8 @@ $(function() {
       }).get()
     )
   );
+
+  $("input,select,textarea").not("[type=submit]").jqBootstrapValidation();
 
   $('div.btn-group[data-toggle-name=*]').each(function(){
     var group   = $(this);

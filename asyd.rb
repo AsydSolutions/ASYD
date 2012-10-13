@@ -3,13 +3,17 @@
 require 'rubygems'
 require 'sinatra'
 load 'src/helper.rb'
+load 'src/setup.rb'
 load 'src/server.rb'
 load 'src/monitor.rb'
 
-monitor_all
+if File.directory? 'data'
+  monitor_all
+end
 
 configure do
   set :public_folder, Proc.new { File.join(root, "static") }
+  #set :environment, :production
   enable :sessions
 end
 
@@ -20,7 +24,25 @@ helpers do
 end
 
 get '/' do
-  erb '- Dashboard -'
+  if File.directory? 'data'
+    erb "- Dashboard -"
+  else
+    erb :setup
+  end
+end
+
+post '/setup' do
+  home = '/'
+  if File.directory? 'data'
+    redirect to home
+  else
+    if params['generate'] == '1'
+      setup(params['password'])
+    else
+      setup()
+    end
+  end
+  redirect to home
 end
 
 get '/server/list' do

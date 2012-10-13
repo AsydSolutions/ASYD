@@ -5,6 +5,6 @@ Download and run:
 	cd asyd
 	bundle install				# To install sinatra
 
-	ruby app.rb 				# To run the sample
+	ruby asyd.rb 				# To run asyd
 	
 Then open [http://localhost:4567/](http://localhost:4567/)

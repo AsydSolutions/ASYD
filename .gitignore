@@ -1,3 +1,1 @@
-data/servers/*
-data/ssh_key.pub
-data/private_key
+data
