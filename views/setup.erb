@@ -1,4 +1,4 @@
-<form id="setup" action='/setup' method='post' class="form-inline well">
+<form id="setup" action='/setup' method='post' enctype='multipart/form-data' class="form-inline well">
   <h1> Setup </h1>
   <legend></legend>
   <div class="btn-group control-group" data-toggle-name="generate" data-toggle="buttons-radio" >
@@ -6,18 +6,18 @@
     <button type="button" value="0" class="btn import_key" data-toggle="button">Import key pair</button>
   </div>
   <input type="hidden" name="generate" value="1" />
-  <div id="gen" class="control-group"><input name='password' type="password" class="input-xlarge" required minlength="5" data-validation-minlength-message="5 characters minimum" placeholder="Private key passphrase"><p class="help-block"></p></div>
+  <div id="gen" class="control-group"><input name='password' type="password" class="input-xlarge" minlength="5" data-validation-minlength-message="5 characters minimum" placeholder="Private key passphrase"><p class="help-block"></p></div>
   <div id="import" style="display:none">
     <div class="control-group">
       <label class="control-label" for="priv_key">Private key</label>
       <div class="controls">
-        <input class="input-file" id="priv_key" type="file">
+        <input class="input-file" name="priv_key" type="file">
       </div>
     </div>
     <div class="control-group">
       <label class="control-label" for="pub_key">Public key</label>
       <div class="controls">
-        <input class="input-file" id="pub_key" type="file">
+        <input class="input-file" name="pub_key" type="file">
       </div>
     </div>
   </div>

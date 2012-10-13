@@ -37,9 +37,17 @@ post '/setup' do
     redirect to home
   else
     if params['generate'] == '1'
+      if params['password'] == ""
+        @error = 'Password required'
+        halt erb(:setup)
+      end
       setup(params['password'])
     else
-      setup()
+      if params[:priv_key].nil? || params[:pub_key].nil?
+        @error = 'All files required'
+        halt erb(:setup)
+      end
+      setup(params[:priv_key], params[:pub_key])
     end
   end
   redirect to home
