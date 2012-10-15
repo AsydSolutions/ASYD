@@ -24,12 +24,3 @@ def srv_init(name, host, password)
   f.puts dist
   f.close
 end
-
-def check_dist
-  file = ssh.exec "which yum"
-  if file.include? "/yum"
-    return "yum"
-  else
-    return "apt"
-  end
-end
