@@ -2,10 +2,10 @@
 
 require 'rubygems'
 require 'sinatra'
-load 'src/helper.rb'
-load 'src/setup.rb'
-load 'src/server.rb'
-load 'src/monitor.rb'
+load 'inc/helper.rb'
+load 'inc/setup.rb'
+load 'inc/server.rb'
+load 'inc/monitor.rb'
 
 if File.directory? 'data'
   monitor_all
@@ -23,12 +23,37 @@ helpers do
   end
 end
 
+
+if File.directory? 'data'
+
 get '/' do
-  if File.directory? 'data'
     erb "- Dashboard -"
-  else
-    erb :setup
-  end
+end
+
+get '/server/list' do
+  @arr = get_dirs("data/servers/")
+  erb :serverlist
+end
+
+get '/server/:name' do
+  f = File.open("data/servers/"+params[:name]+"/srv.info", "r")
+  @host = f.gets
+  @var_name = "$up_"+params[:name]
+  erb 'Hostname for <%=params[:name]%> is <%=@host%>, uptime: <%=eval("#{@var_name}")%>'
+end
+
+post '/server/add' do
+  srv_init(params['name'], params['host'], params['password'])
+  monitor(params['name'])
+  serverlist = '/server/list'
+  redirect to serverlist 
+end
+
+# if not data show setup
+else
+get '*' do
+  erb :setup
+end
 end
 
 post '/setup' do
@@ -52,28 +77,6 @@ post '/setup' do
   end
   redirect to home
 end
-
-get '/server/list' do
-  @arr = get_dirs("data/servers/")
-  erb :serverlist
-end
-
-get '/server/:name' do
-  f = File.open("data/servers/"+params[:name]+"/srv.info", "r")
-  @host = f.gets
-  @var_name = "$up_"+params[:name]
-  erb 'Hostname for <%=params[:name]%> is <%=@host%>, uptime: <%=eval("#{@var_name}")%>'
-end
-
-post '/server/add' do
-  srv_init(params['name'], params['host'], params['password'])
-  monitor(params['name'])
-  serverlist = '/server/list'
-  redirect to serverlist 
-end
-
-
-
 
 
 
