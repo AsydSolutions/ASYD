@@ -32,6 +32,10 @@ end
 
 get '/server/list' do
   @arr = get_dirs("data/servers/")
+  if $error
+    @error = $error
+    $error = nil
+  end
   erb :serverlist
 end
 
@@ -46,7 +50,10 @@ post '/server/add' do
   srv_init(params['name'], params['host'], params['password'])
   monitor(params['name'])
   serverlist = '/server/list'
-  redirect to serverlist 
+  if @error
+    $error = @error
+  end
+  redirect to serverlist
 end
 
 # if not data show setup

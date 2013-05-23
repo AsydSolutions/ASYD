@@ -3,11 +3,10 @@ require 'net/scp'
 require 'fileutils'
 
 def srv_init(name, host, password)
+  begin
   distro,dist_name,dist_ver,pkg_mgr = ""
 
   Net::SSH.start(host, "root", :password => password) do |ssh|
-    ssh.scp.upload!("data/ssh_key.pub", "/tmp/ssh_key.pub")
-    ssh.exec "mkdir -p /root/.ssh && touch /root/.ssh/authorized_keys && cat /tmp/ssh_key.pub >> /root/.ssh/authorized_keys && rm /tmp/ssh_key.pub"
     ssh.exec!("cat /etc/issue")  do |channel, stream, data|
       distro << data if stream == :stdout
     end
@@ -20,7 +19,12 @@ def srv_init(name, host, password)
       pkg_mgr = "apt"
     elsif dist_name == "Fedora" or dist_name == "CentOS"
       pkg_mgr = "yum"
+    else
+      exit
     end
+
+    ssh.scp.upload!("data/ssh_key.pub", "/tmp/ssh_key.pub")
+    ssh.exec "mkdir -p /root/.ssh && touch /root/.ssh/authorized_keys && cat /tmp/ssh_key.pub >> /root/.ssh/authorized_keys && rm /tmp/ssh_key.pub"
 
   end
 
@@ -31,4 +35,9 @@ def srv_init(name, host, password)
   f.puts dist_ver
   f.puts pkg_mgr
   f.close
+
+  rescue SystemExit
+    @error = 'Unsupported system'
+    return @error
+  end
 end
