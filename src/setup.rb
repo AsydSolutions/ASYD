@@ -3,7 +3,7 @@ require 'fileutils'
 def setup(*params)
   FileUtils.mkdir_p("data/servers")
   if params.length == 1
-    `ssh-keygen -f data/ssh_key -t rsa -P "#{params[0]}"`
+    `ssh-keygen -f data/ssh_key -t rsa -N ""`
   elsif params.length == 2
     File.open('data/ssh_key', "w") do |f|
       f.write(params[0][:tempfile].read)
