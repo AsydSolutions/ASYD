@@ -6,6 +6,7 @@ load 'inc/helper.rb'
 load 'inc/setup.rb'
 load 'inc/server.rb'
 load 'inc/monitor.rb'
+load 'inc/sw_manager.rb'
 
 if File.directory? 'data'
   monitor_all
@@ -23,25 +24,38 @@ helpers do
   end
 end
 
-
-if File.directory? 'data'
-
-get '/' do
-    erb "- Dashboard -"
-end
-
-get '/server/list' do
-  @arr = get_dirs("data/servers/")
+def alerts
   if $error
     @error = $error
     $error = nil
   end
+  if $info
+    @info = $info
+    $info = nil
+  end
+  if $done
+    @done = $done
+    $done = nil
+  end
+end
+
+if File.directory? 'data'
+
+get '/' do
+  alerts
+  erb "- Dashboard -"
+end
+
+## SERVERS BLOCK START
+get '/server/list' do
+  @arr = get_dirs("data/servers/")
+  alerts
   erb :serverlist
 end
 
 get '/server/:name' do
   f = File.open("data/servers/"+params[:name]+"/srv.info", "r")
-  @host = f.gets
+  @host = f.gets.strip
   @var_name = "$up_"+params[:name]
   erb 'Hostname for <%=params[:name]%> is <%=@host%>, uptime: <%=eval("#{@var_name}")%>'
 end
@@ -55,6 +69,25 @@ post '/server/add' do
   end
   redirect to serverlist
 end
+## SERVERS BLOCK END
+
+## PACKAGES BLOCK START
+get '/packages/list' do
+  @arr = get_dirs("data/servers/")
+  alerts
+  erb :packages
+end
+
+post '/packages/add' do
+  fork do
+    install_pkg(params['host'],params['package'])
+  end
+  $info = "Installation in progress"
+  packages = '/packages/list'
+  redirect to packages
+end
+## PACKAGES BLOCK END
+
 
 # if not data show setup
 else
