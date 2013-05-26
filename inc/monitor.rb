@@ -13,7 +13,7 @@ def monitor(srv)
     name = srv.to_s
     path = "data/servers/" + name + "/srv.info"
     f = File.open(path, "r")
-    host = f.gets
+    host = f.gets.strip
     var_name = "$up_" + name
     Net::SSH.start(host.strip, "root", :keys => "data/ssh_key") do |ssh|
       while true do
