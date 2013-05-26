@@ -79,7 +79,8 @@ get '/packages/list' do
 end
 
 post '/packages/add' do
-  fork do
+  $rd, $wr = IO.pipe
+  threadA = Thread.fork do
     install_pkg(params['host'],params['package'])
   end
   $info = "Installation in progress"
