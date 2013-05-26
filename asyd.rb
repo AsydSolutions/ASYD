@@ -48,7 +48,7 @@ end
 
 ## SERVERS BLOCK START
 get '/server/list' do
-  @arr = get_dirs("data/servers/")
+  @hosts = get_dirs("data/servers/")
   alerts
   erb :serverlist
 end
@@ -71,23 +71,22 @@ post '/server/add' do
 end
 ## SERVERS BLOCK END
 
-## PACKAGES BLOCK START
-get '/packages/list' do
-  @arr = get_dirs("data/servers/")
+## DEPLOYS BLOCK START
+get '/deploys/list' do
+  @hosts = get_dirs("data/servers/")
   alerts
-  erb :packages
+  erb :deploys
 end
 
-post '/packages/add' do
-  $rd, $wr = IO.pipe
-  threadA = Thread.fork do
+post '/deploys/install-pkg' do
+  inst = Thread.fork do
     install_pkg(params['host'],params['package'])
   end
   $info = "Installation in progress"
-  packages = '/packages/list'
-  redirect to packages
+  deploys = '/deploys/list'
+  redirect to deploys
 end
-## PACKAGES BLOCK END
+## DEPLOYS BLOCK END
 
 
 # if not data show setup

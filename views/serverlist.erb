@@ -1,15 +1,15 @@
 <div class="well">
   <legend>Server list</legend>
-  <% @arr.each do |page| %>
+  <% @hosts.each do |host| %>
     <h5><div class="btn-group">
-    <a class="btn btn-success srv" href="/server/<%=page%>"><%=page%></a>
+    <a class="btn btn-success srv" href="/server/<%=host%>"><%=host%></a>
           <a class="btn btn-success dropdown-toggle" data-toggle="dropdown" href="#"><span class="caret"></span></a>
           <ul class="dropdown-menu">
             <li><a href="#">Action</a></li>
             <li><a href="#">Another action</a></li>
             <li><a href="#">Something else here</a></li>
             <li class="divider"></li>
-            <li><a href="/server/del/<%=page%>">Delete</a></li>
+            <li><a href="/server/del/<%=host%>">Delete</a></li>
           </ul>
         </div></h5>
   <% end %>
