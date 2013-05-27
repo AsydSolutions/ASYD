@@ -83,7 +83,16 @@ post '/deploys/install-pkg' do
   inst = Thread.fork do
     install_pkg(params['host'],params['package'])
   end
-  $info = "Installation in progress"
+  sleep 0.2
+  if not $error
+    $info = "Installation in progress"
+  end
+  deploys = '/deploys/list'
+  redirect to deploys
+end
+
+get '/deploys/deploy/:dep' do
+  deploy("test",params[:dep])
   deploys = '/deploys/list'
   redirect to deploys
 end

@@ -10,6 +10,9 @@ def install_pkg(host,pkg)
     dist_name = f.gets.strip
     dist_ver  = f.gets.strip
     pkg_mgr = f.gets.strip
+    if pkg.include? "&" or pkg.include? "|" or pkg.include? ">" or pkg.include? "<" or pkg.include? "`" or pkg.include? "$"
+      exit
+    end
     if pkg_mgr == "apt"
       cmd = pkg_mgr+"-get -y -q install "+pkg
     end
@@ -26,8 +29,12 @@ def install_pkg(host,pkg)
         return $done
       end
     end
-  rescue StandardError
-    $error = 'Something really bad happened when installing packages'
+  rescue StandardError,SystemExit => e
+    if e.inspect.include? "SystemExit"
+      $error = "Don't try to hack your own server"
+    else
+      $error = "Something really bad happened when installing packages"
+    end
     return $error
   end
 end
@@ -40,25 +47,27 @@ def deploy(host,dep)
     f.each_line do |line|
       if line.start_with?("install:")
         line = line.split(':')
-        pkgs = line[1]
-        p "Installing: "+pkg
+        pkgs = line[1].strip
+
+        p "Installing: "+pkgs
       elsif line.start_with?("config file:")
         line = line.split(':')
         cfg = line[1].split(',')
-        cfg_src = "configs/"+cfg[0]
-        cfg_dst = cfg[1]
+        cfg_src = "configs/"+cfg[0].strip
+        cfg_dst = cfg[1].strip
+
         p "Set up config file "+cfg_src+" as "+cfg_dst
       elsif line.start_with?("config dir:")
         line = line.split(':')
         cfg = line[1].split(',')
-        cfg_src = "configs/"+cfg[0]
-        cfg_dst = cfg[1]
+        cfg_src = "configs/"+cfg[0].strip
+        cfg_dst = cfg[1].strip
+
         p "Set up config directory "+cfg_src+" as "+cfg_dst
       else
         exit
       end
     end
-    f.close
   rescue SystemExit
     @error = 'Bad formatting, check your deploy file'
     return @error
