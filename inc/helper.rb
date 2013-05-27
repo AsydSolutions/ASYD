@@ -1,3 +1,6 @@
+require 'fileutils'
+require 'net/ssh'
+require 'net/scp'
 require 'pathname'
 require 'find'
 
@@ -18,6 +21,34 @@ def get_files path
 end
 
 def exec_cmd(host,cmd)
+  Net::SSH.start(host.strip, "root", :keys => "data/ssh_key") do |ssh|
+    result = ssh.exec!(cmd)
+    return result
+  end
+end
+
+def upload_file(host,src,dest)
+  Net::SSH.start(host.strip, "root", :keys => "data/ssh_key") do |ssh|
+    result = ssh.exec!(cmd)
+    return result
+  end
+end
+
+def download_file(host,src,dest)
+  Net::SSH.start(host.strip, "root", :keys => "data/ssh_key") do |ssh|
+    result = ssh.exec!(cmd)
+    return result
+  end
+end
+
+def upload_dir(host,src,dest)
+  Net::SSH.start(host.strip, "root", :keys => "data/ssh_key") do |ssh|
+    result = ssh.exec!(cmd)
+    return result
+  end
+end
+
+def download_dir(host,src,dest)
   Net::SSH.start(host.strip, "root", :keys => "data/ssh_key") do |ssh|
     result = ssh.exec!(cmd)
     return result

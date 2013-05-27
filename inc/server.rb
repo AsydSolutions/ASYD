@@ -1,16 +1,9 @@
-require 'net/ssh'
-require 'net/scp'
-require 'fileutils'
-
 def srv_init(name, host, password)
   begin
   distro,dist_name,dist_ver,pkg_mgr = ""
+  distro = exec_cmd(host,"cat /etc/issue")
 
   Net::SSH.start(host, "root", :password => password) do |ssh|
-    ssh.exec!("cat /etc/issue")  do |channel, stream, data|
-      distro << data if stream == :stdout
-    end
-
     distro = distro.split
     dist_name = distro[0]
     dist_ver  = distro[2]

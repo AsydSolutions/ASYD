@@ -1,7 +1,3 @@
-require 'net/ssh'
-require 'net/scp'
-require 'fileutils'
-
 def install_pkg(host,pkg)
   begin
     path = "data/servers/"+host+"/srv.info"

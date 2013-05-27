@@ -1,5 +1,3 @@
-require 'fileutils'
-
 def setup(*params)
   FileUtils.mkdir_p("data/servers")
   FileUtils.mkdir_p("data/deploys")

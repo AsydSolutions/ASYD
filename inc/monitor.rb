@@ -1,6 +1,3 @@
-require 'net/ssh'
-require 'net/scp'
-
 def monitor_all
   arr = get_dirs("data/servers/")
   arr.each do |srv|
