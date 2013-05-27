@@ -10,28 +10,28 @@ def install_pkg(host,pkg)
     dist_name = f.gets.strip
     dist_ver  = f.gets.strip
     pkg_mgr = f.gets.strip
+    f.close
+
     if pkg.include? "&" or pkg.include? "|" or pkg.include? ">" or pkg.include? "<" or pkg.include? "`" or pkg.include? "$"
       exit
     end
     if pkg_mgr == "apt"
       cmd = pkg_mgr+"-get -y -q install "+pkg
     end
-    f.close
-    Net::SSH.start(host.strip, "root", :keys => "data/ssh_key") do |ssh|
-      result = ssh.exec!(cmd)
-      if result.include? "\nE: "
-        result = result.split("\n")
-        $error = result.last
-        return $error
-      else
-        result = result.split("\n")
-	$done = result.last
-        return $done
-      end
+
+    result = exec_cmd(host,cmd)
+    if result.include? "\nE: "
+      result = result.split("\n")
+      $error = result.last
+      return $error
+    else
+      result = result.split("\n")
+      $done = result.last
+      return $done
     end
   rescue StandardError,SystemExit => e
     if e.inspect.include? "SystemExit"
-      $error = "Don't try to hack your own server"
+      $error = "Invalid characters detected"
     else
       $error = "Something really bad happened when installing packages"
     end
@@ -64,6 +64,11 @@ def deploy(host,dep)
         cfg_dst = cfg[1].strip
 
         p "Set up config directory "+cfg_src+" as "+cfg_dst
+      elsif line.start_with?("exec:")
+        line = line.split(':')
+        cmd = line[1].strip
+
+        p "Exec "+cmd
       else
         exit
       end
