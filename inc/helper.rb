@@ -27,30 +27,14 @@ def exec_cmd(host,cmd)
   end
 end
 
-def upload_file(host,src,dest)
-  Net::SSH.start(host.strip, "root", :keys => "data/ssh_key") do |ssh|
-    result = ssh.exec!(cmd)
-    return result
+def upload(host, local, remote)
+  Net::SCP.start(host.strip, "root", :keys => "data/ssh_key") do |scp|
+    scp.upload!(local, remote)
   end
 end
 
-def download_file(host,src,dest)
-  Net::SSH.start(host.strip, "root", :keys => "data/ssh_key") do |ssh|
-    result = ssh.exec!(cmd)
-    return result
-  end
-end
-
-def upload_dir(host,src,dest)
-  Net::SSH.start(host.strip, "root", :keys => "data/ssh_key") do |ssh|
-    result = ssh.exec!(cmd)
-    return result
-  end
-end
-
-def download_dir(host,src,dest)
-  Net::SSH.start(host.strip, "root", :keys => "data/ssh_key") do |ssh|
-    result = ssh.exec!(cmd)
-    return result
+def download(host, remote, local)
+  Net::SCP.start(host.strip, "root", :keys => "data/ssh_key") do |scp|
+    scp.download!(remote, local)
   end
 end
