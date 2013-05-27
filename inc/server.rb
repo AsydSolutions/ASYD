@@ -1,9 +1,9 @@
 def srv_init(name, host, password)
   begin
   distro,dist_name,dist_ver,pkg_mgr = ""
-  distro = exec_cmd(host,"cat /etc/issue")
 
   Net::SSH.start(host, "root", :password => password) do |ssh|
+    distro = ssh.exec!("cat /proc/issue")
     distro = distro.split
     dist_name = distro[0]
     dist_ver  = distro[2]
