@@ -17,3 +17,9 @@ def get_files path
   return files_array
 end
 
+def exec_cmd(host,cmd)
+  Net::SSH.start(host.strip, "root", :keys => "data/ssh_key") do |ssh|
+    result = ssh.exec!(cmd)
+    return result
+  end
+end
