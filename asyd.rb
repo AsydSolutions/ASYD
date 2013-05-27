@@ -73,6 +73,7 @@ end
 
 ## DEPLOYS BLOCK START
 get '/deploys/list' do
+  @deploys = get_dirs("data/deploys/")
   @hosts = get_dirs("data/servers/")
   alerts
   erb :deploys
