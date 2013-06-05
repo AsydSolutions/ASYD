@@ -2,7 +2,7 @@ def install_pkg(host,pkg)
   begin
     path = "data/servers/"+host+"/srv.info"
     f = File.open(path, "r")
-    host = f.gets.strip
+    ip = f.gets.strip
     dist_name = f.gets.strip
     dist_ver  = f.gets.strip
     pkg_mgr = f.gets.strip
@@ -15,7 +15,7 @@ def install_pkg(host,pkg)
       cmd = pkg_mgr+"-get -y -q install "+pkg
     end
 
-    result = exec_cmd(host,cmd)
+    result = exec_cmd(ip, cmd)
     if result.include? "\nE: "
       result = result.split("\n")
       $error = result.last
@@ -37,6 +37,15 @@ end
 
 def deploy(host,dep)
   begin
+    path = "data/servers/"+host+"/srv.info"
+    f = File.open(path, "r")
+    ip = f.gets.strip
+    dist_name = f.gets.strip
+    dist_ver  = f.gets.strip
+    pkg_mgr = f.gets.strip
+    f.close
+
+    cfg_root = "data/deploys/"+dep+"/configs/"
     path = "data/deploys/"+dep+"/def"
     f = File.open(path, "r").read
     f.gsub!(/\r\n?/, "\n")
@@ -44,27 +53,28 @@ def deploy(host,dep)
       if line.start_with?("install:")
         line = line.split(':')
         pkgs = line[1].strip
-
+        install_pkg(host, pkgs)
         p "Installing: "+pkgs
       elsif line.start_with?("config file:")
         line = line.split(':')
         cfg = line[1].split(',')
-        cfg_src = "configs/"+cfg[0].strip
+        cfg_src = cfg_root+cfg[0].strip
         cfg_dst = cfg[1].strip
-
-        p "Set up config file "+cfg_src+" as "+cfg_dst
+        upload_file(ip, cfg_src, cfg_dst)
       elsif line.start_with?("config dir:")
         line = line.split(':')
         cfg = line[1].split(',')
-        cfg_src = "configs/"+cfg[0].strip
+        cfg_src = cfg_root+cfg[0].strip
         cfg_dst = cfg[1].strip
-
-        p "Set up config directory "+cfg_src+" as "+cfg_dst
+        upload_dir(ip, cfg_src, cfg_dst)
       elsif line.start_with?("exec:")
         line = line.split(':')
         cmd = line[1].strip
-
-        p "Exec "+cmd
+        exec_cmd(ip, cmd)
+      elsif line.start_with?("monitor:")
+        line = line.split(':')
+        services = line[1].split(' ')
+#        monitor(ip, services.each)
       else
         exit
       end

@@ -6,11 +6,7 @@ load 'inc/helper.rb'
 load 'inc/setup.rb'
 load 'inc/server.rb'
 load 'inc/monitor.rb'
-load 'inc/sw_manager.rb'
-
-if File.directory? 'data'
-  monitor_all
-end
+load 'inc/deployer.rb'
 
 configure do
   set :public_folder, Proc.new { File.join(root, "static") }
@@ -54,10 +50,7 @@ get '/server/list' do
 end
 
 get '/server/:name' do
-  f = File.open("data/servers/"+params[:name]+"/srv.info", "r")
-  @host = f.gets.strip
-  @var_name = "$up_"+params[:name]
-  erb 'Hostname for <%=params[:name]%> is <%=@host%>, uptime: <%=eval("#{@var_name}")%>'
+  erb 'Rewriting monitoring'
 end
 
 post '/server/add' do
@@ -92,7 +85,7 @@ post '/deploys/install-pkg' do
 end
 
 get '/deploys/deploy/:dep' do
-  deploy("test",params[:dep])
+  deploy("Test", params[:dep])
   deploys = '/deploys/list'
   redirect to deploys
 end

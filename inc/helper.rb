@@ -20,21 +20,33 @@ def get_files path
   return files_array
 end
 
-def exec_cmd(host,cmd)
-  Net::SSH.start(host.strip, "root", :keys => "data/ssh_key") do |ssh|
+def exec_cmd(ip, cmd)
+  Net::SSH.start(ip.strip, "root", :keys => "data/ssh_key") do |ssh|
     result = ssh.exec!(cmd)
     return result
   end
 end
 
-def upload(host, local, remote)
-  Net::SCP.start(host.strip, "root", :keys => "data/ssh_key") do |scp|
-    scp.upload!(local, remote)
+def upload_file(ip, local, remote)
+  Net::SSH.start(ip.strip, "root", :keys => "data/ssh_key") do |ssh|
+    ssh.scp.upload!(local, remote)
   end
 end
 
-def download(host, remote, local)
-  Net::SCP.start(host.strip, "root", :keys => "data/ssh_key") do |scp|
-    scp.download!(remote, local)
+def download_file(ip, remote, local)
+  Net::SSH.start(ip.strip, "root", :keys => "data/ssh_key") do |ssh|
+    ssh.scp.download!(remote, local)
+  end
+end
+
+def upload_dir(ip, local, remote)
+  Net::SSH.start(ip.strip, "root", :keys => "data/ssh_key") do |ssh|
+    ssh.scp.upload!(local, remote, :recursive => true)
+  end
+end
+
+def download_dir(ip, remote, local)
+  Net::SSH.start(ip.strip, "root", :keys => "data/ssh_key") do |ssh|
+    ssh.scp.download!(remote, local, :recursive => true)
   end
 end
