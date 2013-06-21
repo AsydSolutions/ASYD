@@ -1,6 +1,6 @@
 Installation on Debian:
 
-	apt-get update && apt-get install ruby rubygems git
+	apt-get update && apt-get install ruby rubygems git libxslt-dev libxml2-dev
 	gem install bundler
 	export PATH=/var/lib/gems/1.8/bin/:${PATH}
 
