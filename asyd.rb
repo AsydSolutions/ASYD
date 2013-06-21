@@ -84,8 +84,8 @@ post '/deploys/install-pkg' do
   redirect to deploys
 end
 
-get '/deploys/deploy/:dep' do
-  deploy("Test", params[:dep])
+get '/deploys/deploy/:host/:dep' do
+  deploy(params[:host], params[:dep])
   deploys = '/deploys/list'
   redirect to deploys
 end
