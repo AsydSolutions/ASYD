@@ -14,3 +14,6 @@ Run ASYD:
 	ruby asyd.rb
 
 Then open [http://localhost:4567/](http://localhost:4567/)
+
+
+**Please read the documentation on http://localhost:4567/help**
