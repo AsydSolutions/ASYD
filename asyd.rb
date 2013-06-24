@@ -85,7 +85,13 @@ post '/deploys/install-pkg' do
 end
 
 get '/deploys/deploy/:host/:dep' do
-  deploy(params[:host], params[:dep])
+  inst = Thread.fork do
+    deploy(params[:host], params[:dep])
+  end
+  sleep 0.2
+  if not $error
+    $info = "Deployment in progress"
+  end
   deploys = '/deploys/list'
   redirect to deploys
 end

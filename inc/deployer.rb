@@ -54,7 +54,6 @@ def deploy(host,dep)
         line = line.split(':')
         pkgs = line[1].strip
         install_pkg(host, pkgs)
-        p "Installing: "+pkgs
       elsif line.start_with?("config file:")
         line = line.split(':')
         cfg = line[1].split(',')
