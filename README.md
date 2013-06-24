@@ -16,4 +16,6 @@ Run ASYD:
 Then open [http://localhost:4567/](http://localhost:4567/)
 
 
-**Please read the documentation on http://localhost:4567/help**
+**Please read the documentation on [http://localhost:4567/help](http://localhost:4567/help)**
+
+And FFS, don't use it in production systems, is still on a very early development stage
