@@ -1,0 +1,35 @@
+<pre>Eveything works via webinterface, except for the deploy delcaration.
+
+Check "Servers" section for adding servers,
+you only need the server IP and the -root- password for adding it to ASYD.
+
+You can also install packages alone on the "Deploys" menu,
+separated by spaces (i.e. htop nano vim).
+
+-- Deploys --
+
+For creating deploys, browse on your ASYD server to the "data/deploys/" directory,
+the file structure is the following:
+ * A directory named as the name of the deploy (i.e. data/deploys/LAMP/)
+ * A "def" file with the definition of the packages to be installed,
+   configurations and commands to be executed (.e. data/deploys/LAMP/def)
+ * A "configs" directory with the configuration files and folders to be uploaded
+   (i.e. data/deploys/LAMP/configs/apache/apache.conf)
+
+The def file structure is as follows:
+ install: package_a package_b package_c
+ config file: file.conf, /destination/route
+ config dir: confdir, /destination/route
+ exec: command -params
+
+Deploy example:
+ - data/deploys/LAMP/def:
+   install: apache mysql-server php5
+   config dir: apache2, /etc/apache2
+   config file: php.ini, /www/php.ini
+   exec: service apache2 restart
+ - data/deploys/LAPM/configs/:
+   * apache2/
+   * php.ini
+
+</pre>

@@ -91,8 +91,15 @@ get '/deploys/deploy/:host/:dep' do
 end
 ## DEPLOYS BLOCK END
 
+## HELP BLOCK START
+get '/help' do
+  alerts
+  erb :help
+end
+## HELP BLOCK END
 
-# if not data show setup
+
+# if not data directory show setup
 else
 get '*' do
   erb :setup
