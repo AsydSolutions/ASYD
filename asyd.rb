@@ -35,7 +35,11 @@ def alerts
   end
 end
 
-if File.directory? 'data'
+before /^(?!\/(setup))/ do
+  if !File.directory? 'data'
+    redirect '/setup'
+  end
+end
 
 get '/' do
   alerts
@@ -104,12 +108,8 @@ get '/help' do
 end
 ## HELP BLOCK END
 
-
-# if not data directory show setup
-else
-get '*' do
+get '/setup' do
   erb :setup
-end
 end
 
 post '/setup' do
