@@ -1,18 +1,16 @@
 def install_pkg(host,pkg)
   begin
-    path = "data/servers/"+host+"/srv.info"
-    f = File.open(path, "r")
-    ip = f.gets.strip
-    dist_name = f.gets.strip
-    dist_ver  = f.gets.strip
-    pkg_mgr = f.gets.strip
-    f.close
+    hostdata = get_host_data(host)
+    ip = hostdata[:ip]
+    pkg_mgr = hostdata[:pkg_mgr]
 
     if pkg.include? "&" or pkg.include? "|" or pkg.include? ">" or pkg.include? "<" or pkg.include? "`" or pkg.include? "$"
       exit
     end
     if pkg_mgr == "apt"
       cmd = pkg_mgr+"-get -y -q install "+pkg
+    else
+      cmd = pkg_mgr+" install -y "+pkg		## NOT TESTED, DEVELOPMENT IN PROGRESS
     end
 
     result = exec_cmd(ip, cmd)
@@ -37,13 +35,8 @@ end
 
 def deploy(host,dep)
   begin
-    path = "data/servers/"+host+"/srv.info"
-    f = File.open(path, "r")
-    ip = f.gets.strip
-    dist_name = f.gets.strip
-    dist_ver  = f.gets.strip
-    pkg_mgr = f.gets.strip
-    f.close
+    hostdata = get_host_data(host)
+    ip = hostdata[:ip]
 
     cfg_root = "data/deploys/"+dep+"/configs/"
     path = "data/deploys/"+dep+"/def"
