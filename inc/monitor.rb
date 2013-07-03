@@ -1,5 +1,22 @@
 require 'monit'
 
+def monitor(host)
+  begin
+    path = "data/servers/"+host+"/srv.info"
+    f = File.open(path, "r")
+    ip = f.gets.strip
+    dist_name = f.gets.strip
+    dist_ver  = f.gets.strip
+    pkg_mgr = f.gets.strip
+    f.close
+
+
+
+  end
+end
+
+
+
 def get_host_status(host)
 
   status = Monit::Status.new({ :host => "localhost",

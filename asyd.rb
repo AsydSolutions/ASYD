@@ -20,16 +20,21 @@ helpers do
   end
 end
 
+parse_config('Test', 'data/monitors/monitrc')
+
 def alerts
   if $error
+    p $error
     @error = $error
     $error = nil
   end
   if $info
+    p $info
     @info = $info
     $info = nil
   end
   if $done
+    p $done
     @done = $done
     $done = nil
   end
