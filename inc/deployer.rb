@@ -51,9 +51,10 @@ def deploy(host,dep)
         line = line.split(':')
         cfg = line[1].split(',')
         cfg_src = cfg_root+cfg[0].strip
+	parsed_cfg = parse_config(host, cfg_src).path
         cfg_dst = cfg[1].strip
-        upload_file(ip, cfg_src, cfg_dst)
-      elsif line.start_with?("config dir:")
+        upload_file(ip, parsed_cfg, cfg_dst)
+      elsif line.start_with?("config dir:")	## TODO: parse each config file in the directory
         line = line.split(':')
         cfg = line[1].split(',')
         cfg_src = cfg_root+cfg[0].strip
