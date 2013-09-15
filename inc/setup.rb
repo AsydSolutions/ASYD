@@ -1,7 +1,8 @@
 def setup(*params)
   FileUtils.mkdir_p("data/servers")
   FileUtils.mkdir_p("data/deploys")
-  FileUtils.mkdir_p("data/monitors")
+  FileUtils.mv("installer/monitors", "data/monitors")
+  FileUtils.remove_dir("installer")
   if params.length == 1
     `ssh-keygen -f data/ssh_key -t rsa -N ""`
   elsif params.length == 2
