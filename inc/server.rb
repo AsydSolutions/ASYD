@@ -1,16 +1,16 @@
-def srv_init(name, host, password)
+def srv_init(host, ip, password)
   begin
-  distro,dist_name,dist_ver,pkg_mgr = ""
+  distro,dist_host,dist_ver,pkg_mgr = ""
 
-  Net::SSH.start(host, "root", :password => password) do |ssh|
-    distro = ssh.exec!("cat /proc/issue")
+  Net::SSH.start(ip, "root", :password => password) do |ssh|
+    distro = ssh.exec!("cat /etc/issue")
     distro = distro.split
-    dist_name = distro[0]
+    dist_host = distro[0]
     dist_ver  = distro[2]
 
-    if dist_name == "Debian" or dist_name == "Ubuntu"
+    if dist_host == "Debian" or dist_host == "Ubuntu"
       pkg_mgr = "apt"
-    elsif dist_name == "Fedora" or dist_name == "CentOS"
+    elsif dist_host == "Fedora" or dist_host == "CentOS"
       pkg_mgr = "yum"
     else
       exit
@@ -21,13 +21,19 @@ def srv_init(name, host, password)
 
   end
 
-  FileUtils.mkdir_p("data/servers/" + name)
-  f = File.new("data/servers/"+name+"/srv.info",  "w+")
-  f.puts host
-  f.puts dist_name
+  FileUtils.mkdir_p("data/servers/" + host)
+  f = File.new("data/servers/"+host+"/srv.info",  "w+")
+  f.puts ip
+  f.puts dist_host
   f.puts dist_ver
   f.puts pkg_mgr
   f.close
+
+  monitor(host)
+
+  if $error.nil?
+    $done = host+" successfully added"
+  end
 
   rescue SystemExit
     @error = 'Unsupported system'

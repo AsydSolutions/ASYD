@@ -20,8 +20,6 @@ helpers do
   end
 end
 
-parse_config('Test', 'data/monitors/monitrc')
-
 def alerts
   if $error
     p $error
@@ -58,13 +56,14 @@ get '/server/list' do
   erb :serverlist
 end
 
-get '/server/:name' do
-  erb 'Rewriting monitoring'
+get '/server/:host' do
+  @status = get_host_status(params[:host])
+  @data = get_host_data(params[:host])
+  erb :hostdetail
 end
 
 post '/server/add' do
   srv_init(params['name'], params['host'], params['password'])
-  monitor(params['name'])
   serverlist = '/server/list'
   if @error
     $error = @error

@@ -67,7 +67,9 @@ def deploy(host,dep)
       elsif line.start_with?("monitor:")
         line = line.split(':')
         services = line[1].split(' ')
-#        monitor_service(host, services.each)
+        services.each do |service|
+          monitor_service(ip, service)
+        end
       else
         exit
       end
