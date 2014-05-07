@@ -13,6 +13,7 @@ set statefile /var/.monit.state
 set httpd port 2812 and
     use address <%IP%>
     allow <%ASYD%>
+    allow admin:monit
 
 check system <%HOSTNAME%>
     if loadavg (1min) > 4 then alert

@@ -2,8 +2,8 @@
   <legend>Server list</legend>
   <% @hosts.each do |host| %>
     <h5><div class="btn-group">
-    <a class="btn btn-success srv server" href="/server/<%=host%>"><%=host%></a>
-          <a class="btn btn-success dropdown-toggle" data-toggle="dropdown" href="#"><span class="caret"></span></a>
+    <a style="margin-bottom: 10px" class="btn btn-success srv server" href="/server/<%=host%>"><%=host%></a>
+          <a style="margin-top: -10px" class="btn btn-success dropdown-toggle" data-toggle="dropdown" href="#"><span class="caret"></span></a>
           <ul class="dropdown-menu">
             <li><a href="#">Action</a></li>
             <li><a href="#">Another action</a></li>
@@ -13,7 +13,7 @@
           </ul>
         </div></h5>
   <% end %>
-  <legend><br /></legend>
+  <legend></legend>
   <a id="add" class="btn btn-primary offset9">Add server</a>
 </div>
 

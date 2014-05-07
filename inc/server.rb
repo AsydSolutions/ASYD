@@ -1,6 +1,6 @@
 def srv_init(host, ip, password)
   begin
-  distro,dist_host,dist_ver,pkg_mgr = ""
+  distro,dist_host,dist_ver,arch,pkg_mgr = ""
 
   Net::SSH.start(ip, "root", :password => password) do |ssh|
     distro = ssh.exec!("cat /etc/issue")
@@ -16,6 +16,8 @@ def srv_init(host, ip, password)
       exit
     end
 
+    arch = ssh.exec!("uname -m")
+
     ssh.scp.upload!("data/ssh_key.pub", "/tmp/ssh_key.pub")
     ssh.exec "mkdir -p /root/.ssh && touch /root/.ssh/authorized_keys && cat /tmp/ssh_key.pub >> /root/.ssh/authorized_keys && rm /tmp/ssh_key.pub"
 
@@ -26,6 +28,7 @@ def srv_init(host, ip, password)
   f.puts ip
   f.puts dist_host
   f.puts dist_ver
+  f.puts arch
   f.puts pkg_mgr
   f.close
 

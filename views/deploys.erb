@@ -1,7 +1,7 @@
-<div class="well">
+<div class="well row">
   <legend>Deploy Software Group</legend>
-  <div class="control-group">
-  <p class="help-block">Select host or hostgroup for deploying</p>
+  <div style="text-align: center" class="span3">
+  <p class="help-block">Select host or hostgroup</p>
     <select id="dep_host" name="dep_host">
         <option value="">--- Select ---</option>
       <% @hosts.each do |host| %>
@@ -9,6 +9,7 @@
       <% end %>
     </select>
   </div>
+  <div class="span6">
   <p class="help-block">Select package to deploy</p>
   <% @deploys.each do |deploy| %>
     <h5><div class="btn-group">
@@ -22,6 +23,7 @@
           </ul>
         </div></h5>
   <% end %>
+  </div>
 </div>
 
 

@@ -27,8 +27,10 @@ end
 
 
 def get_host_status(host)
+  hostdata = get_host_data(host)
+  ip = hostdata[:ip]
 
-  status = Monit::Status.new({ :host => "localhost",
+  status = Monit::Status.new({ :host => ip,
                                :auth => true,
                                :username => "admin",
                                :password => "monit" })
@@ -39,7 +41,6 @@ def get_host_status(host)
   data = {}
   data[:total_cpu] = status.platform.cpu
   data[:total_memory] = status.platform.memory/1024  # converted to MB
-  data[:architecture] = status.platform.machine
   data[:used_sysmem_mb] = ''
   data[:used_sysmem_percent] = ''
   data[:load_15] = ''
@@ -55,6 +56,9 @@ def get_host_status(host)
     data[:load_15] = service.system['load']['avg15']
     data[:load_5] = service.system['load']['avg05']
     data[:load_1] = service.system['load']['avg01']
+    data[:cpu_wa] = service.system['cpu']['wait']
+    data[:cpu_sy] = service.system['cpu']['system']
+    data[:cpu_us] = service.system['cpu']['user']
   else
 
     data[:services][i] = {}

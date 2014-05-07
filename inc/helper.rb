@@ -27,7 +27,9 @@ end
 def get_files path
   files_array = Array.new
   Find.find(path) do |f|
-    files_array << File.basename(f, "*")
+    if !FileTest.directory?(f)
+      files_array << File.basename(f, "*")
+    end
   end
   return files_array
 end
@@ -50,6 +52,7 @@ def get_host_data(host)
   hostdata[:ip] = f.gets.strip
   hostdata[:dist_name] = f.gets.strip
   hostdata[:dist_ver]  = f.gets.strip
+  hostdata[:arch]  = f.gets.strip
   hostdata[:pkg_mgr] = f.gets.strip
   f.close
   return hostdata
@@ -147,6 +150,12 @@ def parse_config(host, cfg)
   end
   newconf.flush
   return newconf
+end
+
+def round
+    return (self+0.5).floor if self > 0.0
+    return (self-0.5).ceil  if self < 0.0
+    return 0    
 end
 
 # @!endgroup
