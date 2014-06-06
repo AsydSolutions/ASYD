@@ -5,6 +5,7 @@ require 'sinatra'
 load 'inc/helper.rb'
 load 'inc/setup.rb'
 load 'inc/server.rb'
+load 'inc/groups.rb'
 load 'inc/monitor.rb'
 load 'inc/deployer.rb'
 
@@ -38,12 +39,14 @@ def alerts
   end
 end
 
+# Check if ASYD was installed
 before /^(?!\/(setup))/ do
   if !File.directory? 'data'
     redirect '/setup'
   end
 end
 
+# Dashboard
 get '/' do
   alerts
   erb "- Dashboard -"
@@ -71,6 +74,30 @@ post '/server/add' do
   redirect to serverlist
 end
 ## SERVERS BLOCK END
+
+## HOST GROUPS START
+get '/groups/list' do
+  @groups = get_files("data/groups/")
+  erb :grouplist
+end
+
+get '/groups/:group' do
+  @group = params[:group]
+  @members = get_group_members(params[:group])
+  erb :groupdetail
+end
+
+post '/groups/edit' do
+p params[:action]
+p params[:params]
+  groups_edit(params[:action], params[:params])
+  grouplist = '/groups/list'
+  if @error
+    $error = @error
+  end
+  redirect to grouplist
+end
+## HOST GROUPS END
 
 ## DEPLOYS BLOCK START
 get '/deploys/list' do
@@ -112,6 +139,7 @@ get '/help' do
 end
 ## HELP BLOCK END
 
+## SETUP START
 get '/setup' do
   erb :setup
 end
@@ -137,7 +165,7 @@ post '/setup' do
   end
   redirect to home
 end
-
+## SETUP END
 
 
 
