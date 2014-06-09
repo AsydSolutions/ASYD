@@ -11,7 +11,7 @@ require 'socket'
 # Gets the directories inside a path.
 #
 # @param path [String] Route to the directory where you want to list the subdirectories.
-# @return dir_array [Array] The subdirectories in the given directory. 
+# @return dir_array [Array] The subdirectories in the given directory.
 def get_dirs path
   dir_array = Array.new
   Pathname.new(path).children.select do |dir|
@@ -40,7 +40,18 @@ end
 def get_server_list
   servers = SQLite3::Database.new "data/db/servers.db"
   serverlist = servers.execute("select hostname from servers")
+  servers.close
   return serverlist
+end
+
+# Gets the hostgroups list
+#
+# @return grouplist [Array] Array with the added host groups
+def get_hostgroup_list
+  groups = SQLite3::Database.new "data/db/hostgroups.db"
+  grouplist = groups.execute("select name from hostgroups")
+  groups.close
+  return grouplist
 end
 
 # Gets all the host data stored for a host
@@ -64,6 +75,7 @@ def get_host_data(host)
   hostdata[:dist_ver] = ret[3].to_s
   hostdata[:arch] = ret[4]
   hostdata[:pkg_mgr] = ret[5]
+  servers.close
   return hostdata
 end
 
@@ -131,7 +143,7 @@ end
 
 # Parse a config file (read the documentation for syntax reference)
 #
-# @param host [String] host to take the data from 
+# @param host [String] host to take the data from
 # @see #get_host_data
 # @param cfg [String] config to be parsed
 # @return newconf [Object] temporal file with the parameters substituted by the values
@@ -164,7 +176,7 @@ end
 def round
     return (self+0.5).floor if self > 0.0
     return (self-0.5).ceil  if self < 0.0
-    return 0    
+    return 0
 end
 
 # @!endgroup

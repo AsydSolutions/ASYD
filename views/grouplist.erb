@@ -1,11 +1,12 @@
 <div class="well">
   <legend>Host Groups</legend>
   <% @groups.each do |group| %>
+    <% group = group[0] %>
     <h5><div class="btn-group">
       <a style="margin-bottom: 10px" class="btn srv" href="/groups/<%=group%>"><%=group%></a>
       <a style="margin-bottom: 10px" href="#delGroup" role="button" class="btn dropdown-toggle" data-toggle="modal"><span class="icon-remove"></span></a>
     </div></h5>
-    
+
     <div id="delGroup" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>

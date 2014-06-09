@@ -78,7 +78,7 @@ end
 
 ## HOST GROUPS START
 get '/groups/list' do
-  @groups = get_files("data/groups/")
+  @groups = get_hostgroup_list
   erb :grouplist
 end
 

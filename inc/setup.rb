@@ -32,7 +32,7 @@ def setup(*params)
   # Create hostgroups database
   hostgroups = SQLite3::Database.new "data/db/hostgroups.db"
   hostgroups.execute <<-SQL
-  create table servers (
+  create table hostgroups (
     name text not null primary key,
     members text,
     opt_vars text

@@ -1,14 +1,12 @@
 def get_group_members(group)
-  path = 'data/groups/'+group
-  f = File.open(path, "r")
-  line = f.gets
-  if line.nil?
-    members = ""
+  groups = SQLite3::Database.new "data/db/hostgroups.db"
+  group_members = groups.get_first_row("select members from hostgroups where name=?", group)
+  if group_members[0].nil?
+    members = []
   else
-    memberlist = line.strip
-    members = memberlist.split(';')
+    members = Marshal.load(group_members[0])
   end
-  f.close
+  groups.close
   return members
 end
 
@@ -25,31 +23,46 @@ def groups_edit(action, params)
 end
 
 def add_group(group)
-  f = File.new("data/groups/"+group,  "w+")
-  f.close
+  groups = SQLite3::Database.new "data/db/hostgroups.db"
+  groups.execute("INSERT INTO hostgroups (name) VALUES (?)", group)
+  groups.close
 end
 
 def del_group(group)
-  FileUtils.rm("data/groups/"+group)
+  groups = SQLite3::Database.new "data/db/hostgroups.db"
+  groups.execute("DELETE FROM hostgroups WHERE name=?", group)
+  groups.close
 end
 
 def add_group_member(group, server)
-  path = 'data/groups/'+group
-  f = File.open(path, "r+")
-  line = f.gets
-  if line.nil?
-    f.puts(server)
+  groups = SQLite3::Database.new "data/db/hostgroups.db"
+  group_members = groups.get_first_row("select members from hostgroups where name=?", group)
+  if group_members[0].nil?
+    members = [server]
   else
-    f.seek(line.size-1)
-    f.puts(";"+server)
+    members = Marshal.load(group_members[0])
+    members << server
   end
-  f.close
+  members_srlzd = Marshal.dump(members)
+  groups.execute("UPDATE hostgroups SET members=? WHERE name=?", [members_srlzd, group])
+  groups.close
 end
 
 def del_group_member(group, server)
-  path = 'data/groups/'+group
-  data = File.read(path).gsub(/^#{server};?|;?#{server}/, '')
-  f = File.open(path, "w")
-  f.puts data
-  f.close
+  groups = SQLite3::Database.new "data/db/hostgroups.db"
+  group_members = groups.get_first_row("select members from hostgroups where name=?", group)
+  if group_members[0].nil?
+    error = "No members found in group "+group
+    groups.close
+    return error
+  else
+    members = Marshal.load(group_members[0])
+    members.delete(server) {
+      groups.close
+      return server+" not found in group "+group
+    }
+    members_srlzd = Marshal.dump(members)
+    groups.execute("UPDATE hostgroups SET members=? WHERE name=?", [members_srlzd, group])
+    groups.close
+  end
 end
