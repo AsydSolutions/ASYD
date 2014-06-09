@@ -1,30 +1,10 @@
 <div class="well">
   <legend>Host Groups</legend>
   <% @groups.each do |group| %>
-    <% group = group[0] %>
     <h5><div class="btn-group">
       <a style="margin-bottom: 10px" class="btn srv" href="/groups/<%=group%>"><%=group%></a>
-      <a style="margin-bottom: 10px" href="#delGroup" role="button" class="btn dropdown-toggle" data-toggle="modal"><span class="icon-remove"></span></a>
+      <a style="margin-bottom: 10px" href="#delGroup" class="btn dropdown-toggle" onclick="passDataToModal('<%=group%>', '#delGroup')"><span class="icon-remove"></span></a>
     </div></h5>
-
-    <div id="delGroup" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-        <h3 id="myModalLabel">Attention!</h3>
-      </div>
-      <div class="modal-body">
-        <p>Are you sure you want to delete <%=group%> hostgroup?</p>
-      </div>
-      <div class="modal-footer">
-        <form id="form" id="delGroup" action="/groups/edit" method="post">
-          <input type="hidden" name="action" value="del_group">
-          <input type="hidden" name="params[group]" value="<%=group%>">
-          <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
-          <button type="submit" class="btn btn-primary">Delete</button>
-        </form>
-      </div>
-    </div>
-
   <% end %>
   <legend></legend>
   <a id="add" class="btn btn-primary offset9">Add group</a>
@@ -35,3 +15,21 @@
   <div class="control-group"><input name='params[group]' type="text" class="input-xlarge" placeholder="Name" autofocus></div>
   <div class="control-group"><input class="btn primary" type='submit' value='Add'></div>
 </form>
+
+<div id="delGroup" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <h3 id="myModalLabel">Attention!</h3>
+  </div>
+  <div class="modal-body">
+    <p>Are you sure you want to delete <b id="dataInput"></b> hostgroup?</p>
+  </div>
+  <div class="modal-footer">
+    <form id="form" id="delGroup" action="/groups/edit" method="post">
+      <input type="hidden" name="action" value="del_group">
+      <input type="hidden" name="params[group]" id="dataInput" value="">
+      <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+      <button type="submit" class="btn btn-primary">Delete</button>
+    </form>
+  </div>
+</div>

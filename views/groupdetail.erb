@@ -3,14 +3,35 @@
   <% @members.each do |host| %>
       <h5><div class="btn-group">
       <a style="margin-bottom: 10px" class="btn btn-success srv server" href="/server/<%=host%>"><%=host%></a>
-          <a style="margin-top: -10px" class="btn btn-success dropdown-toggle" data-toggle="dropdown" href="#"><span class="caret"></span></a>
-          <ul class="dropdown-menu">
-            <li><a href="#">Action</a></li>
-            <li><a href="#">Another action</a></li>
-            <li><a href="#">Something else here</a></li>
-            <li class="divider"></li>
-            <li><a href="/server/del/<%=host%>">Delete</a></li>
-          </ul>
+      <a style="margin-bottom: 10px" href="#delMember" class="btn btn-success dropdown-toggle" onclick="passDataToModal('<%=host%>', '#delMember')"><span class="icon-remove icon-white"></span></a>
         </div></h5>
   <% end %>
+  <legend></legend>
+  <a id="add" class="btn btn-primary offset9">Add server to group</a>
+</div>
+
+<form id="add_form" style="display:none" action='/groups/edit' method='post' class="form-inline well">
+  <input name='action' type="hidden" value="add_member">
+  <input name='params[group]' type="hidden" value="<%=@group%>">
+  <div class="control-group"><input name='params[server]' type="text" class="input-xlarge" data-provide="typeahead" data-items="5" data-source='<%=get_server_list%>' autocomplete="off" autofocus></div>
+  <div class="control-group"><input class="btn primary" type='submit' value='Add'></div>
+</form>
+
+<div id="delMember" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <h3 id="myModalLabel">Attention!</h3>
+  </div>
+  <div class="modal-body">
+    <p>Are you sure you want to delete <b id="dataInput"></b> from the <b><%=@group%></b> hostgroup?</p>
+  </div>
+  <div class="modal-footer">
+    <form id="form" id="delGroup" action="/groups/edit" method="post">
+      <input type="hidden" name="action" value="del_member">
+      <input type="hidden" name="params[group]" value="<%=@group%>">
+      <input type="hidden" name="params[server]" id="dataInput" value="">
+      <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+      <button type="submit" class="btn btn-primary">Delete</button>
+    </form>
+  </div>
 </div>

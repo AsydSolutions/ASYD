@@ -39,7 +39,10 @@ end
 # @return serverlist [Array] Array with the added servers
 def get_server_list
   servers = SQLite3::Database.new "data/db/servers.db"
-  serverlist = servers.execute("select hostname from servers")
+  serverlist = []
+  servers.execute("select hostname from servers") do |row|
+    serverlist << row[0]
+  end
   servers.close
   return serverlist
 end
@@ -49,7 +52,10 @@ end
 # @return grouplist [Array] Array with the added host groups
 def get_hostgroup_list
   groups = SQLite3::Database.new "data/db/hostgroups.db"
-  grouplist = groups.execute("select name from hostgroups")
+  grouplist = []
+  groups.execute("select name from hostgroups") do |row|
+    grouplist << row[0]
+  end
   groups.close
   return grouplist
 end

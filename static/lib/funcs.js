@@ -38,3 +38,9 @@ $(function() {
     });
   });
 });
+
+function passDataToModal(data, modal_id) {
+  $(".modal-body #dataInput").text(data);
+  $(".modal-footer #dataInput").val( data );
+  $(modal_id).modal('show');
+}

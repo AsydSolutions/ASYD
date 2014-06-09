@@ -89,14 +89,16 @@ get '/groups/:group' do
 end
 
 post '/groups/edit' do
-p params[:action]
-p params[:params]
+  if params[:action] == "add_member" || params[:action] == "del_member"
+    redir = '/groups/'+params[:params][:group]
+  else
+    redir = '/groups/list'
+  end
   groups_edit(params[:action], params[:params])
-  grouplist = '/groups/list'
   if @error
     $error = @error
   end
-  redirect to grouplist
+  redirect to redir
 end
 ## HOST GROUPS END
 
