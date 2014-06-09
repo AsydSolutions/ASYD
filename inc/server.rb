@@ -38,3 +38,20 @@ def srv_init(host, ip, password)
     return @error
   end
 end
+
+def remove_server(host, revoke)
+  if revoke == true
+    hostdata = get_host_data(host)
+    ip = hostdata[:ip]
+    ssh_key = File.open("data/ssh_key.pub", "r").read.strip
+    cmd = '/bin/grep -v "'+ssh_key+'" /root/.ssh/authorized_keys > /tmp/auth_keys && mv /tmp/auth_keys /root/.ssh/authorized_keys'
+    exec_cmd(ip, cmd)
+  end
+  servers = SQLite3::Database.new "data/db/servers.db"
+  servers.execute("DELETE FROM servers WHERE hostname=?", host)
+  servers.close
+  groups = get_hostgroup_list
+  groups.each do |group|
+    del_group_member(group, host)
+  end
+end

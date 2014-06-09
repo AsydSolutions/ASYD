@@ -74,6 +74,20 @@ post '/server/add' do
   end
   redirect to serverlist
 end
+
+post '/server/del' do
+  if params['revoke'] == "true"
+    revoke = true
+  else
+    revoke = false
+  end
+  remove_server(params['host'], revoke)
+  serverlist = '/server/list'
+  if @error
+    $error = @error
+  end
+  redirect to serverlist
+end
 ## SERVERS BLOCK END
 
 ## HOST GROUPS START

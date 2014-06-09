@@ -6,13 +6,14 @@
 # <%MONITOR:service%> - Service to monitor by default
 
 set daemon 120
-set logfile syslog facility log_daemon                       
+set logfile syslog facility log_daemon
 set idfile /var/.monit.id
 set statefile /var/.monit.state
 
 set httpd port 2812 and
     use address <%IP%>
     allow <%ASYD%>
+    allow 127.0.0.1
     allow admin:monit
 
 check system <%HOSTNAME%>
