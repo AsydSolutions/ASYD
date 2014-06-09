@@ -34,6 +34,15 @@ def get_files path
   return files_array
 end
 
+# Gets the server list
+#
+# @return serverlist [Array] Array with the added servers
+def get_server_list
+  servers = SQLite3::Database.new "data/db/servers.db"
+  serverlist = servers.execute("select hostname from servers")
+  return serverlist
+end
+
 # Gets all the host data stored for a host
 #
 # @param host [String] The name of the host you want to retreive the data from
@@ -45,16 +54,16 @@ end
 #     hostdata[:dist_ver]  <- the version of the distributions
 #     hostdata[:pkg_mgr]   <- the package manager used, can be "apt" or "yum" atm
 def get_host_data(host)
-  path = "data/servers/"+host.to_s+"/srv.info"
-  f = File.open(path, "r")
+  host = host.to_s
+  servers = SQLite3::Database.new "data/db/servers.db"
+  ret = servers.get_first_row("select * from servers where hostname=?", host)
   hostdata = {}
   hostdata[:hostname] = host
-  hostdata[:ip] = f.gets.strip
-  hostdata[:dist_name] = f.gets.strip
-  hostdata[:dist_ver]  = f.gets.strip
-  hostdata[:arch]  = f.gets.strip
-  hostdata[:pkg_mgr] = f.gets.strip
-  f.close
+  hostdata[:ip] = ret[1]
+  hostdata[:dist_name] = ret[2]
+  hostdata[:dist_ver] = ret[3].to_s
+  hostdata[:arch] = ret[4]
+  hostdata[:pkg_mgr] = ret[5]
   return hostdata
 end
 

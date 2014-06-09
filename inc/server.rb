@@ -23,14 +23,9 @@ def srv_init(host, ip, password)
 
   end
 
-  FileUtils.mkdir_p("data/servers/" + host)
-  f = File.new("data/servers/"+host+"/srv.info",  "w+")
-  f.puts ip
-  f.puts dist_host
-  f.puts dist_ver
-  f.puts arch
-  f.puts pkg_mgr
-  f.close
+  servers = SQLite3::Database.new "data/db/servers.db"
+  servers.execute("INSERT INTO servers (hostname, ip, dist, dist_ver, arch, pkg_mgr) VALUES (?, ?, ?, ?, ?, ?)", [host, ip, dist_host, dist_ver, arch, pkg_mgr])
+  servers.close
 
   monitor(host)
 

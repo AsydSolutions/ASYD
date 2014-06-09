@@ -2,6 +2,7 @@
 
 require 'rubygems'
 require 'sinatra'
+require 'sqlite3'
 load 'inc/helper.rb'
 load 'inc/setup.rb'
 load 'inc/server.rb'
@@ -54,7 +55,7 @@ end
 
 ## SERVERS BLOCK START
 get '/server/list' do
-  @hosts = get_dirs("data/servers/")
+  @hosts = get_server_list
   alerts
   erb :serverlist
 end
@@ -102,7 +103,7 @@ end
 ## DEPLOYS BLOCK START
 get '/deploys/list' do
   @deploys = get_dirs("data/deploys/")
-  @hosts = get_dirs("data/servers/")
+  @hosts = get_server_list
   alerts
   erb :deploys
 end
