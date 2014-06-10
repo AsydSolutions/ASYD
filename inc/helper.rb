@@ -91,6 +91,33 @@ def get_asyd_ip
   return ip
 end
 
+# Gets active notifications
+#
+# @return msgs [Array] All the active notifications
+#   msgs[:error|:info|:done][i][0] <- Notification ID
+#   msgs[:error|:info|:done][i][1] <- Notification text
+def get_notifications
+  notifications = SQLite3::Database.new "data/db/notifications.db"
+  msgs = {}
+  msgs[:error] = []
+  msgs[:info] = []
+  msgs[:done] = []
+  # type = 0 stands for errors
+  notifications.execute("select id,message from notifications where type=0 and dismiss=0") do |row|
+    msgs[:error] << row
+  end
+  # type = 1 stands for informational messages
+  notifications.execute("select id,message from notifications where type=1 and dismiss=0") do |row|
+    msgs[:info] << row
+  end
+  # type = 3 stands for success messages
+  notifications.execute("select id,message from notifications where type=2 and dismiss=0") do |row|
+    msgs[:done] << row
+  end
+  notifications.close
+  return msgs
+end
+
 # Executes a command on a remote host
 #
 # @param ip [String] target ip address

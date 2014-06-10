@@ -149,6 +149,12 @@ get '/deploys/deploy/:host/:dep' do
 end
 ## DEPLOYS BLOCK END
 
+post '/notifications/dismiss' do
+  notifications = SQLite3::Database.new "data/db/notifications.db"
+  notifications.execute("UPDATE notifications SET dismiss=1 WHERE id=?", params['msg_id'])
+  notifications.close
+end
+
 ## HELP BLOCK START
 get '/help' do
   alerts
