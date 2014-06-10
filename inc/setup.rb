@@ -17,33 +17,45 @@ def setup(*params)
   end
   # Create servers database
   begin
-  servers = SQLite3::Database.new "data/db/servers.db"
-  servers.execute <<-SQL
-  create table servers (
-    hostname text not null primary key,
-    ip text not null,
-    dist text not null,
-    dist_ver real not null,
-    arch text not null,
-    pkg_mgr text not null,
-    opt_vars text
-  );
-  SQL
-  # Create hostgroups database
-  hostgroups = SQLite3::Database.new "data/db/hostgroups.db"
-  hostgroups.execute <<-SQL
-  create table hostgroups (
-    name text not null primary key,
-    members text,
-    opt_vars text
-  );
-  SQL
-  # Any errors?
+    servers = SQLite3::Database.new "data/db/servers.db"
+    servers.execute <<-SQL
+    create table servers (
+      hostname text not null primary key,
+      ip text not null,
+      dist text not null,
+      dist_ver real not null,
+      arch text not null,
+      pkg_mgr text not null,
+      opt_vars text
+    );
+    SQL
+    # Create hostgroups database
+    hostgroups = SQLite3::Database.new "data/db/hostgroups.db"
+    hostgroups.execute <<-SQL
+    create table hostgroups (
+      name text not null primary key,
+      members text,
+      opt_vars text
+    );
+    SQL
+    # Create notifications database
+    notifications = SQLite3::Database.new "data/db/notifications.db"
+    notifications.execute <<-SQL
+    create table notifications (
+      id integer primary key AUTOINCREMENT,
+      type integer not null,
+      message text not null,
+      dismiss integer DEFAULT 0,
+      created DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+    SQL
+    # Any errors?
   rescue SQLite3::Exception => e
     puts e
-  # Close databases
+    # Close databases
   ensure
     servers.close if servers
     hostgroups.close if hostgroups
+    notifications.close if notifications
   end
 end
