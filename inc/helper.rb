@@ -160,22 +160,25 @@ def parse_config(host, cfg)
   asyd = get_asyd_ip
 
   newconf = Tempfile.new('conf')
-  File.open(cfg, "r").each do |line|
-    line = line.split('#')
-    line = line[0]
-    if !line.include?('<%MONITOR:')
-      line.gsub!('<%ASYD%>', asyd)
-      line.gsub!('<%IP%>', ip)
-      line.gsub!('<%HOSTNAME%>', hostname)
-      newconf << line
-    else
-      monitor = line.gsub!(/([<%>])/, '')
-      monitor = monitor.split(':')
-      service = monitor[1].strip
-      monitor_service(service, host)
+  begin
+    File.open(cfg, "r").each do |line|
+      line = line.split('#')
+      line = line[0]
+      if !line.include?('<%MONITOR:')
+        line.gsub!('<%ASYD%>', asyd)
+        line.gsub!('<%IP%>', ip)
+        line.gsub!('<%HOSTNAME%>', hostname)
+        newconf << line
+      else
+        monitor = line.gsub!(/([<%>])/, '')
+        monitor = monitor.split(':')
+        service = monitor[1].strip
+        monitor_service(service, host)
+      end
     end
+  ensure
+    newconf.close
   end
-  newconf.flush
   return newconf
 end
 

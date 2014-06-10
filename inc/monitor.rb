@@ -6,8 +6,9 @@ def monitor(host)
     ip = hostdata[:ip]
 
     install_pkg(host,"monit")
-    parsed_cfg = parse_config(host, "data/monitors/monitrc").path
-    upload_file(ip, parsed_cfg, "/etc/monit/monitrc")
+    parsed_cfg = parse_config(host, "data/monitors/monitrc")
+    upload_file(ip, parsed_cfg.path, "/etc/monit/monitrc")
+    parsed_cfg.unlink
     exec_cmd(ip, 'echo "startup=1" > /etc/default/monit')
     exec_cmd(ip, 'service monit restart')
   end
@@ -19,8 +20,9 @@ def monitor_service(service, host)
     hostdata = get_host_data(host)
     ip = hostdata[:ip]
 
-    parsed_cfg = parse_config(host, "data/monitors/modules/"+service).path
-    upload_file(ip, parsed_cfg, "/etc/monit/conf.d/"+service)
+    parsed_cfg = parse_config(host, "data/monitors/modules/"+service)
+    upload_file(ip, parsed_cfg.path, "/etc/monit/conf.d/"+service)
+    parsed_cfg.unlink
     exec_cmd(ip, "service monit restart")
   end
 end
@@ -74,7 +76,7 @@ def get_host_status(host)
         data[:services][i][:status] = 'ok'
       end
     end
-    i += 1 
+    i += 1
   end
   end
   return data

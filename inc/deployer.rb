@@ -37,7 +37,7 @@ def deploy(host,dep)
   begin
     hostdata = get_host_data(host)
     ip = hostdata[:ip]
-
+    
     cfg_root = "data/deploys/"+dep+"/configs/"
     path = "data/deploys/"+dep+"/def"
     f = File.open(path, "r").read
@@ -51,9 +51,10 @@ def deploy(host,dep)
         line = line.split(':')
         cfg = line[1].split(',')
         cfg_src = cfg_root+cfg[0].strip
-	parsed_cfg = parse_config(host, cfg_src).path
+        parsed_cfg = parse_config(host, cfg_src)
         cfg_dst = cfg[1].strip
-        upload_file(ip, parsed_cfg, cfg_dst)
+        upload_file(ip, parsed_cfg.path, cfg_dst)
+        parsed_cfg.unlink
       elsif line.start_with?("config dir:")	## TODO: parse each config file in the directory
         line = line.split(':')
         cfg = line[1].split(',')
