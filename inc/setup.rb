@@ -26,6 +26,7 @@ def setup(*params)
       dist_ver real not null,
       arch text not null,
       pkg_mgr text not null,
+      monit_pw text not null,
       opt_vars text
     );
     SQL

@@ -81,6 +81,8 @@ def get_host_data(host)
   hostdata[:dist_ver] = ret[3].to_s
   hostdata[:arch] = ret[4]
   hostdata[:pkg_mgr] = ret[5]
+  hostdata[:monit_pw] = ret[6]
+  hostdata[:opt_vars] = ret[7]
   servers.close
   return hostdata
 end
@@ -222,22 +224,26 @@ def parse_config(host, cfg)
   dist = hostdata[:dist_name]
   dist_ver = hostdata[:dist_name]
   arch = hostdata[:dist_name]
+  monit_pw = hostdata[:monit_pw]
   asyd = get_asyd_ip
 
   newconf = Tempfile.new('conf')
   begin
     File.open(cfg, "r").each do |line|
-      if !line.match(/<%MONITOR:.+%>/)
-        line.gsub!('<%ASYD%>', asyd)
-        line.gsub!('<%IP%>', ip)
-        line.gsub!('<%DIST%>', dist)
-        line.gsub!('<%DIST_VER%>', dist_ver)
-        line.gsub!('<%ARCH%>', arch)
-        line.gsub!('<%HOSTNAME%>', hostname)
-        newconf << line
-      else
-        service = line.match(/<%MONITOR:(.+)%>/)
-        monitor_service(service, host)
+      if !line.start_with?("#") #the line is a comment
+        if !line.match(/^<%MONITOR:.+%>/)
+          line.gsub!('<%ASYD%>', asyd)
+          line.gsub!('<%MONIT_PW%>', monit_pw)
+          line.gsub!('<%IP%>', ip)
+          line.gsub!('<%DIST%>', dist)
+          line.gsub!('<%DIST_VER%>', dist_ver)
+          line.gsub!('<%ARCH%>', arch)
+          line.gsub!('<%HOSTNAME%>', hostname)
+          newconf << line
+        else
+          service = line.match(/^<%MONITOR:(.+)%>/)[1]
+          monitor_service(service, host)
+        end
       end
     end
   ensure

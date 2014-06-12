@@ -5,7 +5,7 @@ def monitor(host)
     hostdata = get_host_data(host)
     ip = hostdata[:ip]
 
-    install_pkg(host,"monit")
+    install_pkg(host,"monit",true)
     parsed_cfg = parse_config(host, "data/monitors/monitrc")
     upload_file(ip, parsed_cfg.path, "/etc/monit/monitrc")
     parsed_cfg.unlink
@@ -31,11 +31,12 @@ end
 def get_host_status(host)
   hostdata = get_host_data(host)
   ip = hostdata[:ip]
+  monit_pw = hostdata[:monit_pw]
 
   status = Monit::Status.new({ :host => ip,
                                :auth => true,
                                :username => "admin",
-                               :password => "monit" })
+                               :password => monit_pw })
   if !status.get
     exit
   end
