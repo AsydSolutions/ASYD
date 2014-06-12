@@ -35,7 +35,7 @@ def get_host_status(host)
 
   status = Monit::Status.new({ :host => ip,
                                :auth => true,
-                               :username => "admin",
+                               :username => "asyd",
                                :password => monit_pw })
   if !status.get
     exit
