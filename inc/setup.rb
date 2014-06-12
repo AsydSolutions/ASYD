@@ -46,6 +46,19 @@ def setup(*params)
       type integer not null,
       message text not null,
       dismiss integer DEFAULT 0,
+      task_id integer,
+      created DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+    SQL
+    # Create activity database
+    activity = SQLite3::Database.new "data/db/activity.db"
+    activity.execute <<-SQL
+    create table activity (
+      id integer primary key AUTOINCREMENT,
+      action text not null,
+      target text not null,
+      status text DEFAULT "in progress",
+      seen integer DEFAULT 0,
       created DATETIME DEFAULT CURRENT_TIMESTAMP
     );
     SQL

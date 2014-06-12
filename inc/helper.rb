@@ -98,24 +98,59 @@ end
 #   msgs[:error|:info|:done][i][1] <- Notification text
 def get_notifications
   notifications = SQLite3::Database.new "data/db/notifications.db"
+  activity = SQLite3::Database.new "data/db/activity.db"
   msgs = {}
   msgs[:error] = []
   msgs[:info] = []
   msgs[:done] = []
+  msgs[:activity] = []
   # type = 0 stands for errors
-  notifications.execute("select id,message from notifications where type=0 and dismiss=0") do |row|
+  notifications.execute("select id,message from notifications where type=0 and dismiss=0 order by id desc") do |row|
     msgs[:error] << row
   end
   # type = 1 stands for informational messages
-  notifications.execute("select id,message from notifications where type=1 and dismiss=0") do |row|
+  notifications.execute("select id,message from notifications where type=1 and dismiss=0 order by id desc") do |row|
     msgs[:info] << row
   end
   # type = 3 stands for success messages
-  notifications.execute("select id,message from notifications where type=2 and dismiss=0") do |row|
+  notifications.execute("select id,message from notifications where type=2 and dismiss=0 order by id desc") do |row|
     msgs[:done] << row
   end
+  activity.execute("select id,action,target,status from activity where seen=0 order by id desc") do |row|
+    msgs[:activity] << row
+    activity.execute("UPDATE activity SET seen=1 WHERE id=?", row[0])
+  end
   notifications.close
+  activity.close
   return msgs
+end
+
+# Add a new notification
+#
+# @param type [Integer] Alert type (0 = error, 1 = info, 2 = success)
+# @param test [String] Alert message text
+def add_notification(type, text, task_id)
+  if type == 0 || type == 1 || type == 2
+    notifications = SQLite3::Database.new "data/db/notifications.db"
+    notifications.execute("INSERT INTO notifications (type, message, task_id) VALUES (?, ?, ?)", [type, text, task_id])
+    notifications.close
+  else
+    p "Wrong notification type"
+  end
+end
+
+def add_activity(action, target)
+  activity = SQLite3::Database.new "data/db/activity.db"
+  activity.execute("INSERT INTO activity (action, target) VALUES (?, ?)", [action, target])
+  id = activity.last_insert_row_id
+  activity.close
+  return id
+end
+
+def update_activity(id, status)
+  activity = SQLite3::Database.new "data/db/activity.db"
+  activity.execute("UPDATE activity SET status=? WHERE id=?", [status, id])
+  activity.close
 end
 
 # Executes a command on a remote host
@@ -184,22 +219,24 @@ def parse_config(host, cfg)
   hostdata = get_host_data(host)
   hostname = hostdata[:hostname]
   ip = hostdata[:ip]
+  dist = hostdata[:dist_name]
+  dist_ver = hostdata[:dist_name]
+  arch = hostdata[:dist_name]
   asyd = get_asyd_ip
 
   newconf = Tempfile.new('conf')
   begin
     File.open(cfg, "r").each do |line|
-      line = line.split('#')
-      line = line[0]
-      if !line.include?('<%MONITOR:')
+      if !line.match(/<%MONITOR:.+%>/)
         line.gsub!('<%ASYD%>', asyd)
         line.gsub!('<%IP%>', ip)
+        line.gsub!('<%DIST%>', dist)
+        line.gsub!('<%DIST_VER%>', dist_ver)
+        line.gsub!('<%ARCH%>', arch)
         line.gsub!('<%HOSTNAME%>', hostname)
         newconf << line
       else
-        monitor = line.gsub!(/([<%>])/, '')
-        monitor = monitor.split(':')
-        service = monitor[1].strip
+        service = line.match(/<%MONITOR:(.+)%>/)
         monitor_service(service, host)
       end
     end

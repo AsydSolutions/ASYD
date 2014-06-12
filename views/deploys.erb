@@ -1,12 +1,14 @@
-<div class="well row">
+<div class="row well">
   <legend>Deploy Software Group</legend>
   <div style="text-align: center" class="span3">
     <p class="help-block">Select host or hostgroup</p>
     <select id="dep_host" name="dep_host">
       <option value="">--- Select ---</option>
-      <% @hosts.each do |server| %>
-        <% host = server[0] %>
-        <option value="<%=host%>">Host: <%=host%></option>
+      <% @hosts.each do |host| %>
+        <option value="host;<%=host%>">Host: <%=host%></option>
+      <% end %>
+      <% @groups.each do |group| %>
+        <option value="group;<%=group%>">Hostgroup: <%=group%></option>
       <% end %>
     </select>
   </div>
@@ -33,8 +35,7 @@
   <div class="control-group"><input name='package' type="text" class="input" placeholder="Package to install" autofocus><p class="help-block">Packages to install separated by spaces</p></div>
   <div class="control-group" for"host"><select id="host" name="host">
     <option value="">--- Select ---</option>
-    <% @hosts.each do |server| %>
-      <% host = server[0] %>
+    <% @hosts.each do |host| %>
       <option value="<%=host%>">Host: <%=host%></option>
     <% end %>
   </select><p class="help-block">Select host or hostgroup</p></div>

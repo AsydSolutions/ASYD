@@ -1,0 +1,9 @@
+Task #<%=@task[0].to_s%> - <%=@task[1]%> on <%=@task[2]%>
+<br><br>
+Started on <%=@task[4].to_s%><br>
+Status: <%=@task[3]%>
+<br><br>
+Notifications:<br>
+<%@alerts.each do |notice|%>
+  <%=notice[1]%> - <%=notice[0]%><br>
+<%end%>

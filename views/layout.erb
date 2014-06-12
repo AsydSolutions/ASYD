@@ -43,14 +43,18 @@
   <br />
 
   <div class="container">
-    <% get_notifications[:error].each do |error| %>
+    <% notifications = get_notifications %>
+    <% notifications[:activity].each do |action| %>
+      <div class="alert alert-info"><%=action[1]%> on <%=action[2]%></div>
+    <% end %>
+    <% notifications[:error].each do |error| %>
       <div class="alert alert-error"><a href="#" class="close" data-dismiss="alert" onclick="dismissNotification('<%=error[0]%>')">&times;</a><%=error[1]%></div>
     <% end %>
-    <% get_notifications[:info].each do |info| %>
-      <div class="alert alert-info"><a href="#" class="close" data-dismiss="alert">&times;</a><%=info[1]%></div>
+    <% notifications[:info].each do |info| %>
+      <div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" onclick="dismissNotification('<%=info[0]%>')">&times;</a><%=info[1]%></div>
     <% end %>
-    <% get_notifications[:done].each do |done| %>
-      <div class="alert alert-success"><a href="#" class="close" data-dismiss="alert">&times;</a><%=done[1]%></div>
+    <% notifications[:done].each do |done| %>
+      <div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" onclick="dismissNotification('<%=done[0]%>')">&times;</a><%=done[1]%></div>
     <% end %>
     <%= yield %>
   </div>

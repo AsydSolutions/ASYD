@@ -11,9 +11,9 @@ Installation on Debian:
 
 Run ASYD:
 
-	ruby asyd.rb
+	rakup
 
-Then open [http://localhost:4567/](http://localhost:4567/)
+Then open [http://localhost:9292/](http://localhost:9292/)
 
 
 **Please read the documentation on [http://localhost:4567/help](http://localhost:4567/help)**

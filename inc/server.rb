@@ -29,13 +29,12 @@ def srv_init(host, ip, password)
 
   monitor(host)
 
-  if $error.nil?
-    $done = host+" successfully added"
-  end
+  done = host+" successfully added"
+  add_notification(2, error, 0)
 
   rescue SystemExit
-    @error = 'Unsupported system'
-    return @error
+    error = 'Unsupported system'
+    add_notification(0, error, 0)
   end
 end
 

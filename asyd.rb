@@ -3,6 +3,7 @@
 require 'rubygems'
 require 'sinatra'
 require 'sqlite3'
+load 'inc/lib/spork.rb'
 load 'inc/helper.rb'
 load 'inc/setup.rb'
 load 'inc/server.rb'
@@ -22,24 +23,6 @@ helpers do
   end
 end
 
-def alerts
-  if $error
-    p $error
-    @error = $error
-    $error = nil
-  end
-  if $info
-    p $info
-    @info = $info
-    $info = nil
-  end
-  if $done
-    p $done
-    @done = $done
-    $done = nil
-  end
-end
-
 # Check if ASYD was installed
 before /^(?!\/(setup))/ do
   if !File.directory? 'data'
@@ -49,14 +32,12 @@ end
 
 # Dashboard
 get '/' do
-  alerts
   erb "- Dashboard -"
 end
 
 ## SERVERS BLOCK START
 get '/server/list' do
   @hosts = get_server_list
-  alerts
   erb :serverlist
 end
 
@@ -69,9 +50,6 @@ end
 post '/server/add' do
   srv_init(params['name'], params['host'], params['password'])
   serverlist = '/server/list'
-  if @error
-    $error = @error
-  end
   redirect to serverlist
 end
 
@@ -83,9 +61,6 @@ post '/server/del' do
   end
   remove_server(params['host'], revoke)
   serverlist = '/server/list'
-  if @error
-    $error = @error
-  end
   redirect to serverlist
 end
 ## SERVERS BLOCK END
@@ -109,9 +84,6 @@ post '/groups/edit' do
     redir = '/groups/list'
   end
   groups_edit(params[:action], params[:params])
-  if @error
-    $error = @error
-  end
   redirect to redir
 end
 ## HOST GROUPS END
@@ -120,44 +92,58 @@ end
 get '/deploys/list' do
   @deploys = get_dirs("data/deploys/")
   @hosts = get_server_list
-  alerts
+  @groups = get_hostgroup_list
   erb :deploys
 end
 
 post '/deploys/install-pkg' do
-  inst = Thread.fork do
-    install_pkg(params['host'],params['package'])
-  end
-  sleep 0.2
-  if not $error
-    $info = "Installation in progress"
+  inst = Spork.spork do
+    install_pkg(params['host'],params['package'],false)
   end
   deploys = '/deploys/list'
   redirect to deploys
 end
 
-get '/deploys/deploy/:host/:dep' do
-  inst = Thread.fork do
-    deploy(params[:host], params[:dep])
+get '/deploys/deploy/:target/:dep' do
+  target = params[:target].split(";")
+  if target[0] == "host"
+    inst = Spork.spork do
+    # inst = Thread.fork do #debug
+      deploy(target[1], params[:dep],false)
+    end
+    # inst.join #debug
   end
-  sleep 0.2
-  if not $error
-    $info = "Deployment in progress"
+  if target[0] == "group"
+    inst = Spork.spork do
+      group_deploy(target[1], params[:dep])
+    end
   end
   deploys = '/deploys/list'
   redirect to deploys
 end
 ## DEPLOYS BLOCK END
 
+## TASKS BLOCK START
+get '/tasks/:id' do
+  activity = SQLite3::Database.new "data/db/activity.db"
+  @task = activity.get_first_row("select id,action,target,status,created from activity where id=?", params[:id].to_i)
+  notifications = SQLite3::Database.new "data/db/notifications.db"
+  @alerts = notifications.execute("select message,created from notifications where task_id=?", params[:id].to_i)
+  erb :taskdetail
+end
+## TASKS BLOCK END
+
+## NOTIFICATIONS BLOCK START
 post '/notifications/dismiss' do
   notifications = SQLite3::Database.new "data/db/notifications.db"
   notifications.execute("UPDATE notifications SET dismiss=1 WHERE id=?", params['msg_id'])
   notifications.close
 end
+## NOTIFICATIONS BLOCK END
 
 ## HELP BLOCK START
 get '/help' do
-  alerts
+  @vars = "<%ASYD%> - ASYD IP\n <%HOSTNAME%> - Target host name\n <%IP%> - Target host IP\n <%DIST%> - Target host linux distribution\n <%DIST_VER%> - Target host distribution version\n <%ARCH%> - Target host architecture\n <%MONITOR:service%> - Monitors the service 'service'"
   erb :help
 end
 ## HELP BLOCK END
