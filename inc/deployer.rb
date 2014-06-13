@@ -130,6 +130,19 @@ def deploy(host,dep,group)
             monitor_service(ip, service)
           end
         end
+      elsif line.start_with?("deploy")
+          doit = true
+          m = line.match(/^deploy if (.+):/)
+          if !m.nil?
+            doit = check_condition(m, host)
+          end
+          if doit
+            line = line.split(':')
+            deploys = line[1].split(' ')
+            deploys.each do |deploy|
+              deploy(host,deploy,group)
+            end
+          end
       else
         exit
       end
