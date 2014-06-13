@@ -176,7 +176,10 @@ post '/setup' do
 end
 ## SETUP END
 
-
+get '/test' do
+  ret = check_condition([0, "<%DIST%> == centos or <%DIST_VER%> == 6 and <%DIST%> == debian"], "localhost")
+  p ret
+end
 
 
 

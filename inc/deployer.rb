@@ -1,3 +1,5 @@
+# Install package or packages on defined host
+#
 def install_pkg(host,pkg,dep)
   act_id = add_activity("Installing "+pkg, host) unless dep
   begin
@@ -38,6 +40,8 @@ def install_pkg(host,pkg,dep)
   end
 end
 
+# Deploy a deploy on the defined host
+#
 def deploy(host,dep,group)
   act_id = add_activity("Deploying "+dep, host) unless group
   begin
@@ -60,36 +64,71 @@ def deploy(host,dep,group)
     f.each_line do |line|
       if line.start_with?("#")
         # Ignore comments
-      elsif line.start_with?("install:")
-        line = line.split(':')
-        pkgs = line[1].strip
-        ret = install_pkg(host, pkgs, true)
-        if ret[0] == 0
-          raise ret[1]
+      elsif line.start_with?("install")
+        doit = true
+        m = line.match(/^install if (.+):/)
+        if !m.nil?
+          doit = check_condition(m, host)
         end
-      elsif line.start_with?("config file:")
-        line = line.split(':')
-        cfg = line[1].split(',')
-        cfg_src = cfg_root+cfg[0].strip
-        parsed_cfg = parse_config(host, cfg_src)
-        cfg_dst = cfg[1].strip
-        upload_file(ip, parsed_cfg.path, cfg_dst)
-        parsed_cfg.unlink
-      elsif line.start_with?("config dir:")	## TODO: parse each config file in the directory
-        line = line.split(':')
-        cfg = line[1].split(',')
-        cfg_src = cfg_root+cfg[0].strip
-        cfg_dst = cfg[1].strip
-        upload_dir(ip, cfg_src, cfg_dst)
-      elsif line.start_with?("exec:")
-        line = line.split(':')
-        cmd = line[1].strip
-        exec_cmd(ip, cmd)
-      elsif line.start_with?("monitor:")
-        line = line.split(':')
-        services = line[1].split(' ')
-        services.each do |service|
-          monitor_service(ip, service)
+        if doit
+          line = line.split(':')
+          pkgs = line[1].strip
+          ret = install_pkg(host, pkgs, true)
+          if ret[0] == 0
+            raise ret[1]
+          end
+        end
+      elsif line.start_with?("config file")
+        doit = true
+        m = line.match(/^config file if (.+):/)
+        if !m.nil?
+          doit = check_condition(m, host)
+        end
+        if doit
+          line = line.split(':')
+          cfg = line[1].split(',')
+          cfg_src = cfg_root+cfg[0].strip
+          parsed_cfg = parse_config(host, cfg_src)
+          cfg_dst = cfg[1].strip
+          upload_file(ip, parsed_cfg.path, cfg_dst)
+          parsed_cfg.unlink
+        end
+      elsif line.start_with?("config dir")	## TODO: parse each config file in the directory
+        doit = true
+        m = line.match(/^config dir if (.+):/)
+        if !m.nil?
+          doit = check_condition(m, host)
+        end
+        if doit
+          line = line.split(':')
+          cfg = line[1].split(',')
+          cfg_src = cfg_root+cfg[0].strip
+          cfg_dst = cfg[1].strip
+          upload_dir(ip, cfg_src, cfg_dst)
+        end
+      elsif line.start_with?("exec")
+        doit = true
+        m = line.match(/^exec if (.+):/)
+        if !m.nil?
+          doit = check_condition(m, host)
+        end
+        if doit
+          line = line.split(':')
+          cmd = line[1].strip
+          exec_cmd(ip, cmd)
+        end
+      elsif line.start_with?("monitor")
+        doit = true
+        m = line.match(/^monitor if (.+):/)
+        if !m.nil?
+          doit = check_condition(m, host)
+        end
+        if doit
+          line = line.split(':')
+          services = line[1].split(' ')
+          services.each do |service|
+            monitor_service(ip, service)
+          end
         end
       else
         exit
@@ -112,6 +151,8 @@ def deploy(host,dep,group)
   end
 end
 
+# Deploy a deploy on defined hostgroup
+#
 def group_deploy(group, dep)
   act_id = add_activity("Deploying "+dep, group+" hostgroup")
   begin
@@ -139,6 +180,8 @@ def group_deploy(group, dep)
   end
 end
 
+# Validate deploy file
+#
 def check_deploy(dep)
   begin
     error = nil
@@ -201,5 +244,148 @@ def check_deploy(dep)
     return [1, "pass"] # 1 == all ok
   rescue SystemExit
     return [0, error] # 0 == error
+  end
+end
+
+# Checks conditionals on dep file
+#
+def check_condition(m, host)
+  statements = Array.new
+  i = 0
+  conditions = m[1].split(' ')
+  conditions.each do |cond|
+    if cond == "and" || cond == "or"
+      i += 1
+      if statements[i].nil?
+        statements[i] = cond
+      else
+        statements[i] << cond
+      end
+      i += 1
+    else
+      if statements[i].nil?
+        statements[i] = cond
+      else
+        statements[i] << cond
+      end
+    end
+  end
+  comply = false
+  comply_prev,comply_curr = false,false
+  vand,vor = false,false
+  statements.each do |st|
+    if st == "and"
+      vand = true
+    elsif st == "or"
+      vor = true
+    else
+      if vand
+        ret = evaluale_condition(st, host)
+        if ret
+          comply_curr = true
+        else
+          comply_curr = false
+        end
+        if comply_prev && comply_curr
+          comply = true
+          comply_prev = comply_curr
+        else
+          comply = false
+          comply_prev = comply_curr
+        end
+        vand = false
+      elsif vor
+        ret = evaluale_condition(st, host)
+        if ret
+          comply_curr = true
+        else
+          comply_curr = false
+        end
+        if comply_prev || comply_curr
+          comply = true
+          if comply_prev
+            break
+          else
+            comply_prev = true
+          end
+        else
+          comply,comply_prev = false,false
+        end
+        vor = false
+      else
+        ret = evaluale_condition(st, host)
+        if ret
+          comply,comply_prev,comply_curr = true,true,true
+        end
+      end
+    end
+  end
+  return comply
+end
+
+# Evaluate conditional
+#
+def evaluale_condition(st, host)
+  hostdata = get_host_data(host)
+  hostname = hostdata[:hostname]
+  ip = hostdata[:ip]
+  dist = hostdata[:dist_name]
+  dist_ver = hostdata[:dist_ver]
+  arch = hostdata[:arch]
+  monit_pw = hostdata[:monit_pw]
+  asyd = get_asyd_ip
+
+  st.gsub!('<%ASYD%>', asyd)
+  st.gsub!('<%MONIT_PW%>', monit_pw)
+  st.gsub!('<%IP%>', ip)
+  st.gsub!('<%DIST%>', dist)
+  st.gsub!('<%DIST_VER%>', dist_ver)
+  st.gsub!('<%ARCH%>', arch)
+  st.gsub!('<%HOSTNAME%>', hostname)
+
+  condition = st.match(/(.+)(==|!=|>=|<=)(.+)/)
+  case condition[2]
+  when "=="
+    if condition[1].nan? && condition[3].nan?
+      if condition[1].downcase == condition[3].downcase
+        return true
+      else
+        return false
+      end
+    else
+      if condition[1].to_f == condition[3].to_f
+        return true
+      else
+        return false
+      end
+    end
+  when "!="
+    if condition[1].nan? && condition[3].nan?
+      if condition[1].downcase == condition[3].downcase
+        return false
+      else
+        return true
+      end
+    else
+      if condition[1].to_f == condition[3].to_f
+        return false
+      else
+        return true
+      end
+    end
+  when ">="
+    if condition[1].to_f >= condition[3].to_f
+      return true
+    else
+      return false
+    end
+  when "<="
+    if condition[1].to_f <= condition[3].to_f
+      return true
+    else
+      return false
+    end
+  else
+    return false
   end
 end

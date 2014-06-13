@@ -8,6 +8,14 @@ require 'find'
 require 'tempfile'
 require 'socket'
 
+# Returns true if the string is not a number
+#
+class String
+  def nan?
+    self !~ /^\s*[+-]?((\d+_?)*\d+(\.(\d+_?)*\d+)?|\.(\d+_?)*\d+)(\s*|([eE][+-]?(\d+_?)*\d+)\s*)$/
+  end
+end
+
 # Gets the directories inside a path.
 #
 # @param path [String] Route to the directory where you want to list the subdirectories.
@@ -222,8 +230,8 @@ def parse_config(host, cfg)
   hostname = hostdata[:hostname]
   ip = hostdata[:ip]
   dist = hostdata[:dist_name]
-  dist_ver = hostdata[:dist_name]
-  arch = hostdata[:dist_name]
+  dist_ver = hostdata[:dist_ver]
+  arch = hostdata[:arch]
   monit_pw = hostdata[:monit_pw]
   asyd = get_asyd_ip
 
