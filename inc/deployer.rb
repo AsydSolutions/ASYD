@@ -1,3 +1,12 @@
+class SilentFormatException < StandardError
+end
+
+class FormatException < StandardError
+end
+
+class ExecutionError < StandardError
+end
+
 # Install package or packages on defined host
 #
 def install_pkg(host,pkg,dep)
@@ -21,7 +30,7 @@ def install_pkg(host,pkg,dep)
       result = result.split("\n")
       add_notification(0, result.last, act_id) unless dep
       update_activity(act_id, "failed") unless dep
-      return [0, result] # 0 == error
+      return [4, result] # 0 == error
     else
       result = result.split("\n")
       add_notification(2, result.last, act_id) unless dep
@@ -30,13 +39,21 @@ def install_pkg(host,pkg,dep)
     end
   rescue StandardError,SystemExit => e
     if e.inspect.include? "SystemExit"
-      error = "Invalid characters detected on package name: "+pkg+" (task <a href='/tasks/"+act_id.to_s+"'>#"+act_id.to_s+"</a>)"
+      if dep
+        error = "Invalid characters detected on package name: "+pkg
+      else
+        error = "Invalid characters detected on package name: "+pkg+" (task <a href='/tasks/"+act_id.to_s+"'>#"+act_id.to_s+"</a>)"
+      end
     else
-      error = "Something really bad happened when installing "+pkg+" on "+host+" (task <a href='/tasks/"+act_id.to_s+"'>#"+act_id.to_s+"</a>)"
+      if dep
+        error = "Invalid characters detected on package name: "+pkg
+      else
+        error = "Something really bad happened when installing "+pkg+" on "+host+" (task <a href='/tasks/"+act_id.to_s+"'>#"+act_id.to_s+"</a>)"
+      end
     end
     add_notification(0, error, act_id) unless dep
     update_activity(act_id, "failed") unless dep
-    return [0, error] # 0 == error
+    return [4, error] # 4 == execution error
   end
 end
 
@@ -45,13 +62,10 @@ end
 def deploy(host,dep,group)
   act_id = add_activity("Deploying "+dep, host) unless group
   begin
-    unless group
-      ret = check_deploy(dep)
-      if ret[0] == 0
-        add_notification(0, ret[1], act_id)
-        update_activity(act_id, "failed")
-        exit
-      end
+    ret = check_deploy(dep)
+    if ret[0] == 5
+      p ret[1]
+      raise FormatException, ret[1]
     end
 
     hostdata = get_host_data(host)
@@ -74,8 +88,8 @@ def deploy(host,dep,group)
           line = line.split(':')
           pkgs = line[1].strip
           ret = install_pkg(host, pkgs, true)
-          if ret[0] == 0
-            raise ret[1]
+          if ret[0] == 4
+            raise ExecutionError, ret[1].last
           end
         end
       elsif line.start_with?("config file")
@@ -140,27 +154,42 @@ def deploy(host,dep,group)
             line = line.split(':')
             deploys = line[1].split(' ')
             deploys.each do |deploy|
-              deploy(host,deploy,group)
+              ret = deploy(host,deploy,true)
+              if ret[0] == 6
+                raise SilentFormatException, ret[1]
+              elsif ret[0] == 5
+                raise FormatException, ret[1]
+              elsif ret[0] == 4
+                raise ExecutionError, ret[1]
+              end
             end
           end
       else
-        exit
+        error = "Bad formatting, check your deploy file"
+        raise SilentFormatException, error
       end
     end
     done = "Deploy "+dep+" successfully deployed on "+host
     add_notification(2, done, act_id) unless group
     update_activity(act_id, "completed") unless group
     return [1, done] # 1 == all ok
-  rescue SystemExit,Exception => e
-    if e.inspect.include? "SystemExit"
-      error = "Bad formatting, check your deploy file (task <a href='/tasks/"+act_id.to_s+"'>#"+act_id.to_s+"</a>)"
-      add_notification(0, error, act_id) unless group
-      update_activity(act_id, "failed") unless group
-      return [5, error] # 5 == error without output
-    else
-      error = e.message
-      return [0, error] # 0 == error
-    end
+
+  rescue SilentFormatException => e
+    error = "Bad formatting, check your deploy file (task <a href='/tasks/"+act_id.to_s+"'>#"+act_id.to_s+"</a>)"
+    add_notification(0, error, act_id) unless group
+    update_activity(act_id, "failed") unless group
+    return [6, error] # 6 == format exeption without output
+  rescue FormatException => e
+    error = "Bad formatting, check your deploy file (task <a href='/tasks/"+act_id.to_s+"'>#"+act_id.to_s+"</a>)"
+    add_notification(0, e.message, act_id) unless group
+    add_notification(0, error, act_id) unless group
+    update_activity(act_id, "failed") unless group
+    return [5, e.message] # 5 == format exeption with output
+  rescue ExecutionError => e
+    error = e.message+" (task <a href='/tasks/"+act_id.to_s+"'>#"+act_id.to_s+"</a>)"
+    add_notification(0, error, act_id) unless group
+    update_activity(act_id, "failed") unless group
+    return [4, e.message] # 4 == execution error
   end
 end
 
@@ -169,25 +198,31 @@ end
 def group_deploy(group, dep)
   act_id = add_activity("Deploying "+dep, group+" hostgroup")
   begin
-    ret = check_deploy(dep)
-    if ret[0] == 0
-      add_notification(0, ret[1], act_id)
-      update_activity(act_id, "failed")
-      exit
-    end
     members = get_group_members(group)
     members.each do |host|
       ret = deploy(host,dep,true)
-      if ret[0] == 0
-        exit
+      if ret[0] == 6
+        raise SilentFormatException, ret[1]
+      elsif ret[0] == 5
+        raise FormatException, ret[1]
+      elsif ret[0] == 4
+        raise ExecutionError, ret[1]
       end
     end
-  rescue SystemExit,Exception => e
-    if e.inspect.include? "SystemExit"
-      error = "Bad formatting, check your deploy file (task <a href='/tasks/"+act_id.to_s+"'>#"+act_id.to_s+"</a>)"
-    else
-      error = e.message
-    end
+    done = "Deploy "+dep+" successfully deployed on "+group+" hostgroup"
+    add_notification(2, done, act_id)
+    update_activity(act_id, "completed")
+  rescue SilentFormatException => e
+    error = "Bad formatting, check your deploy file (task <a href='/tasks/"+act_id.to_s+"'>#"+act_id.to_s+"</a>)"
+    add_notification(0, error, act_id)
+    update_activity(act_id, "failed")
+  rescue FormatException => e
+    error = "Bad formatting, check your deploy file (task <a href='/tasks/"+act_id.to_s+"'>#"+act_id.to_s+"</a>)"
+    add_notification(0, e.message, act_id)
+    add_notification(0, error, act_id)
+    update_activity(act_id, "failed")
+  rescue ExecutionError => e
+    error = e.message+" (task <a href='/tasks/"+act_id.to_s+"'>#"+act_id.to_s+"</a>)"
     add_notification(0, error, act_id)
     update_activity(act_id, "failed")
   end
@@ -205,14 +240,14 @@ def check_deploy(dep)
     f.each_line do |line|
       if line.start_with?("#")
         # Ignore comments
-      elsif line.start_with?("install:")
+      elsif line.start_with?("install")
         l = line.split(':')
         pkgs = l[1].strip
-        if pkgs.include? "&" or pkg.include? "|" or pkg.include? ">" or pkg.include? "<" or pkg.include? "`" or pkg.include? "$"
+        if pkgs.include? "&" or pkgs.include? "|" or pkgs.include? ">" or pkgs.include? "<" or pkgs.include? "`" or pkgs.include? "$"
           error = "Invalid characters found: "+line.strip
           exit
         end
-      elsif line.start_with?("config file:")
+      elsif line.start_with?("config file")
         l = line.split(':')
         cfg = l[1].split(',')
         cfg_src = cfg_root+cfg[0].strip
@@ -225,7 +260,7 @@ def check_deploy(dep)
           error = "Local config file not found: "+cfg_src
           exit
         end
-      elsif line.start_with?("config dir:")
+      elsif line.start_with?("config dir")
         l = line.split(':')
         cfg = l[1].split(',')
         cfg_src = cfg_root+cfg[0].strip
@@ -238,9 +273,9 @@ def check_deploy(dep)
           error = "Local config directory not found: "+cfg_src
           exit
         end
-      elsif line.start_with?("exec:")
+      elsif line.start_with?("exec")
         # We imply we actually WANT to execute the command
-      elsif line.start_with?("monitor:")
+      elsif line.start_with?("monitor")
         line = line.split(':')
         services = line[1].split(' ')
         services.each do |service|
@@ -256,7 +291,7 @@ def check_deploy(dep)
     end
     return [1, "pass"] # 1 == all ok
   rescue SystemExit
-    return [0, error] # 0 == error
+    return [5, error] # 5 == format exeption with output
   end
 end
 
