@@ -4,6 +4,7 @@ require 'rubygems'
 require 'sinatra'
 require 'sqlite3'
 load 'inc/lib/spork.rb'
+load 'inc/lib/subclassess.rb'
 load 'inc/helper.rb'
 load 'inc/setup.rb'
 load 'inc/server.rb'
@@ -42,9 +43,13 @@ get '/server/list' do
 end
 
 get '/server/:host' do
-  @status = get_host_status(params[:host])
   @data = get_host_data(params[:host])
-  erb :hostdetail
+  if @data.nil?
+    erb :oops
+  else
+    @status = get_host_status(params[:host])
+    erb :hostdetail
+  end
 end
 
 post '/server/add' do
@@ -74,7 +79,11 @@ end
 get '/groups/:group' do
   @group = params[:group]
   @members = get_group_members(params[:group])
-  erb :groupdetail
+  if @members.nil?
+    erb :oops
+  else
+    erb :groupdetail
+  end
 end
 
 post '/groups/edit' do
@@ -104,7 +113,7 @@ post '/deploys/install-pkg' do
   redirect to deploys
 end
 
-get '/deploys/deploy/:target/:dep' do
+get '/deploys/deploy/:target/:dep' do  ##TODO: switch to POST
   target = params[:target].split(";")
   if target[0] == "host"
     # inst = Spork.spork do
@@ -127,9 +136,13 @@ end
 get '/tasks/:id' do
   activity = SQLite3::Database.new "data/db/activity.db"
   @task = activity.get_first_row("select id,action,target,status,created from activity where id=?", params[:id].to_i)
-  notifications = SQLite3::Database.new "data/db/notifications.db"
-  @alerts = notifications.execute("select message,created from notifications where task_id=?", params[:id].to_i)
-  erb :taskdetail
+  if @task.nil?
+    erb :oops
+  else
+    notifications = SQLite3::Database.new "data/db/notifications.db"
+    @alerts = notifications.execute("select message,created from notifications where task_id=?", params[:id].to_i)
+    erb :taskdetail
+  end
 end
 ## TASKS BLOCK END
 
@@ -175,6 +188,12 @@ post '/setup' do
   redirect to home
 end
 ## SETUP END
+
+# 404 Error!
+not_found do
+  status 404
+  erb :oops
+end
 
 
 

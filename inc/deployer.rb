@@ -1,12 +1,3 @@
-class SilentFormatException < StandardError
-end
-
-class FormatException < StandardError
-end
-
-class ExecutionError < StandardError
-end
-
 # Install package or packages on defined host
 #
 def install_pkg(host,pkg,dep)

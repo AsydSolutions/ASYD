@@ -1,13 +1,17 @@
 def get_group_members(group)
   groups = SQLite3::Database.new "data/db/hostgroups.db"
   group_members = groups.get_first_row("select members from hostgroups where name=?", group)
-  if group_members[0].nil?
-    members = []
+  if group_members.nil?
+    return nil
   else
-    members = Marshal.load(group_members[0])
+    if group_members[0].nil?
+      members = []
+    else
+      members = Marshal.load(group_members[0])
+    end
+    groups.close
+    return members
   end
-  groups.close
-  return members
 end
 
 def groups_edit(action, params)

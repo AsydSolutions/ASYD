@@ -29,8 +29,8 @@
   </div>
 </div>
 
-
-<form id="install_pkg" action='/deploys/install-pkg' method='post' class="form-inline well">
+<div class="row well">
+<form id="install_pkg" action='/deploys/install-pkg' method='post' class="form-inline">
   <legend>Quick Install</legend>
   <div class="control-group"><input name='package' type="text" class="input" placeholder="Package to install" autofocus><p class="help-block">Packages to install separated by spaces</p></div>
   <div class="control-group" for"host"><select id="host" name="host">
@@ -41,3 +41,4 @@
   </select><p class="help-block">Select host or hostgroup</p></div>
   <div class="control-group"><input class="btn primary" type='submit' value='Install!'></div>
 </form>
+</div>

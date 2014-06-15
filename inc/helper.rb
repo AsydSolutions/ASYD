@@ -8,14 +8,6 @@ require 'find'
 require 'tempfile'
 require 'socket'
 
-# Returns true if the string is not a number
-#
-class String
-  def nan?
-    self !~ /^\s*[+-]?((\d+_?)*\d+(\.(\d+_?)*\d+)?|\.(\d+_?)*\d+)(\s*|([eE][+-]?(\d+_?)*\d+)\s*)$/
-  end
-end
-
 # Gets the directories inside a path.
 #
 # @param path [String] Route to the directory where you want to list the subdirectories.
@@ -79,20 +71,32 @@ end
 #     hostdata[:dist_ver]  <- the version of the distributions
 #     hostdata[:pkg_mgr]   <- the package manager used, can be "apt" or "yum" atm
 def get_host_data(host)
-  host = host.to_s
-  servers = SQLite3::Database.new "data/db/servers.db"
-  ret = servers.get_first_row("select * from servers where hostname=?", host)
-  hostdata = {}
-  hostdata[:hostname] = host
-  hostdata[:ip] = ret[1]
-  hostdata[:dist_name] = ret[2]
-  hostdata[:dist_ver] = ret[3].to_s
-  hostdata[:arch] = ret[4]
-  hostdata[:pkg_mgr] = ret[5]
-  hostdata[:monit_pw] = ret[6]
-  hostdata[:opt_vars] = ret[7]
-  servers.close
-  return hostdata
+  begin
+    host = host.to_s
+    servers = SQLite3::Database.new "data/db/servers.db"
+    ret = servers.get_first_row("select * from servers where hostname=?", host)
+    if ret.nil?
+      exit
+    end
+    hostdata = {}
+    hostdata[:hostname] = host
+    hostdata[:ip] = ret[1]
+    hostdata[:dist_name] = ret[2]
+    hostdata[:dist_ver] = ret[3].to_s
+    hostdata[:arch] = ret[4]
+    hostdata[:pkg_mgr] = ret[5]
+    hostdata[:monit_pw] = ret[6]
+    if ret[7].nil?
+      hostdata[:opt_vars] = ""
+    else
+      hostdata[:opt_vars] = Marshal.load(ret[7])
+    end
+    return hostdata
+  rescue SystemExit
+    return nil
+  ensure
+    servers.close
+  end
 end
 
 # Gets ASYD server IP address
