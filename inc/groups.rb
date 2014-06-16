@@ -14,6 +14,44 @@ def get_group_members(group)
   end
 end
 
+def groups_having(host)
+  groupsdb = SQLite3::Database.new "data/db/hostgroups.db"
+  groups = groupsdb.execute("select name,members from hostgroups")
+  if groups.nil?
+    groupsdb.close
+    return nil
+  else
+    groups_in = []
+    groups.each do |group|
+      unless group[1].nil?
+        members = Marshal.load(group[1])
+        if members.include? host
+          groups_in << group[0]
+        end
+      end
+    end
+    groupsdb.close
+    return groups_in
+  end
+end
+
+def get_group_vars(group)
+  groups = SQLite3::Database.new "data/db/hostgroups.db"
+  group_vars = groups.get_first_row("select opt_vars from hostgroups where name=?", group)
+  if group_vars.nil?
+    groups.close
+    return nil
+  else
+    if group_vars[0].nil?
+      vars = []
+    else
+      vars = Marshal.load(group_vars[0])
+    end
+    groups.close
+    return vars
+  end
+end
+
 def groups_edit(action, params)
   if action == "add_group"
     add_group(params[:group])
@@ -69,4 +107,40 @@ def del_group_member(group, server)
     groups.execute("UPDATE hostgroups SET members=? WHERE name=?", [members_srlzd, group])
     groups.close
   end
+end
+
+def add_group_var(group, name, value)
+  groups = SQLite3::Database.new "data/db/hostgroups.db"
+  opt_vars = groups.get_first_row("select opt_vars from hostgroups where name=?", group)
+  if opt_vars.nil?
+    return 4
+  else
+    if opt_vars[0].nil?
+      vars = {}
+    else
+      vars = Marshal.load(opt_vars[0])
+    end
+  end
+  vars[name] = value
+  vars_srlzd = Marshal.dump(vars)
+  groups.execute("UPDATE hostgroups SET opt_vars=? WHERE name=?", [vars_srlzd, group])
+  groups.close
+end
+
+def del_group_var(group, name)
+  groups = SQLite3::Database.new "data/db/hostgroups.db"
+  opt_vars = groups.get_first_row("select opt_vars from hostgroups where name=?", group)
+  if opt_vars.nil?
+    return 4
+  else
+    if opt_vars[0].nil?
+      return 4
+    else
+      vars = Marshal.load(opt_vars[0])
+    end
+  end
+  vars.delete(name)
+  vars_srlzd = Marshal.dump(vars)
+  groups.execute("UPDATE hostgroups SET opt_vars=? WHERE name=?", [vars_srlzd, group])
+  groups.close
 end

@@ -237,13 +237,38 @@ def parse_config(host, cfg)
   dist_ver = hostdata[:dist_ver]
   arch = hostdata[:arch]
   monit_pw = hostdata[:monit_pw]
+  host_vars = hostdata[:opt_vars]
   asyd = get_asyd_ip
+  group_vars = []
+  groups = groups_having(host)
+  groups.each do |group|
+    vars = get_group_vars(group)
+    unless vars.nil? || vars.empty?
+      group_vars << vars
+    end
+  end
 
   newconf = Tempfile.new('conf')
   begin
     File.open(cfg, "r").each do |line|
       if !line.start_with?("#") #the line is a comment
-        if !line.match(/^<%MONITOR:.+%>/)
+        if line.match(/^<%MONITOR:.+%>/)
+          service = line.match(/^<%MONITOR:(.+)%>/)[1]
+          monitor_service(service, host)
+        elsif line.match(/<%VAR:.+%>/)
+          varname = line.match(/<%VAR:(.+)%>/)[1]
+          if !host_vars[varname].nil?
+            line.gsub!(/<%VAR:.+%>/, host_vars[varname])
+            newconf << line
+          else
+            group_vars.each do |group_var|
+              if !group_var[varname].nil?
+                line.gsub!(/<%VAR:.+%>/, group_var[varname])
+              end
+            end
+            newconf << line
+          end
+        else
           line.gsub!('<%ASYD%>', asyd)
           line.gsub!('<%MONIT_PW%>', monit_pw)
           line.gsub!('<%IP%>', ip)
@@ -252,9 +277,6 @@ def parse_config(host, cfg)
           line.gsub!('<%ARCH%>', arch)
           line.gsub!('<%HOSTNAME%>', hostname)
           newconf << line
-        else
-          service = line.match(/^<%MONITOR:(.+)%>/)[1]
-          monitor_service(service, host)
         end
       end
     end

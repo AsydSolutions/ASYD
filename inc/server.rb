@@ -57,3 +57,41 @@ def remove_server(host, revoke)
     del_group_member(group, host)
   end
 end
+
+def add_host_var(host, name, value)
+  servers = SQLite3::Database.new "data/db/servers.db"
+  opt_vars = servers.get_first_row("select opt_vars from servers where hostname=?", host)
+  if opt_vars.nil?
+    return 4
+  else
+    if opt_vars[0].nil?
+      vars = {}
+    else
+      vars = Marshal.load(opt_vars[0])
+    end
+  end
+  vars[name] = value
+  vars_srlzd = Marshal.dump(vars)
+  servers.execute("UPDATE servers SET opt_vars=? WHERE hostname=?", [vars_srlzd, host])
+  servers.close
+end
+
+def del_host_var(host, name)
+  servers = SQLite3::Database.new "data/db/servers.db"
+  opt_vars = servers.get_first_row("select opt_vars from servers where hostname=?", host)
+  if opt_vars.nil?
+    return 4
+  else
+    if opt_vars[0].nil?
+      return 4
+    else
+      vars = Marshal.load(opt_vars[0])
+    end
+  end
+  p vars
+  vars.delete(name)
+  p vars
+  vars_srlzd = Marshal.dump(vars)
+  servers.execute("UPDATE servers SET opt_vars=? WHERE hostname=?", [vars_srlzd, host])
+  servers.close
+end

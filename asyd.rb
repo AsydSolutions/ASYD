@@ -198,6 +198,12 @@ end
 
 
 
+
+
+
+
+
+
 before '/secure/*' do
   if !session[:identity] then
     session[:previous_url] = request['REQUEST_PATH']
