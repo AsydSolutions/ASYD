@@ -39,7 +39,7 @@ def install_pkg(host,pkg,dep)
       else
         error = "Invalid characters detected on package name: "+pkg+" (task <a href='/tasks/"+act_id.to_s+"'>#"+act_id.to_s+"</a>)"
       end
-    if e.inspect.include? "ExecutionError"
+    elsif e.inspect.include? "ExecutionError"
       if dep
         error = e.message
       else
