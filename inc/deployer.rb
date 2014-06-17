@@ -4,6 +4,10 @@ def install_pkg(host,pkg,dep)
   act_id = add_activity("Installing "+pkg, host) unless dep
   begin
     hostdata = get_host_data(host)
+    if hostdata.nil?
+      error = "host '"+host+"' not found"
+      raise ExecutionError, error
+    end
     ip = hostdata[:ip]
     pkg_mgr = hostdata[:pkg_mgr]
 
@@ -28,16 +32,22 @@ def install_pkg(host,pkg,dep)
       update_activity(act_id, "completed") unless dep
       return [1, result] # 1 == all ok
     end
-  rescue StandardError,SystemExit => e
+  rescue StandardError,SystemExit,ExecutionError => e
     if e.inspect.include? "SystemExit"
       if dep
         error = "Invalid characters detected on package name: "+pkg
       else
         error = "Invalid characters detected on package name: "+pkg+" (task <a href='/tasks/"+act_id.to_s+"'>#"+act_id.to_s+"</a>)"
       end
+    if e.inspect.include? "ExecutionError"
+      if dep
+        error = e.message
+      else
+        error = e.message+" (task <a href='/tasks/"+act_id.to_s+"'>#"+act_id.to_s+"</a>)"
+      end
     else
       if dep
-        error = "Invalid characters detected on package name: "+pkg
+        error = "Something really bad happened when installing "+pkg+" on "+host
       else
         error = "Something really bad happened when installing "+pkg+" on "+host+" (task <a href='/tasks/"+act_id.to_s+"'>#"+act_id.to_s+"</a>)"
       end
@@ -55,11 +65,14 @@ def deploy(host,dep,group)
   begin
     ret = check_deploy(dep)
     if ret[0] == 5
-      p ret[1]
       raise FormatException, ret[1]
     end
 
     hostdata = get_host_data(host)
+    if hostdata.nil?
+      error = "host '"+host+"' not found"
+      raise ExecutionError, error
+    end
     ip = hostdata[:ip]
 
     cfg_root = "data/deploys/"+dep+"/configs/"
@@ -124,6 +137,10 @@ def deploy(host,dep,group)
               # if complies then execute the command on remote host
               if doit
                 other_hostdata = get_host_data(other_host)
+                if other_hostdata.nil?
+                  error = "host '"+host+"' not found"
+                  raise ExecutionError, error
+                end
                 other_ip = other_hostdata[:ip]
                 line = line.split(':')
                 cmd = line[1].strip
@@ -141,6 +158,10 @@ def deploy(host,dep,group)
             other_host = m2[0].strip
             if doit
               other_hostdata = get_host_data(other_host)
+              if other_hostdata.nil?
+                error = "host '"+host+"' not found"
+                raise ExecutionError, error
+              end
               other_ip = other_hostdata[:ip]
               line = line.split(':')
               cmd = line[1].strip
