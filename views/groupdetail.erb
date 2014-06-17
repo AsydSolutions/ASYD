@@ -6,6 +6,22 @@
       <a style="margin-bottom: 10px" href="#delMember" class="btn btn-success dropdown-toggle" onclick="passDataToModal('<%=host%>', '#delMember')"><span class="icon-remove icon-white"></span></a>
         </div></h5>
   <% end %>
+
+    <input type="hidden" name="count" value="1" />
+      <div class="control-group" id="fields">
+        <label class="control-label" for="field1">Custom variables:</label>
+        <div class="controls" id="profs">
+          <%@opt_vars.each do |var|%>
+            <form class="input-append" id="add_group_var" action='/groups/del-var' method='post'>
+              <div id="field"><input type="hidden" name="group" value="<%=@group%>"><input type="hidden" name="var_name" value="<%=var[0]%>"><span class="span2 uneditable-input focused"><%=var[0]%></span><span class="uneditable-input focused"><%=var[1]%></span><button class="btn" type="submit"><i class="icon-minus"></i></button></div>
+            </form>
+          <%end%>
+          <form class="input-append" id="add_group_var" action='/groups/add-var' method='post'>
+            <div id="field"><input type="hidden" name="group" value="<%=@group%>"><input autocomplete="off" class="input span2" id="var_name" name="var_name" type="text" placeholder="variable name"/><input autocomplete="off" class="input" id="value" name="value" type="text" placeholder="value"/><button class="btn" type="submit"><i class="icon-plus"></i></button></div>
+          </form>
+        </div>
+      </div>
+
   <legend></legend>
   <a id="add" class="btn btn-primary offset9">Add server to group</a>
 </div>

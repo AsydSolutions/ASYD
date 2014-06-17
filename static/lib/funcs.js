@@ -57,6 +57,6 @@ function dismissNotification(msg_id)
     xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
   }
   xmlhttp.open("POST","/notifications/dismiss",true);
-  xmlhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded"); 
+  xmlhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
   xmlhttp.send("msg_id=" + msg_id);
 }

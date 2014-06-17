@@ -48,6 +48,7 @@ get '/server/:host' do
     erb :oops
   else
     @status = get_host_status(params[:host])
+    @opt_vars = @data[:opt_vars]
     erb :hostdetail
   end
 end
@@ -68,6 +69,18 @@ post '/server/del' do
   serverlist = '/server/list'
   redirect to serverlist
 end
+
+post '/server/add-var' do
+  add_host_var(params['host'], params['var_name'], params['value'])
+  redir = '/server/'+params['host']
+  redirect to redir
+end
+
+post '/server/del-var' do
+  del_host_var(params['host'], params['var_name'])
+  redir = '/server/'+params['host']
+  redirect to redir
+end
 ## SERVERS BLOCK END
 
 ## HOST GROUPS START
@@ -82,6 +95,7 @@ get '/groups/:group' do
   if @members.nil?
     erb :oops
   else
+    @opt_vars = get_group_vars(params[:group])
     erb :groupdetail
   end
 end
@@ -93,6 +107,18 @@ post '/groups/edit' do
     redir = '/groups/list'
   end
   groups_edit(params[:action], params[:params])
+  redirect to redir
+end
+
+post '/groups/add-var' do
+  add_group_var(params['group'], params['var_name'], params['value'])
+  redir = '/groups/'+params['group']
+  redirect to redir
+end
+
+post '/groups/del-var' do
+  del_group_var(params['group'], params['var_name'])
+  redir = '/groups/'+params['group']
   redirect to redir
 end
 ## HOST GROUPS END
