@@ -122,7 +122,9 @@ def deploy(host,dep,group)
           cfg = line[1].split(',')
           cfg_src = cfg_root+cfg[0].strip
           cfg_dst = cfg[1].strip
-          upload_dir(ip, cfg_src, cfg_dst)
+          parsed_cfg = parse_config_dir(host, cfg_src)
+          upload_dir(ip, parsed_cfg, cfg_dst)
+          FileUtils.rm_r parsed_cfg
         end
       elsif line.start_with?("exec")
         doit = true

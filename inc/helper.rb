@@ -13,11 +13,17 @@ require 'socket'
 # @param path [String] Route to the directory where you want to list the subdirectories.
 # @return dir_array [Array] The subdirectories in the given directory.
 def get_dirs path
-  dir_array = Array.new
-  Pathname.new(path).children.select do |dir|
-    dir_array << dir.basename
+  files_array = Array.new
+  entries = Dir.entries(path)
+  entries.each do |d|
+    d = path+"/"+d
+    if FileTest.directory?(d)
+      unless File.basename(d, "*").match(/^\./)
+        files_array << File.basename(d, "*")
+      end
+    end
   end
-  return dir_array
+  return files_array
 end
 
 # Gets the files inside a path.
@@ -26,8 +32,10 @@ end
 # @return files_array [Array] The files in the given directory.
 def get_files path
   files_array = Array.new
-  Find.find(path) do |f|
-    if !FileTest.directory?(f)
+  entries = Dir.entries(path)
+  entries.each do |f|
+    f = path+"/"+f
+    if FileTest.file?(f)
       files_array << File.basename(f, "*")
     end
   end
@@ -290,6 +298,26 @@ def round
     return (self+0.5).floor if self > 0.0
     return (self-0.5).ceil  if self < 0.0
     return 0
+end
+
+def parse_config_dir(host, cfg_dir, tmpath)
+  if tmpath.nil?
+    o = [('a'..'z'), ('A'..'Z')].map { |i| i.to_a }.flatten
+    tmpath = (0...8).map { o[rand(o.length)] }.join
+  end
+  tempdir = "/tmp/"+tmpath+"/"
+
+  dirs = get_dirs(cfg_dir)
+  files = get_files(cfg_dir)
+  FileUtils.mkdir_p(tempdir)
+  files.each do |file|
+    parsed_cfg = parse_config(host, cfg_dir+"/"+file)
+    FileUtils.mv parsed_cfg.path, tempdir+file
+  end
+  dirs.each do |dir|
+    parse_config_dir(host, cfg_dir+"/"+dir, tmpath+"/"+dir)
+  end
+  return tempdir
 end
 
 # @!endgroup
