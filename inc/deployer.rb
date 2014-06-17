@@ -113,14 +113,46 @@ def deploy(host,dep,group)
         end
       elsif line.start_with?("exec")
         doit = true
-        m = line.match(/^exec if (.+):/)
-        if !m.nil?
-          doit = check_condition(m, host)
-        end
-        if doit
-          line = line.split(':')
-          cmd = line[1].strip
-          exec_cmd(ip, cmd)
+        m = line.match(/^exec (.+):/)
+        if !m.nil? #there's some param
+          m2 = m[1].split(/if\s?/)
+          if !m2[1].nil? #there's conditionals
+            #if there's a host defined, we act over the defined host
+            if !m2[0].nil? && !m2[0].empty?
+              other_host = m2[0].strip
+              doit = check_condition(m2, other_host)
+              # if complies then execute the command on remote host
+              if doit
+                other_hostdata = get_host_data(other_host)
+                other_ip = other_hostdata[:ip]
+                line = line.split(':')
+                cmd = line[1].strip
+                exec_cmd(other_ip, cmd)
+              end
+            else
+              doit = check_condition(m2, host)
+              if doit
+                line = line.split(':')
+                cmd = line[1].strip
+                exec_cmd(ip, cmd)
+              end
+            end
+          elsif !m2[0].nil? #no conditionals but remote execution
+            other_host = m2[0].strip
+            if doit
+              other_hostdata = get_host_data(other_host)
+              other_ip = other_hostdata[:ip]
+              line = line.split(':')
+              cmd = line[1].strip
+              exec_cmd(other_ip, cmd)
+            end
+          end
+        else #just act normally, no params
+          if doit
+            line = line.split(':')
+            cmd = line[1].strip
+            exec_cmd(ip, cmd)
+          end
         end
       elsif line.start_with?("monitor")
         doit = true
@@ -319,7 +351,7 @@ def check_condition(m, host)
       vor = true
     else
       if vand
-        ret = evaluale_condition(st, host)
+        ret = evaluate_condition(st, host)
         if ret
           comply_curr = true
         else
@@ -334,7 +366,7 @@ def check_condition(m, host)
         end
         vand = false
       elsif vor
-        ret = evaluale_condition(st, host)
+        ret = evaluate_condition(st, host)
         if ret
           comply_curr = true
         else
@@ -352,7 +384,7 @@ def check_condition(m, host)
         end
         vor = false
       else
-        ret = evaluale_condition(st, host)
+        ret = evaluate_condition(st, host)
         if ret
           comply,comply_prev,comply_curr = true,true,true
         end
@@ -364,7 +396,7 @@ end
 
 # Evaluate conditional
 #
-def evaluale_condition(st, host)
+def evaluate_condition(st, host)
   hostdata = get_host_data(host)
   hostname = hostdata[:hostname]
   ip = hostdata[:ip]
