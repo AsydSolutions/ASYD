@@ -5,7 +5,7 @@
 # <%IP%> - IP of the target server
 # <%MONITOR:service%> - Service to monitor by default
 
-set daemon 120
+set daemon 120  # please don't use a variable for this value or it will break the monitoring
 set logfile syslog facility log_daemon
 set idfile /var/.monit.id
 set statefile /var/.monit.state

@@ -63,6 +63,11 @@ def get_host_status(host)
         data[:cpu_wa] = service.system['cpu']['wait']
         data[:cpu_sy] = service.system['cpu']['system']
         data[:cpu_us] = service.system['cpu']['user']
+        if Integer(service.status) > 0
+          data[:status] = service.status_message
+        else
+          data[:status] = 'ok'
+        end
       else
 
         data[:services][i] = {}
@@ -87,4 +92,96 @@ def get_host_status(host)
     add_notification(0, error, 0)
     return nil
   end
+end
+
+def background_monitoring()
+  n = ''
+  f = File.open("data/monitors/monitrc", "r").read
+  f.gsub!(/\r\n?/, "\n")
+  f.each_line do |line|
+    m = line.match(/^set daemon (\d+)/)
+    if !m.nil?
+      n = m[1].to_i
+    end
+  end
+  while true
+    servers = get_server_list
+    monitoring = SQLite3::Database.new "data/db/notifications.db"
+    servers.each do |host|
+      status = get_host_status(host)
+      if status[:status] == 'ok'
+        oldstatus = monitoring.get_first_row("select id,solved from monitoring where host=? and service='system' order by id desc", host)
+        if !oldstatus.nil?
+          if oldstatus[1] == 0  # the issue is now solved
+            monitoring.execute("UPDATE monitoring SET solved=1 WHERE id=?", oldstatus[0])
+          end
+        end
+      else
+        oldstatus = monitoring.get_first_row("select id,acknowledge,solved from monitoring where host=? and service='system' order by id desc", host)
+        if !oldstatus.nil?
+          if oldstatus[2] == 0 # exists in db and not solved
+            if oldstatus[1] == 0 # also not acknowledged
+              msg = "Alert on "+host+": "+status[:status]
+              notify(msg)
+            end
+          else # must be old so we create a new one
+            monitoring.execute("INSERT INTO monitoring (host, message) VALUES (?, ?)", [host, status[:status]])
+            msg = "Alert on "+host+": "+status[:status]
+            notify(msg)
+          end
+        else # new on the db
+          monitoring.execute("INSERT INTO monitoring (host, message) VALUES (?, ?)", [host, status[:status]])
+          msg = "Alert on "+host+": "+status[:status]
+          notify(msg)
+        end
+      end
+      status[:services].each do |service|
+        if service[:status] == 'ok'
+          oldstatus = monitoring.get_first_row("select id,solved from monitoring where host=? and service=? order by id desc", [host, service[:name]])
+          if !oldstatus.nil?
+            if oldstatus[1] == 0  # the issue is now solved
+              monitoring.execute("UPDATE monitoring SET solved=1 WHERE id=?", oldstatus[0])
+            end
+          end
+        else
+          oldstatus = monitoring.get_first_row("select id,acknowledge,solved from monitoring where host=? and service=? order by id desc", [host, service[:name]])
+          if !oldstatus.nil?
+            if oldstatus[2] == 0 # exists in db and not solved
+              if oldstatus[1] == 0 # also not acknowledged
+                msg = "Alert service "+service[:name]+" on "+host+": "+service[:status]
+                notify(msg)
+              end
+            else # must be old so we create a new one
+              monitoring.execute("INSERT INTO monitoring (host, service, message) VALUES (?, ?, ?)", [host, service[:name], service[:status]])
+              msg = "Alert service "+service[:name]+" on "+host+": "+service[:status]
+              notify(msg)
+            end
+          else # new on the db
+            monitoring.execute("INSERT INTO monitoring (host, service, message) VALUES (?, ?, ?)", [host, service[:name], service[:status]])
+            msg = "Alert service "+service[:name]+" on "+host+": "+service[:status]
+            notify(msg)
+          end
+        end
+      end
+    end
+    monitoring.close
+    sleep n
+  end
+end
+
+def notify(msg)
+  userdb = SQLite3::Database.new "data/db/users.db"
+  userdb.execute("select email,notifications from users") do |row|
+    if row[1].to_i == 1
+      p email
+      p msg
+    end
+  end
+  userdb.close
+end
+
+def acknowledge(host, service)
+  monitoring = SQLite3::Database.new "data/db/notifications.db"
+  monitoring.execute("UPDATE monitoring SET acknowledge=1 WHERE host=? and service=?", [host, service])
+  monitoring.close
 end

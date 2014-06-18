@@ -15,8 +15,25 @@ def setup(*params)
       f.write(params[1][:tempfile].read)
     end
   end
-  # Create servers database
   begin
+    # Create users database
+    users = SQLite3::Database.new "data/db/users.db"
+    users.execute <<-SQL
+    create table users (
+      user text not null primary key,
+      email text not null,
+      password text not null
+      notifications integer DEFAULT 0,
+    );
+    SQL
+    users.execute <<-SQL
+    create table groups (
+      name text not null primary key,
+      members text,
+      notifications integer DEFAULT 0,
+    );
+    SQL
+    # Create servers database
     servers = SQLite3::Database.new "data/db/servers.db"
     servers.execute <<-SQL
     create table servers (
@@ -48,6 +65,17 @@ def setup(*params)
       message text not null,
       dismiss integer DEFAULT 0,
       task_id integer,
+      created DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+    SQL
+    notifications.execute <<-SQL
+    create table monitoring (
+      id integer primary key AUTOINCREMENT,
+      host text not null,
+      service text default 'system',
+      message text not null,
+      acknowledge integer DEFAULT 0,
+      solved integer DEFAULT 0,
       created DATETIME DEFAULT CURRENT_TIMESTAMP
     );
     SQL
