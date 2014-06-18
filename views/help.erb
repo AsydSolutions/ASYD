@@ -38,7 +38,14 @@ Deploy example:
 
 You can use the following global variables on any configuration file, they will
 get automatically replaced.
- <%= @vars %>
+ <%%ASYD%> - ASYD IP
+ <%%HOSTNAME%> - Target host name
+ <%%IP%> - Target host IP
+ <%%DIST%> - Target host linux distribution
+ <%%DIST_VER%> - Target host distribution version
+ <%%ARCH%> - Target host architecture
+ <%%MONITOR:service%> - Monitors the service 'service'
+ <%%VAR:varname%> - You can add your custom variables
  You can define custom variables on both hosts and hostgroups, if a host has the
  same variable name as his hostgroup, it will use the host one, so you can override
  variables on selected hosts inside a group
@@ -51,6 +58,5 @@ for "def" files on a deploy.
 
 Valid conditions are ==, !=, >= and <=
 Example condition:
-  install if <%= @condition %>
-
+  install if <%%DIST%> == debian and <%%DIST_VER%> == 6 or <%%DIST%> == centos and <%%DIST_ver%> >= 5: package
 </pre>
