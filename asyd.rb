@@ -182,7 +182,8 @@ end
 
 ## HELP BLOCK START
 get '/help' do
-  @vars = "<%ASYD%> - ASYD IP\n <%HOSTNAME%> - Target host name\n <%IP%> - Target host IP\n <%DIST%> - Target host linux distribution\n <%DIST_VER%> - Target host distribution version\n <%ARCH%> - Target host architecture\n <%MONITOR:service%> - Monitors the service 'service'"
+  @vars = "<%ASYD%> - ASYD IP\n <%HOSTNAME%> - Target host name\n <%IP%> - Target host IP\n <%DIST%> - Target host linux distribution\n <%DIST_VER%> - Target host distribution version\n <%ARCH%> - Target host architecture\n <%MONITOR:service%> - Monitors the service 'service'\n <%VAR:varname%> - You can add your custom variables"
+  @condition = "<%DIST%> == debian and <%DIST_VER%> == 6 or <%DIST%> == centos and <%DIST_ver%> >= 5"
   erb :help
 end
 ## HELP BLOCK END

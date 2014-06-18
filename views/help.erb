@@ -17,10 +17,12 @@ the file structure is the following:
    (i.e. data/deploys/LAMP/configs/apache/apache.conf)
 
 The def file structure is as follows:
- install: package_a package_b package_c
- config file: file.conf, /destination/route
- config dir: confdir, /destination/route
- exec: command -params
+ install [if <condition>]: package_a package_b package_c
+ config file [if <condition>]: file.conf, /destination/route
+ config dir [if <condition>]: confdir, /destination/route
+ exec [host][if <condition>]: command
+ monitor [if <condition>]: service
+ deploy [if <condition>]: another_deploy
 
 Deploy example:
  - data/deploys/LAMP/def:
@@ -37,5 +39,18 @@ Deploy example:
 You can use the following global variables on any configuration file, they will
 get automatically replaced.
  <%= @vars %>
+ You can define custom variables on both hosts and hostgroups, if a host has the
+ same variable name as his hostgroup, it will use the host one, so you can override
+ variables on selected hosts inside a group
+
+All this variables can be used on any configuration file inside the "configs"
+directory on a deploy, inside the "data/monitors/" directory, or as conditionals
+for "def" files on a deploy.
+
+-- Conditionals --
+
+Valid conditions are ==, !=, >= and <=
+Example condition:
+  install if <%= @condition %>
 
 </pre>
