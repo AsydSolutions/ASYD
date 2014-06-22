@@ -85,6 +85,7 @@ def add_group_member(group, server)
     members = Marshal.load(group_members[0])
     members << server
   end
+  members = members.uniq
   members_srlzd = Marshal.dump(members)
   groups.execute("UPDATE hostgroups SET members=? WHERE name=?", [members_srlzd, group])
   groups.close
@@ -121,7 +122,9 @@ def add_group_var(group, name, value)
       vars = Marshal.load(opt_vars[0])
     end
   end
-  vars[name] = value
+  if vars[name].nil?  # avoid duplicates
+    vars[name] = value
+  end
   vars_srlzd = Marshal.dump(vars)
   groups.execute("UPDATE hostgroups SET opt_vars=? WHERE name=?", [vars_srlzd, group])
   groups.close

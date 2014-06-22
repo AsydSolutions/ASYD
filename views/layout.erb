@@ -26,16 +26,20 @@
 
         <ul class="nav pull-right">
           <li><a href="/help">Documentation</a></li>
+          <%if !username.nil?%>
           <li class="dropdown">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">
               <%=username%>
             <b class="caret"></b>
             </a>
             <ul class="dropdown-menu">
-              <li><a href="/login/form">Login</a></li>
+              <%if is_admin?(username)%>
+                <li><a href="/users">Manage users</a></li>
+              <%end%>
               <li><a href="/logout">Logout</a></li>
             </ul>
           </li>
+          <%end%>
         </ul>
 
       </div>

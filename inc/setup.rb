@@ -5,15 +5,15 @@ def setup(*params)
   FileUtils.mv("installer/monitors", "data/monitors") # Move predefined monitors
   FileUtils.remove_dir("installer") # Remove installer directory
   # Create or upload an SSH key
-  if params.length == 1
-    `ssh-keygen -f data/ssh_key -t rsa -N ""`
-  elsif params.length == 2
+  if params.length == 2
     File.open('data/ssh_key', "w") do |f|
       f.write(params[0][:tempfile].read)
     end
     File.open('data/ssh_key.pub', "w") do |f|
       f.write(params[1][:tempfile].read)
     end
+  else
+    `ssh-keygen -f data/ssh_key -t rsa -N ""`
   end
   begin
     # Create users database
@@ -22,15 +22,15 @@ def setup(*params)
     create table users (
       user text not null primary key,
       email text not null,
-      password text not null
-      notifications integer DEFAULT 0,
+      password text not null,
+      notifications integer DEFAULT 1
     );
     SQL
     users.execute <<-SQL
-    create table groups (
-      name text not null primary key,
+    create table teams (
+      team text not null primary key,
       members text,
-      notifications integer DEFAULT 0,
+      notifications integer DEFAULT 0
     );
     SQL
     # Create servers database

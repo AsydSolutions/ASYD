@@ -70,7 +70,9 @@ def add_host_var(host, name, value)
       vars = Marshal.load(opt_vars[0])
     end
   end
-  vars[name] = value
+  if vars[name].nil?  # avoid duplicates
+    vars[name] = value
+  end
   vars_srlzd = Marshal.dump(vars)
   servers.execute("UPDATE servers SET opt_vars=? WHERE hostname=?", [vars_srlzd, host])
   servers.close

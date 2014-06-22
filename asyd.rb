@@ -7,6 +7,7 @@ load 'inc/lib/spork.rb'
 load 'inc/lib/subclassess.rb'
 load 'inc/helper.rb'
 load 'inc/setup.rb'
+load 'inc/users.rb'
 load 'inc/server.rb'
 load 'inc/groups.rb'
 load 'inc/monitor.rb'
@@ -20,20 +21,39 @@ end
 
 helpers do
   def username
-    session[:identity] ? session[:identity] : 'Hello stranger'
+    session[:identity] ? session[:identity] : nil
   end
 end
 
 # Check if ASYD was installed
-before /^(?!\/(setup))/ do
+before /^(?!\/(setup))(?!\/(login))/ do
   if !File.directory? 'data'
     redirect '/setup'
+  else
+    if !session[:identity] then
+      redirect '/login'
+    end
   end
 end
 
 # Dashboard
 get '/' do
   erb "- Dashboard -"
+end
+
+get '/login' do
+  erb :login
+end
+
+post '/login' do
+  ret = auth_user(params['username'], params['password'])
+  if ret
+    session[:identity] = params['username']
+    redirect '/'
+  else
+    @error = "Failed login"
+    erb :login
+  end
 end
 
 ## SERVERS BLOCK START
@@ -188,7 +208,12 @@ end
 
 ## SETUP START
 get '/setup' do
-  erb :setup
+  home = '/'
+  if File.directory? 'data'
+    redirect to home
+  else
+    erb :setup, :layout => false
+  end
 end
 
 post '/setup' do
@@ -196,12 +221,12 @@ post '/setup' do
   if File.directory? 'data'
     redirect to home
   else
+    if params['password'].empty? || params['username'].empty? || params['email'].empty?
+      @error = 'All fields required'
+      halt erb(:setup)
+    end
     if params['generate'] == '1'
-      if params['password'] == ""
-        @error = 'Password required'
-        halt erb(:setup)
-      end
-      setup(params['password'])
+      setup()
     else
       if params[:priv_key].nil? || params[:pub_key].nil?
         @error = 'All files required'
@@ -209,6 +234,9 @@ post '/setup' do
       end
       setup(params[:priv_key], params[:pub_key])
     end
+    add_user(params['username'], params['email'], params['password'])
+    add_team("admins")
+    add_team_member("admins", params['username'])
   end
   redirect to home
 end
@@ -230,19 +258,8 @@ end
 
 
 
-before '/secure/*' do
-  if !session[:identity] then
-    session[:previous_url] = request['REQUEST_PATH']
-    @error = 'Sorry guacamole, you need to be logged in to do that'
-    halt erb(:login_form)
-  end
-end
 
 get '/logout' do
   session.delete(:identity)
   erb "<div class='alert alert-message'>Logged out</div>"
-end
-
-get '/secure/place' do
-  erb "This is a secret place that only <%=session[:identity]%> has access to!"
 end
