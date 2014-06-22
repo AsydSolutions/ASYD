@@ -1,6 +1,6 @@
 Installation on Debian:
 
-	apt-get update && apt-get install ruby1.9.1-full git libxslt-dev libxml2-dev libsqlite3-dev
+	apt-get update && apt-get install ruby1.9.1-full git libxslt-dev libxml2-dev libsqlite3-dev make
 	gem install bundler
 	export PATH=/var/lib/gems/1.9.1/bin/:${PATH}
 
