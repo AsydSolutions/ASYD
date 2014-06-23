@@ -66,8 +66,15 @@ end
 
 def add_group(group)
   groups = SQLite3::Database.new "data/db/hostgroups.db"
-  groups.execute("INSERT INTO hostgroups (name) VALUES (?)", group)
-  groups.close
+  ret = groups.execute("select name from hostgroups where name=?", group)
+  if ret.nil? || ret.empty?
+    groups.execute("INSERT INTO hostgroups (name) VALUES (?)", group)
+    groups.close
+    return 1
+  else
+    groups.close
+    return 3
+  end
 end
 
 def del_group(group)

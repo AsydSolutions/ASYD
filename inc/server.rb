@@ -1,5 +1,10 @@
 def srv_init(host, ip, password)
   begin
+  servers = SQLite3::Database.new "data/db/servers.db"
+  ret = servers.execute("select hostname,ip from servers where hostname=? or ip=?", [host, ip])
+  if !ret.nil? || !ret.empty?
+    raise DuplicatesFound
+  end
   distro,dist_host,dist_ver,arch,pkg_mgr = ""
   o = [('a'..'z'), ('A'..'Z')].map { |i| i.to_a }.flatten
   monit_pw = (0...8).map { o[rand(o.length)] }.join
@@ -26,7 +31,6 @@ def srv_init(host, ip, password)
 
   end
 
-  servers = SQLite3::Database.new "data/db/servers.db"
   servers.execute("INSERT INTO servers (hostname, ip, dist, dist_ver, arch, pkg_mgr, monit_pw) VALUES (?, ?, ?, ?, ?, ?, ?)", [host, ip, dist_host, dist_ver, arch, pkg_mgr, monit_pw])
   servers.close
 
@@ -38,6 +42,11 @@ def srv_init(host, ip, password)
   rescue SystemExit
     error = 'Unsupported system'
     add_notification(0, error, 0)
+    servers.close
+  rescue DuplicatesFound
+    error = 'Hostname or IP already exists on the system'
+    add_notification(0, error, 0)
+    servers.close
   end
 end
 
