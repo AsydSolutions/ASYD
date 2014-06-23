@@ -17,3 +17,7 @@ end
 # Return code: 4
 class ExecutionError < StandardError
 end
+
+# Return code: 3
+class DuplicatesFound < StandardError
+end

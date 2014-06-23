@@ -7,6 +7,7 @@ require 'pathname'
 require 'find'
 require 'tempfile'
 require 'socket'
+require 'sqlite3'
 
 # Gets the directories inside a path.
 #

@@ -1,8 +1,6 @@
-# dev hint: shotgun login.rb
-
+# Here we load all the application files
 require 'rubygems'
 require 'sinatra'
-require 'sqlite3'
 load 'inc/lib/spork.rb'
 load 'inc/lib/subclassess.rb'
 load 'inc/helper.rb'
@@ -25,7 +23,7 @@ helpers do
   end
 end
 
-# Check if ASYD was installed
+# Check if ASYD was installed or user is logged in before doing anything
 before /^(?!\/(setup))(?!\/(login))/ do
   if !File.directory? 'data'
     redirect '/setup'
@@ -41,7 +39,11 @@ get '/' do
   erb "- Dashboard -"
 end
 
+## LOGIN/LOGOUT BLOCK START
 get '/login' do
+  if !File.directory? 'data'
+    redirect '/setup'
+  end
   erb :login
 end
 
@@ -55,6 +57,12 @@ post '/login' do
     erb :login
   end
 end
+
+get '/logout' do
+  session.delete(:identity)
+  erb "<div class='alert alert-message'>Logged out</div>"
+end
+## LOGIN/LOGOUT BLOCK END
 
 ## SERVERS BLOCK START
 get '/server/list' do
@@ -246,20 +254,4 @@ end
 not_found do
   status 404
   erb :oops
-end
-
-
-
-
-
-
-
-
-
-
-
-
-get '/logout' do
-  session.delete(:identity)
-  erb "<div class='alert alert-message'>Logged out</div>"
 end
