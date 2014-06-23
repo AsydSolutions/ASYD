@@ -90,7 +90,7 @@ Valid conditions are == (equal), != (different), >= (greater or equal) and <= (l
 
 Example condition:
 
-`install if <%%DIST%> == debian and <%%DIST_VER%> == 6 or <%%DIST%> == centos and <%%DIST_ver%> >= 5: package`
+`install if <%DIST%> == debian and <%DIST_VER%> == 6 or <%DIST%> == centos and <%DIST_ver%> >= 5: package`
 
 Monitors
 --------
