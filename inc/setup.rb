@@ -53,6 +53,7 @@ def setup(*params)
     create table hostgroups (
       name text not null primary key,
       members text,
+      autodeploy text,
       opt_vars text
     );
     SQL
