@@ -18,9 +18,9 @@
 </div>
 
 <form id="add_form" style="display:none" action='/server/add' method='post' class="form-inline well">
-  <div class="control-group"><input name='name' type="text" class="input-xlarge" placeholder="Display name" autofocus></div>
-  <div class="control-group"><input name='host' type="text" class="input-xlarge" placeholder="IP / hostname"></div>
-  <div class="control-group"><input name='password' type="password" class="input-xlarge" placeholder="root password"></div>
+  <div class="control-group"><input autocomplete="off" name='name' type="text" class="input-xlarge" placeholder="Hostname" autofocus data-validation-regex-regex=".*\.?.+\..+" data-validation-regex-message="Must be a fully qualified domain name (example.com)" required><p class="help-block"></p></div>
+  <div class="control-group"><input autocomplete="off" name='host' type="text" class="input-xlarge" placeholder="IP address" data-validation-regex-regex="(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)" data-validation-regex-message="Must be a valid IP address" required><p class="help-block"></p></div>
+  <div class="control-group"><input name='password' type="password" class="input-xlarge" placeholder="root password" required></div>
   <div class="control-group"><input class="btn primary" type='submit' value='Deploy!'></div>
 </form>
 

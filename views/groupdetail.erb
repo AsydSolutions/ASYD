@@ -17,7 +17,7 @@
             </form>
           <%end%>
           <form class="input-append" id="add_group_var" action='/groups/add-var' method='post'>
-            <div id="field"><input type="hidden" name="group" value="<%=@group%>"><input autocomplete="off" class="input span2" id="var_name" name="var_name" type="text" placeholder="variable name"/><input autocomplete="off" class="input" id="value" name="value" type="text" placeholder="value"/><button class="btn" type="submit"><i class="icon-plus"></i></button></div>
+            <div id="field"><input type="hidden" name="group" value="<%=@group%>"><input autocomplete="off" class="input span2" id="var_name" name="var_name" type="text" placeholder="variable name" required/><input autocomplete="off" class="input" id="value" name="value" type="text" placeholder="value" required/><button class="btn" type="submit"><i class="icon-plus"></i></button></div>
           </form>
         </div>
       </div>

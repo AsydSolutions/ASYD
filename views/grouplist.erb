@@ -12,7 +12,7 @@
 
 <form id="add_form" style="display:none" action='/groups/edit' method='post' class="form-inline well">
   <input name='action' type="hidden" value="add_group">
-  <div class="control-group"><input name='params[group]' type="text" class="input-xlarge" placeholder="Name" autofocus></div>
+  <div class="control-group"><input autocomplete="off" name='params[group]' type="text" class="input-xlarge" placeholder="Name" autofocus required></div>
   <div class="control-group"><input class="btn primary" type='submit' value='Add'></div>
 </form>
 
