@@ -2,36 +2,38 @@
 <html>
 <head>
   <title>asyd - Automated SYstem Deploy</title>
-  <script src="/lib/jquery-1.7.2.min.js" type="text/javascript"></script>
-  <script src="/lib/bootstrap/js/bootstrap.min.js"></script>
-  <link rel="stylesheet" href="/lib/bootstrap/css/bootstrap.min.css">
-  <link rel="stylesheet" href="/lib/bootstrap/css/asyd.css">
-  <script src="/lib/jqBootstrapValidation.min.js"></script>
-  <script src="/lib/funcs.js" type="text/javascript"></script>
+  <link rel="stylesheet" href="/lib/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/lib/css/bootstrap-responsive.min.css">
+  <link rel="stylesheet" href="/lib/css/asyd.css">
+  <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,600italic,400,600">
+  <link rel="stylesheet" href="/lib/css/font-awesome.min.css">
+  <link rel="stylesheet" href="/lib/css/style.css">
+  <link rel="stylesheet" href="/lib/css/pages/dashboard.css">
+  <script src="/lib/js/jquery-1.7.2.min.js" type="text/javascript"></script>
+  <script src="/lib/js/excanvas.min.js"></script>
+  <script src="/lib/js/bootstrap.js"></script>
+  <script src="/lib/js/base.js"></script>
+  <script src="/lib/js/jqBootstrapValidation.min.js"></script>
+  <script src="/lib/js/funcs.js" type="text/javascript"></script>
+  <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
+  <!--[if lt IE 9]>
+    <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
 </head>
-<body style="padding-top: 50px;">
-
-  <div class="navbar navbar-inverse navbar-fixed-top">
+<body>
+  <div class="navbar navbar-fixed-top">
     <div class="navbar-inner">
       <div class="container">
 
         <a class="brand" href="/">
-          asyd
+          ASYD
         </a>
-
-        <ul class="nav">
-          <li><a href="/server/list">Servers</a></li>
-          <li><a href="/groups/list">Hostgoups</a></li>
-          <li><a href="/deploys/list">Deploys</a></li>
-        </ul>
-
         <ul class="nav pull-right">
-          <li><a href="/help">Documentation</a></li>
+          <li><a href="/help"><i class="icon-book"></i> Documentation</a></li>
           <%if !username.nil?%>
           <li class="dropdown">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-              <%=username%>
-            <b class="caret"></b>
+              <i class="icon-cog"></i> <%=username%> <span class="caret"></span>
             </a>
             <ul class="dropdown-menu">
               <%if is_admin?(username)%>
@@ -43,6 +45,19 @@
           <%end%>
         </ul>
 
+      </div>
+    </div>
+  </div>
+  <div class="scroller_anchor"></div>
+  <div class="subnavbar subnavbar-fixed-top">
+    <div class="subnavbar-inner">
+      <div class="container">
+        <ul class="mainnav">
+          <li><a href="/"><i class="icon-dashboard"></i><span>Dashboard</span></a></li>
+          <li><a href="/server/list"><i class="icon-hdd"></i><span>Servers</span></a></li>
+          <li><a href="/deploys/list"><i class="icon-code"></i><span>Deploys</span></a></li>
+          <li><a href="/tasks/list"><i class="icon-tasks"></i><span>Tasks</span></a></li>
+        </ul>
       </div>
     </div>
   </div>

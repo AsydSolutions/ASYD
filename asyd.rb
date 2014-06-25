@@ -255,3 +255,7 @@ not_found do
   status 404
   erb :oops
 end
+
+get '/test' do
+  erb :servers_overiew
+end
