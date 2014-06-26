@@ -4,7 +4,6 @@
   <title>asyd - Automated SYstem Deploy</title>
   <link rel="stylesheet" href="/lib/css/bootstrap.min.css">
   <link rel="stylesheet" href="/lib/css/bootstrap-responsive.min.css">
-  <link rel="stylesheet" href="/lib/css/asyd.css">
   <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,600italic,400,600">
   <link rel="stylesheet" href="/lib/css/font-awesome.min.css">
   <link rel="stylesheet" href="/lib/css/style.css">
@@ -21,30 +20,36 @@
   <![endif]-->
 </head>
 <body>
+  <div id="wrapper">
   <div class="navbar navbar-fixed-top">
     <div class="navbar-inner">
       <div class="container">
-
+        <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </a>
         <a class="brand" href="/">
           ASYD
         </a>
-        <ul class="nav pull-right">
-          <li><a href="/help"><i class="icon-book"></i> Documentation</a></li>
-          <%if !username.nil?%>
-          <li class="dropdown">
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-              <i class="icon-cog"></i> <%=username%> <span class="caret"></span>
-            </a>
-            <ul class="dropdown-menu">
-              <%if is_admin?(username)%>
-                <li><a href="/users">Manage users</a></li>
-              <%end%>
-              <li><a href="/logout">Logout</a></li>
-            </ul>
-          </li>
-          <%end%>
-        </ul>
-
+        <div class="nav-collapse">
+          <ul class="nav pull-right">
+            <li><a href="/help"><i class="icon-book"></i> Documentation</a></li>
+            <%if !username.nil?%>
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                <i class="icon-cog"></i> <%=username%> <span class="caret"></span>
+              </a>
+              <ul class="dropdown-menu">
+                <%if is_admin?(username)%>
+                  <li><a href="/users">Manage users</a></li>
+                <%end%>
+                <li><a href="/logout">Logout</a></li>
+              </ul>
+            </li>
+            <%end%>
+          </ul>
+        </div>
       </div>
     </div>
   </div>
@@ -54,30 +59,54 @@
       <div class="container">
         <ul class="mainnav">
           <li><a href="/"><i class="icon-dashboard"></i><span>Dashboard</span></a></li>
-          <li><a href="/server/list"><i class="icon-hdd"></i><span>Servers</span></a></li>
+          <li><a href="/servers/overiew"><i class="icon-hdd"></i><span>Servers</span></a></li>
           <li><a href="/deploys/list"><i class="icon-code"></i><span>Deploys</span></a></li>
           <li><a href="/tasks/list"><i class="icon-tasks"></i><span>Tasks</span></a></li>
         </ul>
       </div>
     </div>
   </div>
-  <br />
-
-  <div class="container">
-    <% notifications = get_notifications %>
-    <% notifications[:activity].each do |action| %>
-      <div class="alert alert-info"><%=action[1]%> on <%=action[2]%></div>
-    <% end %>
-    <% notifications[:error].each do |error| %>
-      <div class="alert alert-error"><a href="#" class="close" data-dismiss="alert" onclick="dismissNotification('<%=error[0]%>')">&times;</a><%=error[1]%></div>
-    <% end %>
-    <% notifications[:info].each do |info| %>
-      <div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" onclick="dismissNotification('<%=info[0]%>')">&times;</a><%=info[1]%></div>
-    <% end %>
-    <% notifications[:done].each do |done| %>
-      <div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" onclick="dismissNotification('<%=done[0]%>')">&times;</a><%=done[1]%></div>
-    <% end %>
-    <%= yield %>
+  <div class="main">
+  	<div class="main-inner">
+      <div class="container">
+        <% notifications = get_notifications %>
+        <% notifications[:activity].each do |action| %>
+          <div class="alert alert-info"><%=action[1]%> on <%=action[2]%></div>
+        <% end %>
+        <% notifications[:error].each do |error| %>
+          <div class="alert alert-error"><a href="#" class="close" data-dismiss="alert" onclick="dismissNotification('<%=error[0]%>')">&times;</a><%=error[1]%></div>
+        <% end %>
+        <% notifications[:info].each do |info| %>
+          <div class="alert alert-info"><a href="#" class="close" data-dismiss="alert" onclick="dismissNotification('<%=info[0]%>')">&times;</a><%=info[1]%></div>
+        <% end %>
+        <% notifications[:done].each do |done| %>
+          <div class="alert alert-success"><a href="#" class="close" data-dismiss="alert" onclick="dismissNotification('<%=done[0]%>')">&times;</a><%=done[1]%></div>
+        <% end %>
+        <%= yield %>
+      </div>
+    </div>
   </div>
+
+  <div class="footer">
+
+	<div class="footer-inner">
+
+		<div class="container">
+
+			<div class="row">
+
+    			<div class="span12">
+    				2014 - ASYD Solutions
+    			</div> <!-- /span12 -->
+
+    		</div> <!-- /row -->
+
+		</div> <!-- /container -->
+
+	</div> <!-- /footer-inner -->
+
+</div>
+</div>
+</div>
 </body>
 </html>

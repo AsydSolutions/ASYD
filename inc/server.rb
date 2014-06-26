@@ -99,9 +99,7 @@ def del_host_var(host, name)
       vars = Marshal.load(opt_vars[0])
     end
   end
-  p vars
   vars.delete(name)
-  p vars
   vars_srlzd = Marshal.dump(vars)
   servers.execute("UPDATE servers SET opt_vars=? WHERE hostname=?", [vars_srlzd, host])
   servers.close

@@ -65,9 +65,10 @@ end
 ## LOGIN/LOGOUT BLOCK END
 
 ## SERVERS BLOCK START
-get '/server/list' do
+get '/servers/overiew' do
+  @groups = get_hostgroup_list
   @hosts = get_server_list
-  erb :serverlist
+  erb :servers_overiew
 end
 
 get '/server/:host' do
@@ -105,6 +106,8 @@ post '/server/add-var' do
 end
 
 post '/server/del-var' do
+  p params['host']
+  p params['var_name']
   del_host_var(params['host'], params['var_name'])
   redir = '/server/'+params['host']
   redirect to redir
@@ -112,11 +115,6 @@ end
 ## SERVERS BLOCK END
 
 ## HOST GROUPS START
-get '/groups/list' do
-  @groups = get_hostgroup_list
-  erb :grouplist
-end
-
 get '/groups/:group' do
   @group = params[:group]
   @members = get_group_members(params[:group])
@@ -254,8 +252,4 @@ end
 not_found do
   status 404
   erb :oops
-end
-
-get '/test' do
-  erb :servers_overiew
 end

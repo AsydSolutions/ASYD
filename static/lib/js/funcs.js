@@ -42,6 +42,8 @@ $(function() {
     $("#gen").toggle();
   });
 
+  $('.hint').tooltip();
+
   $('.srv').width(
     Math.max.apply(
       Math,
