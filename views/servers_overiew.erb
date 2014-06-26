@@ -26,7 +26,33 @@
 								<%=group%>
 							</td>
 							<td>
-								<span style="font-size: 8pt;" class="badge badge-mini badge-success">2/2</span>
+								<div class="accordion-group accordion-invisible">
+									<div class="accordion-heading accordion-invisible">
+										<% members_status = check_members_status(group) %>
+										<% if members_status[2] == 0 %>
+											<a data-toggle="collapse" href="#collapseOne" style="font-size: 8pt; color: #ffffff;" class="badge badge-success"><%=members_status[0]%>/<%=members_status[1]%></a>
+										<% else %>
+											<a data-toggle="collapse" href="#collapseOne" data-placement="right" data-original-title="<%=members_status[2]%> host(s) on this group has issues" style="font-size: 8pt; color: #ffffff;" class="badge badge-warning hint "><%=members_status[0]%>/<%=members_status[1]%></a>
+										<% end %>
+									</div>
+									<div id="collapseOne" class="accordion-body collapse accordion-invisible">
+										<div class="accordion-inner accordion-invisible">
+											<% members = get_group_members(group) %>
+											<% members.each do |member| %>
+												<a href="/server/<%=member%>">
+												<% host_ok = all_ok(member) %>
+												<% if host_ok == 1 %>
+													<span class="label label-success"><%= member %></span>
+												<% elsif host_ok == 2 %>
+													<span class="label label-warning"><%= member %></span>
+												<% elsif host_ok == 3 %>
+													<span class="label label-important"><%= member %></span>
+												<% end %>
+												</a>
+											<% end %>
+										</div>
+									</div>
+								</div>
 							</td>
 							<td class="td-actions">
 								<a data-toggle="tooltip" data-original-title="Details" href="/groups/<%=group%>" class="btn btn-mini btn-icon-only hint"><i class="btn-icon-only icon-search"></i></a>
@@ -66,7 +92,14 @@
 								<%=host%>
 							</td>
 							<td>
-	              <span class="label label-success">all ok</span>
+								<% host_ok = all_ok(host) %>
+								<% if host_ok == 1 %>
+	              	<span class="label label-success">all ok</span>
+								<% elsif host_ok == 2 %>
+									<span class="label label-warning">warning</span>
+								<% elsif host_ok == 3 %>
+									<span class="label label-important">down</span>
+								<% end %>
 							</td>
 							<td class="td-actions">
 								<a data-toggle="tooltip" data-original-title="Details" href="/server/<%=host%>" class="btn btn-mini btn-icon-only hint"><i class="btn-icon-only icon-search"></i></a>

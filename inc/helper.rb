@@ -8,6 +8,7 @@ require 'find'
 require 'tempfile'
 require 'socket'
 require 'sqlite3'
+require 'redcarpet'
 
 # Gets the directories inside a path.
 #

@@ -325,7 +325,6 @@ body, html {
 	position: absolute;
 	bottom: 0;
 	width: 100%;
-	left: 0;
 	border-top: 1px solid #292929;
 }
 
@@ -1113,6 +1112,12 @@ width: 11px;}
 [8. Miscellaneous]
 */
 
+.accordion-invisible {
+	border-style: none !important;
+	background: none !important;
+	color: none !important;
+}
+
 .chart-holder {
 	width: 100%;
 	height: 250px;
@@ -1242,8 +1247,8 @@ color: #333;
 	}
 
 	.footer {
-		margin-right: -20px;
-		margin-left: -20px;
+		margin-right: 0px;
+		margin-left: 0px;
 	}
 
 	.footer .container {

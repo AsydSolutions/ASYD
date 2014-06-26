@@ -84,6 +84,9 @@ def del_group(group)
 end
 
 def add_group_member(group, server)
+  if get_host_data(server).nil?
+    return 4
+  end
   groups = SQLite3::Database.new "data/db/hostgroups.db"
   group_members = groups.get_first_row("select members from hostgroups where name=?", group)
   if group_members[0].nil?
@@ -153,4 +156,25 @@ def del_group_var(group, name)
   vars_srlzd = Marshal.dump(vars)
   groups.execute("UPDATE hostgroups SET opt_vars=? WHERE name=?", [vars_srlzd, group])
   groups.close
+end
+
+def check_members_status(group)
+  groups = SQLite3::Database.new "data/db/hostgroups.db"
+  group_members = groups.get_first_row("select members from hostgroups where name=?", group)
+  if group_members[0].nil?
+    return [0,0,0]
+  else
+    members = Marshal.load(group_members[0])
+  end
+  total = members.count
+  sane = members.count
+  failed = 0
+  members.each do |host|
+    ret = all_ok(host)
+    if ret != 1
+      sane = sane - 1
+      failed = failed + 1
+    end
+  end
+  return [sane,total,failed]
 end
