@@ -53,6 +53,37 @@ $(function() {
     )
   );
 
+  $(document).ready(function() {
+				$('#hgtable').dataTable( {
+            "ordering": false,
+            "lengthChange": false,
+            "pageLength": 15,
+            "info": false,
+            renderer: "bootstrap",
+            "language": {
+              search: "<i class=\"icon-search\"></i>",
+              "paginate": {
+                "next": "<i class=\"icon-arrow-right\"></i>",
+                "previous": "<i class=\"icon-arrow-left\"></i>"
+              }
+            }
+        });
+        $('#htable').dataTable( {
+            "ordering": false,
+            "lengthChange": false,
+            "pageLength": 10,
+            "info": false,
+            renderer: "bootstrap",
+            "language": {
+              search: "<i class=\"icon-search\"></i>",
+              "paginate": {
+                "next": "<i class=\"icon-arrow-right\"></i>",
+                "previous": "<i class=\"icon-arrow-left\"></i>"
+              }
+            }
+        });
+			});
+
   $("input,select,textarea").not("[type=submit]").jqBootstrapValidation();
 
   $('div.btn-group[data-toggle-name=*]').each(function(){

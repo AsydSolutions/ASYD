@@ -5,8 +5,8 @@
 				<i class="icon-sitemap"></i><h3>Host Groups</h3>
 			</div>
 			<div class="widget-content">
-				<table class="table table-striped">
-					<thead>
+				<table id="hgtable" class="stripe row-border">
+					<thead style="text-align:left;">
 						<tr>
 							<th>
 								Name
@@ -30,32 +30,39 @@
 									<div class="accordion-heading accordion-invisible">
 										<% members_status = check_members_status(group) %>
 										<% if members_status[2] == 0 %>
-											<a data-toggle="collapse" href="#collapseOne" style="font-size: 8pt; color: #ffffff;" class="badge badge-success"><%=members_status[0]%>/<%=members_status[1]%></a>
+											<a data-toggle="collapse" href="#collapse<%=group%>" style="font-size: 8pt; color: #ffffff;" class="badge badge-success"><%=members_status[0]%>/<%=members_status[1]%></a>
 										<% else %>
-											<a data-toggle="collapse" href="#collapseOne" data-placement="right" data-original-title="<%=members_status[2]%> host(s) on this group has issues" style="font-size: 8pt; color: #ffffff;" class="badge badge-warning hint "><%=members_status[0]%>/<%=members_status[1]%></a>
+											<a data-toggle="collapse" href="#collapse<%=group%>" data-placement="right" data-original-title="<%=members_status[2]%> host(s) on this group has issues" style="font-size: 8pt; color: #ffffff;" class="badge badge-warning hint "><%=members_status[0]%>/<%=members_status[1]%></a>
 										<% end %>
 									</div>
-									<div id="collapseOne" class="accordion-body collapse accordion-invisible">
+									<div id="collapse<%=group%>" class="accordion-body collapse accordion-invisible">
 										<div class="accordion-inner accordion-invisible">
-											<% members = get_group_members(group) %>
-											<% members.each do |member| %>
-												<a href="/server/<%=member%>">
-												<% host_ok = all_ok(member) %>
-												<% if host_ok == 1 %>
-													<span class="label label-success"><%= member %></span>
-												<% elsif host_ok == 2 %>
-													<span class="label label-warning"><%= member %></span>
-												<% elsif host_ok == 3 %>
-													<span class="label label-important"><%= member %></span>
-												<% end %>
-												</a>
-											<% end %>
+											<table class="table table-condensed">
+												<tbody>
+													<% members = get_group_members(group) %>
+													<% members.each do |member| %>
+													<tr class="accordion-invisible"><td class="accordion-invisible">
+														<i class="icon-angle-right"></i>
+														<a href="/server/<%=member%>">
+														<% host_ok = all_ok(member) %>
+														<% if host_ok == 1 %>
+															<span class="label label-success"><%= member %></span>
+														<% elsif host_ok == 2 %>
+															<span class="label label-warning"><%= member %></span>
+														<% elsif host_ok == 3 %>
+															<span class="label label-important"><%= member %></span>
+														<% end %>
+														</a>
+													</td></tr>
+													<% end %>
+												</tbody>
+											</table>
 										</div>
 									</div>
 								</div>
 							</td>
 							<td class="td-actions">
-								<a data-toggle="tooltip" data-original-title="Details" href="/groups/<%=group%>" class="btn btn-mini btn-icon-only hint"><i class="btn-icon-only icon-search"></i></a>
+								<a data-toggle="tooltip" data-original-title="Details" href="/groups/<%=group%>" class="btn btn-info btn-mini btn-icon-only hint"><i class="btn-icon-only icon-folder-open"></i></a>
 								<a data-toggle="tooltip" data-original-title="Remove" href="#delGroup" class="btn btn-danger btn-mini btn-icon-only hint" onclick="passDataToModal('<%=group%>', '#delGroup')"><i class="btn-icon-only icon-remove"></i></a>
 							</td>
 						</tr>
@@ -71,8 +78,8 @@
 				<i class="icon-hdd"></i><h3>Hosts</h3>
 			</div>
 			<div class="widget-content">
-				<table class="table table-striped">
-					<thead>
+				<table id="htable" class="stripe row-border">
+					<thead style="text-align:left;">
 						<tr>
 							<th>
 								Hostname
@@ -102,7 +109,7 @@
 								<% end %>
 							</td>
 							<td class="td-actions">
-								<a data-toggle="tooltip" data-original-title="Details" href="/server/<%=host%>" class="btn btn-mini btn-icon-only hint"><i class="btn-icon-only icon-search"></i></a>
+								<a data-toggle="tooltip" data-original-title="Details" href="/server/<%=host%>" class="btn btn-info btn-mini btn-icon-only hint"><i class="btn-icon-only icon-folder-open"></i></a>
 								<a data-toggle="tooltip" data-original-title="Remove" href="#delServer" class="btn btn-danger btn-mini btn-icon-only hint" onclick="passDataToModal('<%=host%>', '#delServer')"><i class="btn-icon-only icon-remove"></i></a>
 							</td>
 						</tr>

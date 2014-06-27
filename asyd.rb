@@ -84,7 +84,7 @@ end
 
 post '/server/add' do
   srv_init(params['name'], params['host'], params['password'])
-  serverlist = '/server/list'
+  serverlist = '/servers/overiew'
   redirect to serverlist
 end
 
@@ -95,7 +95,7 @@ post '/server/del' do
     revoke = false
   end
   remove_server(params['host'], revoke)
-  serverlist = '/server/list'
+  serverlist = '/servers/overiew'
   redirect to serverlist
 end
 
@@ -130,7 +130,7 @@ post '/groups/edit' do
   if params[:action] == "add_member" || params[:action] == "del_member"
     redir = '/groups/'+params[:params][:group]
   else
-    redir = '/groups/list'
+    redir = '/servers/overiew'
   end
   groups_edit(params[:action], params[:params])
   redirect to redir
