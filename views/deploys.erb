@@ -5,7 +5,7 @@
         <i class="icon-rocket"></i><h3>Deploy Software Group</h3>
       </div>
       <div class="widget-content">
-        <select name="dep_host" type="text" class="input-xlarge" id="selectHostDeploy">
+        <select name="dep_host" class="input-xlarge" id="selectHostDeploy">
           <option></option>
           <optgroup label="Hosts">
           <% @hosts.each do |host| %>
@@ -35,20 +35,25 @@
     </div>
   </div>
   <div class="row">
-    <div class="span6">
+    <div class="span4">
       <div class="widget">
         <div class="widget-header">
           <i class="icon-bolt"></i><h3>Quick install</h3>
         </div>
         <div class="widget-content">
           <form id="install_pkg" action='/deploys/install-pkg' method='post' class="form-inline">
-            <div class="control-group"><input name='package' type="text" class="input" placeholder="Package to install" autofocus><p class="help-block">Packages to install separated by spaces</p></div>
-            <div class="control-group" for"host"><select id="host" name="host">
-              <option value="">--- Select ---</option>
+            <div class="control-group"><input name='package' type="text" class="input-xlarge" placeholder="Package(s) to install (separated by spaces)" autofocus></div>
+            <div class="control-group" for"host"><select name="target" class="input-xlarge" id="selectHostInstall">
+              <option></option>
+              <optgroup label="Hosts">
               <% @hosts.each do |host| %>
-                <option value="<%=host%>">Host: <%=host%></option>
+                <option value="host;<%=host%>"><%=host%></option>
               <% end %>
-            </select><p class="help-block">Select host or hostgroup</p></div>
+              <optgroup label="Hostgroups">
+              <% @groups.each do |group| %>
+                <option value="group;<%=group%>"><%=group%></option>
+              <% end %>
+            </select></div>
             <div class="control-group"><input class="btn primary" type='submit' value='Install!'></div>
           </form>
         </div>

@@ -157,7 +157,17 @@ end
 
 post '/deploys/install-pkg' do
   inst = Spork.spork do
-    install_pkg(params['host'],params['package'],false)
+    target = params['target'].split(";")
+    if target[0] == "host"
+      install_pkg(target[1],params['package'],false)
+    elsif target[0] == "group"
+      members = get_group_members(target[1])
+      if !members.nil? && !members.empty?
+        members.each do |host|
+          install_pkg(host,params['package'],false)
+        end
+      end
+    end
   end
   deploys = '/deploys/list'
   redirect to deploys

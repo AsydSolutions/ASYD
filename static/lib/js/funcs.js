@@ -110,6 +110,9 @@ $(function() {
         $("#selectHostDeploy").select2( {
           "placeholder": "Select host or hostgroup",
         });
+        $("#selectHostInstall").select2( {
+          "placeholder": "Select host or hostgroup",
+        });
       };
 	});
 
