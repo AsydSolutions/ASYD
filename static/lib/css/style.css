@@ -1,5 +1,5 @@
 /*------------------------------------------------------------------
-Bootstrap Admin Template by EGrappler.com
+Choms ASYD template based on Bootstrap Admin Template by EGrappler.com
 ------------------------------------------------------------------*/
 
 
@@ -9,7 +9,7 @@ Bootstrap Admin Template by EGrappler.com
 */
 
 body {
-	background: #f9f6f1;
+	background: url(../img/body-bg.png);
 	font: 13px/1.7em 'Open Sans';
 }
 
@@ -1108,8 +1108,36 @@ width: 11px;}
 height: 16px;
 width: 11px;}
 
+
+
 /*------------------------------------------------------------------
-[8. Miscellaneous]
+[8. Action Table / .action-table]
+*/
+
+.action-table .btn-small {
+	padding: 4px 5px 5px;
+
+	font-size: 10px;
+}
+
+.action-table .td-actions {
+	width: 80px;
+
+	text-align: center;
+}
+
+	.action-table .td-actions .btn {
+		margin-right: .5em;
+	}
+
+	.action-table .td-actions .btn:last-child {
+		margin-rigth: 0;
+	}
+
+
+
+/*------------------------------------------------------------------
+[9. Miscellaneous]
 */
 
 .accordion-invisible {

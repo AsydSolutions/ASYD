@@ -1,5 +1,5 @@
 /*------------------------------------------------------------------
-Bootstrap Admin Template by EGrappler.com
+Choms ASYD template based on Bootstrap Admin Template by EGrappler.com
 ------------------------------------------------------------------*/
 
 
@@ -168,30 +168,6 @@ Bootstrap Admin Template by EGrappler.com
 }
 
 
-
-/*------------------------------------------------------------------
-[4. Action Table / .action-table]
-*/
-
-.action-table .btn-small {
-	padding: 4px 5px 5px;
-
-	font-size: 10px;
-}
-
-.action-table .td-actions {
-	width: 80px;
-
-	text-align: center;
-}
-
-	.action-table .td-actions .btn {
-		margin-right: .5em;
-	}
-
-	.action-table .td-actions .btn:last-child {
-		margin-rigth: 0;
-	}
 
 
 

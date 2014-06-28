@@ -11,6 +11,7 @@ div.dataTables_filter label {
 	position: relative;
   margin: 3px;
   margin-bottom: 10px;
+	margin-top: 10px;
 }
 
 div.dataTables_info {
