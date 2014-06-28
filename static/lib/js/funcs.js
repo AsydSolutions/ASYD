@@ -62,6 +62,7 @@ $(function() {
             renderer: "bootstrap",
             "language": {
               search: "<i class=\"icon-search\"></i>",
+              "emptyTable": "You haven't added any hostgroup yet",
               "paginate": {
                 "next": "<i class=\"icon-arrow-right\"></i>",
                 "previous": "<i class=\"icon-arrow-left\"></i>"
@@ -76,11 +77,31 @@ $(function() {
             renderer: "bootstrap",
             "language": {
               search: "<i class=\"icon-search\"></i>",
+              "emptyTable": "You haven't added any host yet",
               "paginate": {
                 "next": "<i class=\"icon-arrow-right\"></i>",
                 "previous": "<i class=\"icon-arrow-left\"></i>"
               }
             }
+        });
+        $('#hgmtable').dataTable( {
+            "ordering": false,
+            "lengthChange": false,
+            "pageLength": 10,
+            "info": false,
+            renderer: "bootstrap",
+            "language": {
+              search: "<i class=\"icon-search\"></i>",
+              "emptyTable": "You haven't added any members to this group yet",
+              "paginate": {
+                "next": "<i class=\"icon-arrow-right\"></i>",
+                "previous": "<i class=\"icon-arrow-left\"></i>"
+              }
+            }
+        });
+        $("#selectMember").select2( {
+          "placeholder": "Select host",
+          "allowClear": true
         });
 			});
 
