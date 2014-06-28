@@ -5,6 +5,11 @@
 				<i class="icon-sitemap"></i><h3>Host Groups</h3>
 			</div>
 			<div class="widget-content">
+				<div style="position:absolute; margin:5px; z-index:90;">
+					<a data-toggle="modal" href="#addGroup" class="btn">
+						Add group <i class="btn-icon-only icon-plus"></i>
+					</a>
+				</div>
 				<table id="hgtable" class="stripe row-border">
 					<thead style="text-align:left;">
 						<tr>
@@ -78,6 +83,11 @@
 				<i class="icon-hdd"></i><h3>Hosts</h3>
 			</div>
 			<div class="widget-content">
+				<div style="position:absolute; margin:5px; z-index:90;">
+					<a data-toggle="modal" href="#addServer" class="btn">
+						Add host <i class="btn-icon-only icon-plus"></i>
+					</a>
+				</div>
 				<table id="htable" class="stripe row-border">
 					<thead style="text-align:left;">
 						<tr>
@@ -122,16 +132,53 @@
 </div>
 
 
-<div id="delServer" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+<div id="addServer" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="Add Host" aria-hidden="true">
 	<div class="modal-header">
 		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-		<h3 id="myModalLabel">Attention!</h3>
+		<h3 id="addServerLabel">Add new server</h3>
+	</div>
+	<form id="addServerform" action="/server/add" method="post">
+		<div class="modal-body">
+			<div class="control-group"><input autocomplete="off" name='name' type="text" class="input-xlarge" placeholder="Hostname" autofocus data-validation-regex-regex=".*\.?.+\..+" data-validation-regex-message="Must be a fully qualified domain name (example.com)" required><p class="help-block"></p></div>
+			<div class="control-group"><input autocomplete="off" name='host' type="text" class="input-xlarge" placeholder="IP address" data-validation-regex-regex="(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)" data-validation-regex-message="Must be a valid IP address" required><p class="help-block"></p></div>
+			<div class="control-group"><input name='password' type="password" class="input-xlarge" placeholder="root password" required></div>
+		</div>
+		<div class="modal-footer">
+			<button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+			<button type="submit" class="btn btn-primary">Deploy!</button>
+		</div>
+	</form>
+</div>
+
+
+<div id="addGroup" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="Add Hostgroup" aria-hidden="true">
+	<div class="modal-header">
+		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+		<h3 id="addServerLabel">Add new hostgroup</h3>
+	</div>
+	<form id="addGroupform" action="/groups/edit" method="post">
+		<div class="modal-body">
+			<input name='action' type="hidden" value="add_group">
+			<div class="control-group"><input autocomplete="off" name='params[group]' type="text" class="input-xlarge" placeholder="Name" autofocus required></div>
+		</div>
+		<div class="modal-footer">
+			<button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+			<button type="submit" class="btn btn-primary">Add</button>
+		</div>
+	</form>
+</div>
+
+
+<div id="delServer" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="Remove Host" aria-hidden="true">
+	<div class="modal-header">
+		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+		<h3 id="delServerLabel">Attention!</h3>
 	</div>
 	<div class="modal-body">
 		<p>Are you sure you want to delete <b id="dataInput"></b> from your server list?</p>
 	</div>
 	<div class="modal-footer">
-		<form id="form" id="delGroup" action="/server/del" method="post">
+		<form id="delServerform" action="/server/del" method="post">
 			<input type="hidden" name="host" id="dataInput" value="">
 			<div style="float:left" class="control-group"><input type="checkbox" name="revoke" value="true"> Revoke SSH key</div>
 			<button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
@@ -141,16 +188,16 @@
 </div>
 
 
-<div id="delGroup" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+<div id="delGroup" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="Remove Hostgroup" aria-hidden="true">
 	<div class="modal-header">
 		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-		<h3 id="myModalLabel">Attention!</h3>
+		<h3 id="delGroupLabel">Attention!</h3>
 	</div>
 	<div class="modal-body">
 		<p>Are you sure you want to delete <b id="dataInput"></b> hostgroup?</p>
 	</div>
 	<div class="modal-footer">
-		<form id="form" id="delGroup" action="/groups/edit" method="post">
+		<form id="delGroupform" action="/groups/edit" method="post">
 			<input type="hidden" name="action" value="del_group">
 			<input type="hidden" name="params[group]" id="dataInput" value="">
 			<button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
