@@ -106,8 +106,6 @@ post '/server/add-var' do
 end
 
 post '/server/del-var' do
-  p params['host']
-  p params['var_name']
   del_host_var(params['host'], params['var_name'])
   redir = '/server/'+params['host']
   redirect to redir

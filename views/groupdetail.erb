@@ -97,7 +97,7 @@
       <input name='action' type="hidden" value="add_member">
       <input name='params[group]' type="hidden" value="<%=@group%>">
       <div class="control-group">
-        <select name='params[server]' type="text" class="input-xlarge" id="selectMember">
+        <select name='params[server]' class="input-xlarge" id="selectMember">
           <option></option>
           <% get_server_list.each do |server| %>
             <% if !@members.include?(server) %>

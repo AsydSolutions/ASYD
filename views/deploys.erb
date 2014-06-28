@@ -1,44 +1,58 @@
-<div class="row well">
-  <legend>Deploy Software Group</legend>
-  <div style="text-align: center" class="span3">
-    <p class="help-block">Select host or hostgroup</p>
-    <select id="dep_host" name="dep_host">
-      <option value="">--- Select ---</option>
-      <% @hosts.each do |host| %>
-        <option value="host;<%=host%>">Host: <%=host%></option>
-      <% end %>
-      <% @groups.each do |group| %>
-        <option value="group;<%=group%>">Hostgroup: <%=group%></option>
-      <% end %>
-    </select>
-  </div>
+<div class="row">
   <div class="span6">
-    <p class="help-block">Select package to deploy</p>
-    <% @deploys.each do |deploy| %>
-    <h5><div class="btn-group">
-      <a class="btn btn-success srv"><%=deploy%></a>
-      <a class="btn btn-success dropdown-toggle" data-toggle="dropdown" href="#"><span class="caret"></span></a>
-      <ul class="dropdown-menu">
-        <li><a href="/deploys/deploy" onclick="var e = document.getElementById('dep_host'); var dephost = e.options[e.selectedIndex].value; location.href=this.href+'/'+dephost+'/<%=deploy%>'; return false;">Deploy!</a></li>
-        <li class="divider"></li>
-        <li><a href="/deploys/<%=deploy%>">Details</a></li>
-        <li><a href="/deploys/del/<%=deploy%>">Delete</a></li>
-      </ul>
-    </div></h5>
-    <% end %>
+    <div class="widget">
+      <div class="widget-header">
+        <i class="icon-rocket"></i><h3>Deploy Software Group</h3>
+      </div>
+      <div class="widget-content">
+        <select name="dep_host" type="text" class="input-xlarge" id="selectHostDeploy">
+          <option></option>
+          <optgroup label="Hosts">
+          <% @hosts.each do |host| %>
+            <option value="host;<%=host%>"><%=host%></option>
+          <% end %>
+          <optgroup label="Hostgroups">
+          <% @groups.each do |group| %>
+            <option value="group;<%=group%>"><%=group%></option>
+          <% end %>
+        </select>
+        <div class="span6">
+          <p class="help-block">Select package to deploy</p>
+          <% @deploys.each do |deploy| %>
+          <h5><div class="btn-group">
+            <a class="btn btn-success srv"><%=deploy%></a>
+            <a class="btn btn-success dropdown-toggle" data-toggle="dropdown" href="#"><span class="caret"></span></a>
+            <ul class="dropdown-menu">
+              <li><a href="/deploys/deploy" onclick="var e = document.getElementById('dep_host'); var dephost = e.options[e.selectedIndex].value; location.href=this.href+'/'+dephost+'/<%=deploy%>'; return false;">Deploy!</a></li>
+              <li class="divider"></li>
+              <li><a href="/deploys/<%=deploy%>">Details</a></li>
+              <li><a href="/deploys/del/<%=deploy%>">Delete</a></li>
+            </ul>
+          </div></h5>
+          <% end %>
+        </div>
+      </div>
+    </div>
   </div>
-</div>
-
-<div class="row well">
-<form id="install_pkg" action='/deploys/install-pkg' method='post' class="form-inline">
-  <legend>Quick Install</legend>
-  <div class="control-group"><input name='package' type="text" class="input" placeholder="Package to install" autofocus><p class="help-block">Packages to install separated by spaces</p></div>
-  <div class="control-group" for"host"><select id="host" name="host">
-    <option value="">--- Select ---</option>
-    <% @hosts.each do |host| %>
-      <option value="<%=host%>">Host: <%=host%></option>
-    <% end %>
-  </select><p class="help-block">Select host or hostgroup</p></div>
-  <div class="control-group"><input class="btn primary" type='submit' value='Install!'></div>
-</form>
+  <div class="row">
+    <div class="span6">
+      <div class="widget">
+        <div class="widget-header">
+          <i class="icon-bolt"></i><h3>Quick install</h3>
+        </div>
+        <div class="widget-content">
+          <form id="install_pkg" action='/deploys/install-pkg' method='post' class="form-inline">
+            <div class="control-group"><input name='package' type="text" class="input" placeholder="Package to install" autofocus><p class="help-block">Packages to install separated by spaces</p></div>
+            <div class="control-group" for"host"><select id="host" name="host">
+              <option value="">--- Select ---</option>
+              <% @hosts.each do |host| %>
+                <option value="<%=host%>">Host: <%=host%></option>
+              <% end %>
+            </select><p class="help-block">Select host or hostgroup</p></div>
+            <div class="control-group"><input class="btn primary" type='submit' value='Install!'></div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

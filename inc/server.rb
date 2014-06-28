@@ -2,13 +2,13 @@ def srv_init(host, ip, password)
   begin
   servers = SQLite3::Database.new "data/db/servers.db"
   ret = servers.execute("select hostname,ip from servers where hostname=? or ip=?", [host, ip])
-  if !ret.nil? || !ret.empty?
+  if !ret.empty?
+    p ret
     raise DuplicatesFound
   end
   distro,dist_host,dist_ver,arch,pkg_mgr = ""
   o = [('a'..'z'), ('A'..'Z')].map { |i| i.to_a }.flatten
   monit_pw = (0...8).map { o[rand(o.length)] }.join
-
 
   Net::SSH.start(ip, "root", :password => password) do |ssh|
     distro = ssh.exec!("cat /etc/issue")
@@ -31,7 +31,9 @@ def srv_init(host, ip, password)
 
   end
 
-  servers.execute("INSERT INTO servers (hostname, ip, dist, dist_ver, arch, pkg_mgr, monit_pw) VALUES (?, ?, ?, ?, ?, ?, ?)", [host, ip, dist_host, dist_ver, arch, pkg_mgr, monit_pw])
+  vars = {}
+  vars_srlzd = Marshal.dump(vars)
+  servers.execute("INSERT INTO servers (hostname, ip, dist, dist_ver, arch, pkg_mgr, monit_pw, opt_vars) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", [host, ip, dist_host, dist_ver, arch, pkg_mgr, monit_pw, vars_srlzd])
   servers.close
 
   monitor(host)

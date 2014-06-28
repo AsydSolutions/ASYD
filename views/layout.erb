@@ -24,7 +24,7 @@
   <% end %>
   <!-- DataTables -->
   <!-- Select2 -->
-  <% if request.path_info.start_with?("/group") %>
+  <% if request.path_info.start_with?("/group") || request.path_info.start_with?("/deploys/list") %>
     <link rel="stylesheet" type="text/css" href="/lib/css/select2.css">
     <script type="text/javascript" language="javascript" src="/lib/js/select2.min.js"></script>
   <% end %>

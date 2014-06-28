@@ -54,6 +54,9 @@ $(function() {
   );
 
   $(document).ready(function() {
+    var dttbl = $('script[src="/lib/js/datatables-bootstrap.js"]').length;
+    var slct = $('script[src="/lib/js/select2.min.js"]').length;
+    if (dttbl != 0) {
 				$('#hgtable').dataTable( {
             "ordering": false,
             "lengthChange": false,
@@ -99,10 +102,16 @@ $(function() {
               }
             }
         });
+      };
+      if (slct != 0) {
         $("#selectMember").select2( {
           "placeholder": "Select host",
         });
-			});
+        $("#selectHostDeploy").select2( {
+          "placeholder": "Select host or hostgroup",
+        });
+      };
+	});
 
   $("input,select,textarea").not("[type=submit]").jqBootstrapValidation();
 
