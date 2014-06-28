@@ -101,7 +101,6 @@ $(function() {
         });
         $("#selectMember").select2( {
           "placeholder": "Select host",
-          "allowClear": true
         });
 			});
 
