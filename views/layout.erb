@@ -2,6 +2,7 @@
 <html>
 <head>
   <title>ASYD - Automated SYstem Deploy</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="/lib/css/bootstrap.min.css">
   <link rel="stylesheet" href="/lib/css/bootstrap-responsive.min.css">
   <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,600italic,400,600">
@@ -16,7 +17,7 @@
   <script src="/lib/js/jqBootstrapValidation.min.js"></script>
   <script src="/lib/js/funcs.js" type="text/javascript"></script>
   <!-- DataTables -->
-  <% if request.path_info.start_with?("/servers/overiew") || request.path_info.start_with?("/group") %>
+  <% if request.path_info.start_with?("/servers/overiew") || request.path_info.start_with?("/group") || request.path_info.start_with?("/deploys/list") %>
     <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.0/css/jquery.dataTables.css">
     <link rel="stylesheet" type="text/css" href="/lib/css/datatables-bootstrap.css">
     <script type="text/javascript" language="javascript" src="//cdn.datatables.net/1.10.0/js/jquery.dataTables.min.js"></script>

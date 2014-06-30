@@ -44,14 +44,22 @@ $(function() {
 
   $('.hint').tooltip();
 
-  $('.srv').width(
-    Math.max.apply(
-      Math,
-      $('.srv').map(function(){
-        return $(this).outerWidth();
-      }).get()
-    )
-  );
+  $('a[deploy-confirm]').click(function(ev) {
+    var href = $(this).attr('href');
+    var e = document.getElementById('selectHostDeploy');
+    var target = e.options[e.selectedIndex].value;
+    if (!target) {
+      return false;
+    }
+    var host = target.split(";");
+    if (!$('#dataConfirmModal').length) {
+      $('body').append('<div id="dataConfirmModal" class="modal fade" role="dialog" aria-labelledby="dataConfirmLabel" aria-hidden="true"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button><h3 id="dataConfirmLabel">Please Confirm</h3></div><div class="modal-body"></div><div class="modal-footer"><button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button><a class="btn btn-primary" id="dataConfirmOK">OK</a></div></div>');
+    }
+    $('#dataConfirmModal').find('.modal-body').text($(this).attr('deploy-confirm')+host[0]+" "+host[1]+"?");
+    $('#dataConfirmOK').attr('href', href+target);
+    $('#dataConfirmModal').modal({show:true});
+    return false;
+  });
 
   $(document).ready(function() {
     var dttbl = $('script[src="/lib/js/datatables-bootstrap.js"]').length;
@@ -88,6 +96,21 @@ $(function() {
             }
         });
         $('#hgmtable').dataTable( {
+            "ordering": false,
+            "lengthChange": false,
+            "pageLength": 10,
+            "info": false,
+            renderer: "bootstrap",
+            "language": {
+              search: "<i class=\"icon-search\"></i>",
+              "emptyTable": "You haven't added any members to this group yet",
+              "paginate": {
+                "next": "<i class=\"icon-arrow-right\"></i>",
+                "previous": "<i class=\"icon-arrow-left\"></i>"
+              }
+            }
+        });
+        $('#dptable').dataTable( {
             "ordering": false,
             "lengthChange": false,
             "pageLength": 10,

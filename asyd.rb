@@ -173,7 +173,7 @@ post '/deploys/install-pkg' do
   redirect to deploys
 end
 
-get '/deploys/deploy/:target/:dep' do  ##TODO: switch to POST
+get '/deploys/deploy/:dep/:target' do  ##TODO: switch to POST
   target = params[:target].split(";")
   if target[0] == "host"
     # inst = Spork.spork do
