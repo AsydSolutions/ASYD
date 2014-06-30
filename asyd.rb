@@ -155,6 +155,10 @@ get '/deploys/list' do
   erb :deploys
 end
 
+get '/deploys/:dep' do
+  erb "-WIP-"
+end
+
 post '/deploys/install-pkg' do
   inst = Spork.spork do
     target = params['target'].split(";")
@@ -199,6 +203,10 @@ end
 ## DEPLOYS BLOCK END
 
 ## TASKS BLOCK START
+get '/tasks/list' do
+  erb "-WIP-"
+end
+
 get '/tasks/:id' do
   activity = SQLite3::Database.new "data/db/activity.db"
   @task = activity.get_first_row("select id,action,target,status,created from activity where id=?", params[:id].to_i)
