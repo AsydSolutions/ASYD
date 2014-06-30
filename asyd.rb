@@ -190,6 +190,12 @@ get '/deploys/deploy/:dep/:target' do  ##TODO: switch to POST
   deploys = '/deploys/list'
   redirect to deploys
 end
+
+post '/deploys/del' do
+  del_deploy(params['deploy'])
+  redir = '/deploys/list'
+  redirect to redir
+end
 ## DEPLOYS BLOCK END
 
 ## TASKS BLOCK START

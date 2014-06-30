@@ -124,7 +124,7 @@ def deploy(host,dep,group)
           cfg_dst = cfg[1].strip
           parsed_cfg = parse_config_dir(host, cfg_src)
           upload_dir(ip, parsed_cfg, cfg_dst)
-          FileUtils.rm_r parsed_cfg
+          FileUtils.rm_r parsed_cfg, :secure=>true
         end
       elsif line.start_with?("exec")
         doit = true
@@ -237,6 +237,13 @@ def deploy(host,dep,group)
     update_activity(act_id, "failed") unless group
     return [4, e.message] # 4 == execution error
   end
+end
+
+# Delete a deploy
+#
+def del_deploy(dep)
+  path='data/deploys/'+dep
+  FileUtils.rm_r path, :secure=>true
 end
 
 # Deploy a deploy on defined hostgroup
