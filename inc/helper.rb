@@ -8,6 +8,7 @@ require 'find'
 require 'tempfile'
 require 'socket'
 require 'sqlite3'
+require 'redcarpet'
 
 # Gets the directories inside a path.
 #
@@ -287,6 +288,8 @@ def parse_config(host, cfg)
           line.gsub!('<%HOSTNAME%>', hostname)
           newconf << line
         end
+      else
+        newconf << line
       end
     end
   ensure

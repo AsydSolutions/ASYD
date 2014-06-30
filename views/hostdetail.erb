@@ -1,57 +1,93 @@
-<h3><%=@data[:hostname]%></h3>
 <div class="row">
   <div class="span6">
-  <table class="table table-striped table-bordered table-hover">
-  <tbody>
-    <tr>
-      <td><strong><%="os:"%></strong></td>
-      <td><%=@data[:dist_name]+" "+@data[:dist_ver]%></td>
-    </tr>
-    <tr>
-      <td><strong><%="arch:"%></strong></td>
-      <td><%=@data[:arch]%></td>
-    </tr>
-    <tr>
-      <td><strong><%="ip:"%></strong></td>
-      <td><%=@data[:ip]%></td>
-    </tr>
-  </tbody>
-  </table>
+    <div class="widget widget-table action-table">
+      <div class="widget-header">
+        <i class="icon-stethoscope"></i><h3>System stats</h3>
+      </div>
+      <div class="widget-content">
+        <table class="table table-striped table-bordered">
+        <tbody>
+          <tr>
+            <td><strong><%="load:"%></strong></td>
+            <td><%=@status[:load_1].to_s+" "+@status[:load_5].to_s+" "+@status[:load_15].to_s unless @status.nil? %></td>
+          </tr>
+          <tr>
+            <td><strong><%="cpu:"%></strong></td>
+            <td><%=@status[:cpu_us].to_s+"%us, "+@status[:cpu_sy].to_s+"%sy, "+@status[:cpu_wa].to_s+"%wa" unless @status.nil? %></td>
+          </tr>
+          <tr>
+            <td><strong><%="mem:"%></strong></td>
+            <td><%=@status[:used_sysmem_mb].to_s+"MB used / "+@status[:total_memory].to_s+"MB total" unless @status.nil? %><div style="margin-top: 9px; margin-bottom: 9px; text-align: center" class="progress progress-success">
+                      <div style="width: <%=@status[:used_sysmem_percent].to_i.round.to_s unless @status.nil? %>%" class="bar"><%=@status[:used_sysmem_percent].to_s unless @status.nil? %>% used</div>
+            </div></td>
+          </tr>
+        </tbody>
+        </table>
+      </div>
+    </div>
   </div>
-  <div class="span6">
-  <table class="table table-striped table-bordered table-hover">
-  <tbody>
-    <tr>
-      <td><strong><%="load:"%></strong></td>
-      <td><%=@status[:load_1].to_s+" "+@status[:load_5].to_s+" "+@status[:load_15].to_s unless @status.nil? %></td>
-    </tr>
-    <tr>
-      <td><strong><%="cpu:"%></strong></td>
-      <td><%=@status[:cpu_us].to_s+"%us, "+@status[:cpu_sy].to_s+"%sy, "+@status[:cpu_wa].to_s+"%wa" unless @status.nil? %></td>
-    </tr>
-    <tr>
-      <td><strong><%="mem:"%></strong></td>
-      <td><%=@status[:used_sysmem_mb].to_s+"MB used / "+@status[:total_memory].to_s+"MB total" unless @status.nil? %><div style="margin-top: 9px; margin-bottom: 9px; text-align: center" class="progress progress-success">
-                <div style="width: <%=@status[:used_sysmem_percent].to_i.round.to_s unless @status.nil? %>%" class="bar"><%=@status[:used_sysmem_percent].to_s unless @status.nil? %>% used</div>
-      </div></td>
-    </tr>
-  </tbody>
-  </table>
+  <div class="span4">
+    <div class="widget widget-table action-table">
+      <div class="widget-header">
+        <i class="icon-info"></i><h3>System info</h3>
+      </div>
+      <div class="widget-content">
+        <table class="table table-striped table-bordered">
+        <tbody>
+          <tr>
+            <td><strong><%="hostname:"%></strong></td>
+            <td><%=@data[:hostname]%></td>
+          </tr>
+          <tr>
+            <td><strong><%="ip:"%></strong></td>
+            <td><%=@data[:ip]%></td>
+          </tr>
+          <tr>
+            <td><strong><%="os:"%></strong></td>
+            <td><%=@data[:dist_name]+" "+@data[:dist_ver]%></td>
+          </tr>
+          <tr>
+            <td><strong><%="arch:"%></strong></td>
+            <td><%=@data[:arch]%></td>
+          </tr>
+        </tbody>
+        </table>
+      </div>
+    </div>
   </div>
+</div>
+<div class="row">
   <div class="span6">
-    <input type="hidden" name="count" value="1" />
-      <div class="control-group" id="fields">
-        <label class="control-label" for="field1">Custom variables:</label>
-        <div class="controls" id="profs">
-          <%@opt_vars.each do |var|%>
-            <form class="input-append" id="add_host_var" action='/server/del-var' method='post'>
-              <div id="field"><input type="hidden" name="host" value="<%=@data[:hostname]%>"><input type="hidden" name="var_name" value="<%=var[0]%>"><span class="span2 uneditable-input focused"><%=var[0]%></span><span class="uneditable-input focused"><%=var[1]%></span><button class="btn" type="submit"><i class="icon-minus"></i></button></div>
-            </form>
-          <%end%>
-          <form class="input-append" id="add_host_var" action='/server/add-var' method='post'>
-            <div id="field"><input type="hidden" name="host" value="<%=@data[:hostname]%>"><input autocomplete="off" class="input span2" id="var_name" name="var_name" type="text" placeholder="variable name" required/><input autocomplete="off" class="input" id="value" name="value" type="text" placeholder="value" required/><button class="btn" type="submit"><i class="icon-plus"></i></button></div>
+    <div class="widget">
+      <div class="widget-header">
+        <i class="icon-terminal"></i><h3>Custom variables</h3>
+      </div>
+      <div class="widget-content">
+        <div class="control-group" id="fields">
+            <%@opt_vars.each do |var|%>
+            <div class="controls">
+              <form class="input-prepend input-append" id="add_host_var" action='/server/del-var' method='post'>
+                <input type="hidden" name="host" value="<%=@data[:hostname]%>">
+                <input type="hidden" name="var_name" value="<%=var[0]%>">
+                <input type="text" class="span2 disabled" disabled="" name="dummy_var_name" value="<%=var[0]%>">
+                <input type="text" class="span2 disabled" disabled="" name="dummy_value" value="<%=var[1]%>">
+                <button class="btn btn-append" type="submit"><i class="icon-minus"></i></button>
+              </form>
+            </div>
+            <%end%>
+
+          <form id="add_host_var" action='/server/add-var' method='post'>
+            <div class="controls">
+            <div class="input-append">
+              <input type="hidden" name="host" value="<%=@data[:hostname]%>">
+              <input autocomplete="off" class="input span2" id="var_name" name="var_name" type="text" placeholder="variable name" required/>
+              <input autocomplete="off" class="input span2" id="value" name="value" type="text" placeholder="value" required/>
+              <button class="btn btn-append" type="submit"><i class="icon-plus"></i></button></div>
+            </div>
+            </div>
           </form>
         </div>
       </div>
+    </div>
   </div>
 </div>

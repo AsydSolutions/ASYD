@@ -1,44 +1,94 @@
-<div class="row well">
-  <legend>Deploy Software Group</legend>
-  <div style="text-align: center" class="span3">
-    <p class="help-block">Select host or hostgroup</p>
-    <select id="dep_host" name="dep_host">
-      <option value="">--- Select ---</option>
-      <% @hosts.each do |host| %>
-        <option value="host;<%=host%>">Host: <%=host%></option>
-      <% end %>
-      <% @groups.each do |group| %>
-        <option value="group;<%=group%>">Hostgroup: <%=group%></option>
-      <% end %>
-    </select>
-  </div>
+<div class="row">
   <div class="span6">
-    <p class="help-block">Select package to deploy</p>
-    <% @deploys.each do |deploy| %>
-    <h5><div class="btn-group">
-      <a class="btn btn-success srv"><%=deploy%></a>
-      <a class="btn btn-success dropdown-toggle" data-toggle="dropdown" href="#"><span class="caret"></span></a>
-      <ul class="dropdown-menu">
-        <li><a href="/deploys/deploy" onclick="var e = document.getElementById('dep_host'); var dephost = e.options[e.selectedIndex].value; location.href=this.href+'/'+dephost+'/<%=deploy%>'; return false;">Deploy!</a></li>
-        <li class="divider"></li>
-        <li><a href="/deploys/<%=deploy%>">Details</a></li>
-        <li><a href="/deploys/del/<%=deploy%>">Delete</a></li>
-      </ul>
-    </div></h5>
-    <% end %>
+    <div class="widget widget-table action-table">
+      <div class="widget-header">
+        <i class="icon-rocket"></i><h3>Deploy!</h3>
+      </div>
+      <div class="widget-content">
+        <div style="position:absolute; margin:10px; z-index:90;">
+          <select name="target" class="input" id="selectHostDeploy" style="position:absolute; margin:10px; z-index:90;">
+            <option></option>
+            <optgroup label="Hosts">
+            <% @hosts.each do |host| %>
+              <option value="host;<%=host%>"><%=host%></option>
+            <% end %>
+            <optgroup label="Hostgroups">
+            <% @groups.each do |group| %>
+              <option value="group;<%=group%>"><%=group%></option>
+            <% end %>
+          </select>
+        </div>
+        <div class="visible-phone visible-tablet"><br></br></div>
+        <table id="dptable" class="stripe row-border">
+          <thead style="text-align:left;">
+            <tr>
+              <th>
+                Deploy
+              </th>
+              </th>
+              <th class="td-actions">
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @deploys.each do |deploy| %>
+            <tr>
+              <td>
+                <%=deploy%>
+              </td>
+              <td class="td-actions">
+                <a data-toggle="tooltip" data-original-title="Deploy!" href="/deploys/deploy/<%=deploy%>/" class="btn btn-success btn-mini btn-icon-only hint" deploy-confirm="Do you want to deploy <%=deploy%> on "><i class="btn-icon-only icon-rocket"></i></a>
+                <a data-toggle="tooltip" data-original-title="Details" href="/deploys/<%=deploy%>" class="btn btn-info btn-mini btn-icon-only hint"><i class="btn-icon-only icon-folder-open"></i></a>
+                <a data-toggle="tooltip" data-original-title="Delete" href="#delDeploy" class="btn btn-danger btn-mini btn-icon-only hint" onclick="passDataToModal('<%=deploy%>', '#delDeploy')"><i class="btn-icon-only icon-remove"></i></a>
+              </td>
+            </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="span4-fluid">
+    <div class="widget">
+      <div class="widget-header">
+        <i class="icon-bolt"></i><h3>Quick install</h3>
+      </div>
+      <div class="widget-content">
+        <form id="install_pkg" action='/deploys/install-pkg' method='post' class="form-inline">
+          <div class="control-group"><input name='package' type="text" class="input-xlarge" placeholder="Package(s) to install (separated by spaces)" required></div>
+          <div class="control-group" for"host"><select name="target" class="input-xlarge" id="selectHostInstall" required>
+            <option></option>
+            <optgroup label="Hosts">
+            <% @hosts.each do |host| %>
+              <option value="host;<%=host%>"><%=host%></option>
+            <% end %>
+            <optgroup label="Hostgroups">
+            <% @groups.each do |group| %>
+              <option value="group;<%=group%>"><%=group%></option>
+            <% end %>
+          </select></div>
+          <div class="control-group"><input class="btn primary" type='submit' value='Install!'></div>
+        </form>
+      </div>
+    </div>
   </div>
 </div>
 
-<div class="row well">
-<form id="install_pkg" action='/deploys/install-pkg' method='post' class="form-inline">
-  <legend>Quick Install</legend>
-  <div class="control-group"><input name='package' type="text" class="input" placeholder="Package to install" autofocus><p class="help-block">Packages to install separated by spaces</p></div>
-  <div class="control-group" for"host"><select id="host" name="host">
-    <option value="">--- Select ---</option>
-    <% @hosts.each do |host| %>
-      <option value="<%=host%>">Host: <%=host%></option>
-    <% end %>
-  </select><p class="help-block">Select host or hostgroup</p></div>
-  <div class="control-group"><input class="btn primary" type='submit' value='Install!'></div>
-</form>
+
+<div id="delDeploy" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="Del Deploy" aria-hidden="true">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <h3 id="delDeployLabel">Attention!</h3>
+  </div>
+  <div class="modal-body">
+    <p>Are you sure you want to delete the deploy <b id="dataInput"></b>?</p>
+  </div>
+  <div class="modal-footer">
+    <form id="delDeployform" action="/deploys/del" method="post">
+      <input type="hidden" name="deploy" id="dataInput" value="">
+      <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+      <button type="submit" class="btn btn-primary">Delete</button>
+    </form>
+  </div>
 </div>

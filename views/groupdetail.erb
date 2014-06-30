@@ -1,48 +1,131 @@
-<div class="well">
-  <legend>Group Members for <%=@group%></legend>
-  <% @members.each do |host| %>
-      <h5><div class="btn-group">
-      <a style="margin-bottom: 10px" class="btn btn-success srv server" href="/server/<%=host%>"><%=host%></a>
-      <a style="margin-bottom: 10px" href="#delMember" class="btn btn-success dropdown-toggle" onclick="passDataToModal('<%=host%>', '#delMember')"><span class="icon-remove icon-white"></span></a>
-        </div></h5>
-  <% end %>
+<div class="row">
+  <div class="span6">
+    <div class="widget widget-table action-table">
+      <div class="widget-header">
+        <i class="icon-sitemap"></i><h3>Group Members for <%=@group%></h3>
+      </div>
+      <div class="widget-content">
+        <div style="position:absolute; margin:10px; z-index:90;">
+          <a data-toggle="modal" href="#addMember" class="btn">
+            Add member <i class="btn-icon-only icon-plus"></i>
+          </a>
+        </div>
+        <div class="visible-phone visible-tablet"><br></br></div>
+        <table id="hgmtable" class="stripe row-border">
+          <thead style="text-align:left;">
+            <tr>
+              <th>
+                Hostname
+              </th>
+              <th>
+                Status
+              </th>
+              <th class="td-actions">
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @members.each do |host| %>
+            <tr>
+              <td>
+                <%=host%>
+              </td>
+              <td>
+                <% host_ok = all_ok(host) %>
+                <% if host_ok == 1 %>
+                  <span class="label label-success">all ok</span>
+                <% elsif host_ok == 2 %>
+                  <span class="label label-warning">warning</span>
+                <% elsif host_ok == 3 %>
+                  <span class="label label-important">down</span>
+                <% end %>
+              </td>
+              <td class="td-actions">
+                <a data-toggle="tooltip" data-original-title="Details" href="/server/<%=host%>" class="btn btn-info btn-mini btn-icon-only hint"><i class="btn-icon-only icon-folder-open"></i></a>
+                <a data-toggle="tooltip" data-original-title="Remove from group" href="#delMember" class="btn btn-danger btn-mini btn-icon-only hint" onclick="passDataToModal('<%=host%>', '#delMember')"><i class="btn-icon-only icon-remove"></i></a>
+              </td>
+            </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="span6">
+    <div class="widget">
+      <div class="widget-header">
+        <i class="icon-terminal"></i><h3>Custom variables</h3>
+      </div>
+      <div class="widget-content">
+        <div class="control-group" id="fields">
+            <%@opt_vars.each do |var|%>
+            <div class="controls">
+              <form class="input-prepend input-append" id="add_group_var" action='/groups/del-var' method='post'>
+                <input type="hidden" name="group" value="<%=@group%>">
+                <input type="hidden" name="var_name" value="<%=var[0]%>">
+                <input type="text" class="span2 disabled" disabled="" name="dummy_var_name" value="<%=var[0]%>">
+                <input type="text" class="span2 disabled" disabled="" name="dummy_value" value="<%=var[1]%>">
+                <button class="btn btn-append" type="submit"><i class="icon-minus"></i></button>
+              </form>
+            </div>
+            <%end%>
 
-    <input type="hidden" name="count" value="1" />
-      <div class="control-group" id="fields">
-        <label class="control-label" for="field1">Custom variables:</label>
-        <div class="controls" id="profs">
-          <%@opt_vars.each do |var|%>
-            <form class="input-append" id="add_group_var" action='/groups/del-var' method='post'>
-              <div id="field"><input type="hidden" name="group" value="<%=@group%>"><input type="hidden" name="var_name" value="<%=var[0]%>"><span class="span2 uneditable-input focused"><%=var[0]%></span><span class="uneditable-input focused"><%=var[1]%></span><button class="btn" type="submit"><i class="icon-minus"></i></button></div>
-            </form>
-          <%end%>
-          <form class="input-append" id="add_group_var" action='/groups/add-var' method='post'>
-            <div id="field"><input type="hidden" name="group" value="<%=@group%>"><input autocomplete="off" class="input span2" id="var_name" name="var_name" type="text" placeholder="variable name" required/><input autocomplete="off" class="input" id="value" name="value" type="text" placeholder="value" required/><button class="btn" type="submit"><i class="icon-plus"></i></button></div>
+          <form id="add_group_var" action='/groups/add-var' method='post'>
+            <div class="controls">
+            <div class="input-append">
+              <input type="hidden" name="group" value="<%=@group%>">
+              <input autocomplete="off" class="input span2" id="var_name" name="var_name" type="text" placeholder="variable name" required/>
+              <input autocomplete="off" class="input span2" id="value" name="value" type="text" placeholder="value" required/>
+              <button class="btn btn-append" type="submit"><i class="icon-plus"></i></button></div>
+            </div>
+            </div>
           </form>
         </div>
       </div>
-
-  <legend></legend>
-  <a id="add" class="btn btn-primary offset9">Add server to group</a>
+    </div>
+  </div>
 </div>
 
-<form id="add_form" style="display:none" action='/groups/edit' method='post' class="form-inline well">
-  <input name='action' type="hidden" value="add_member">
-  <input name='params[group]' type="hidden" value="<%=@group%>">
-  <div class="control-group"><input name='params[server]' type="text" class="input-xlarge" data-provide="typeahead" data-items="5" data-source='<%=get_server_list%>' autocomplete="off" autofocus></div>
-  <div class="control-group"><input class="btn primary" type='submit' value='Add'></div>
-</form>
 
-<div id="delMember" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+<div id="addMember" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="Add Member" aria-hidden="true">
   <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h3 id="myModalLabel">Attention!</h3>
+    <h3 id="addMemeberLabel">Add Member</h3>
+  </div>
+  <form id="addMemeberform" action="/groups/edit" method="post">
+    <div class="modal-body">
+      <input name='action' type="hidden" value="add_member">
+      <input name='params[group]' type="hidden" value="<%=@group%>">
+      <div class="control-group">
+        <select name='params[server]' class="input-xlarge" id="selectMember">
+          <option></option>
+          <% get_server_list.each do |server| %>
+            <% if !@members.include?(server) %>
+              <option value="<%=server%>"><%=server%></option>
+            <% end %>
+          <% end %>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+      <button type="submit" class="btn btn-primary">Add</button>
+    </div>
+  </form>
+</div>
+
+
+<div id="delMember" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="Del Memeber" aria-hidden="true">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <h3 id="delDeployLabel">Attention!</h3>
   </div>
   <div class="modal-body">
     <p>Are you sure you want to delete <b id="dataInput"></b> from the <b><%=@group%></b> hostgroup?</p>
   </div>
   <div class="modal-footer">
-    <form id="form" id="delGroup" action="/groups/edit" method="post">
+    <form id="delMemberform" action="/groups/edit" method="post">
       <input type="hidden" name="action" value="del_member">
       <input type="hidden" name="params[group]" value="<%=@group%>">
       <input type="hidden" name="params[server]" id="dataInput" value="">

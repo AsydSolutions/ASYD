@@ -65,9 +65,10 @@ end
 ## LOGIN/LOGOUT BLOCK END
 
 ## SERVERS BLOCK START
-get '/server/list' do
+get '/servers/overiew' do
+  @groups = get_hostgroup_list
   @hosts = get_server_list
-  erb :serverlist
+  erb :servers_overiew
 end
 
 get '/server/:host' do
@@ -83,7 +84,7 @@ end
 
 post '/server/add' do
   srv_init(params['name'], params['host'], params['password'])
-  serverlist = '/server/list'
+  serverlist = '/servers/overiew'
   redirect to serverlist
 end
 
@@ -94,7 +95,7 @@ post '/server/del' do
     revoke = false
   end
   remove_server(params['host'], revoke)
-  serverlist = '/server/list'
+  serverlist = '/servers/overiew'
   redirect to serverlist
 end
 
@@ -112,11 +113,6 @@ end
 ## SERVERS BLOCK END
 
 ## HOST GROUPS START
-get '/groups/list' do
-  @groups = get_hostgroup_list
-  erb :grouplist
-end
-
 get '/groups/:group' do
   @group = params[:group]
   @members = get_group_members(params[:group])
@@ -132,7 +128,7 @@ post '/groups/edit' do
   if params[:action] == "add_member" || params[:action] == "del_member"
     redir = '/groups/'+params[:params][:group]
   else
-    redir = '/groups/list'
+    redir = '/servers/overiew'
   end
   groups_edit(params[:action], params[:params])
   redirect to redir
@@ -159,15 +155,29 @@ get '/deploys/list' do
   erb :deploys
 end
 
+get '/deploys/:dep' do
+  erb "-WIP-"
+end
+
 post '/deploys/install-pkg' do
   inst = Spork.spork do
-    install_pkg(params['host'],params['package'],false)
+    target = params['target'].split(";")
+    if target[0] == "host"
+      install_pkg(target[1],params['package'],false)
+    elsif target[0] == "group"
+      members = get_group_members(target[1])
+      if !members.nil? && !members.empty?
+        members.each do |host|
+          install_pkg(host,params['package'],false)
+        end
+      end
+    end
   end
   deploys = '/deploys/list'
   redirect to deploys
 end
 
-get '/deploys/deploy/:target/:dep' do  ##TODO: switch to POST
+get '/deploys/deploy/:dep/:target' do  ##TODO: switch to POST
   target = params[:target].split(";")
   if target[0] == "host"
     # inst = Spork.spork do
@@ -184,9 +194,19 @@ get '/deploys/deploy/:target/:dep' do  ##TODO: switch to POST
   deploys = '/deploys/list'
   redirect to deploys
 end
+
+post '/deploys/del' do
+  del_deploy(params['deploy'])
+  redir = '/deploys/list'
+  redirect to redir
+end
 ## DEPLOYS BLOCK END
 
 ## TASKS BLOCK START
+get '/tasks/list' do
+  erb "-WIP-"
+end
+
 get '/tasks/:id' do
   activity = SQLite3::Database.new "data/db/activity.db"
   @task = activity.get_first_row("select id,action,target,status,created from activity where id=?", params[:id].to_i)

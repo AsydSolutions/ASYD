@@ -31,6 +31,9 @@ end
 def get_host_status(host)
   begin
     hostdata = get_host_data(host)
+    if hostdata.nil?
+      exit
+    end
     ip = hostdata[:ip]
     monit_pw = hostdata[:monit_pw]
 
@@ -184,4 +187,21 @@ def acknowledge(host, service)
   monitoring = SQLite3::Database.new "data/db/notifications.db"
   monitoring.execute("UPDATE monitoring SET acknowledge=1 WHERE host=? and service=?", [host, service])
   monitoring.close
+end
+
+def all_ok(host)
+  status = get_host_status(host)
+  if status.nil?
+    return 3
+  else
+    if status[:status] != 'ok'
+      return 2
+    end
+    status[:services].each do |service|
+      if service[:status] != 'ok'
+        return 2
+      end
+    end
+    return 1
+  end
 end

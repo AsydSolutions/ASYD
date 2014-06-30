@@ -1,0 +1,209 @@
+<div class="row">
+	<div class="span6">
+		<div class="widget widget-table action-table">
+			<div class="widget-header">
+				<i class="icon-sitemap"></i><h3>Host Groups</h3>
+			</div>
+			<div class="widget-content">
+				<div style="position:absolute; margin:10px; z-index:90;">
+					<a data-toggle="modal" href="#addGroup" class="btn">
+						Add group <i class="btn-icon-only icon-plus"></i>
+					</a>
+				</div>
+				<div class="visible-phone visible-tablet"><br></br></div>
+				<table id="hgtable" class="stripe row-border">
+					<thead style="text-align:left;">
+						<tr>
+							<th>
+								Name
+							</th>
+							<th>
+								Hosts
+							</th>
+							<th class="td-actions">
+								Actions
+							</th>
+						</tr>
+					</thead>
+					<tbody>
+						<% @groups.each do |group| %>
+						<tr>
+							<td>
+								<%=group%>
+							</td>
+							<td>
+								<div class="accordion-group accordion-invisible">
+									<div class="accordion-heading accordion-invisible">
+										<% members_status = check_members_status(group) %>
+										<% if members_status[2] == 0 %>
+											<a data-toggle="collapse" href="#collapse<%=group%>" style="font-size: 8pt; color: #ffffff;" class="badge badge-success"><%=members_status[0]%>/<%=members_status[1]%></a>
+										<% else %>
+											<a data-toggle="collapse" href="#collapse<%=group%>" data-placement="right" data-original-title="<%=members_status[2]%> host(s) on this group has issues" style="font-size: 8pt; color: #ffffff;" class="badge badge-warning hint "><%=members_status[0]%>/<%=members_status[1]%></a>
+										<% end %>
+									</div>
+									<div id="collapse<%=group%>" class="accordion-body collapse accordion-invisible">
+										<div class="accordion-inner accordion-invisible">
+											<table class="table table-condensed">
+												<tbody>
+													<% members = get_group_members(group) %>
+													<% members.each do |member| %>
+													<tr class="accordion-invisible"><td class="accordion-invisible">
+														<i class="icon-angle-right"></i>
+														<a href="/server/<%=member%>">
+														<% host_ok = all_ok(member) %>
+														<% if host_ok == 1 %>
+															<span class="label label-success"><%= member %></span>
+														<% elsif host_ok == 2 %>
+															<span class="label label-warning"><%= member %></span>
+														<% elsif host_ok == 3 %>
+															<span class="label label-important"><%= member %></span>
+														<% end %>
+														</a>
+													</td></tr>
+													<% end %>
+												</tbody>
+											</table>
+										</div>
+									</div>
+								</div>
+							</td>
+							<td class="td-actions">
+								<a data-toggle="tooltip" data-original-title="Details" href="/groups/<%=group%>" class="btn btn-info btn-mini btn-icon-only hint"><i class="btn-icon-only icon-folder-open"></i></a>
+								<a data-toggle="tooltip" data-original-title="Remove" href="#delGroup" class="btn btn-danger btn-mini btn-icon-only hint" onclick="passDataToModal('<%=group%>', '#delGroup')"><i class="btn-icon-only icon-remove"></i></a>
+							</td>
+						</tr>
+						<% end %>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+	<div class="span6">
+		<div class="widget widget-table action-table">
+			<div class="widget-header">
+				<i class="icon-hdd"></i><h3>Hosts</h3>
+			</div>
+			<div class="widget-content">
+				<div style="position:absolute; margin:10px; z-index:90;">
+					<a data-toggle="modal" href="#addServer" class="btn">
+						Add host <i class="btn-icon-only icon-plus"></i>
+					</a>
+				</div>
+				<div class="visible-phone visible-tablet"><br></br></div>
+				<table id="htable" class="stripe row-border">
+					<thead style="text-align:left;">
+						<tr>
+							<th>
+								Hostname
+							</th>
+							<th>
+								Status
+							</th>
+							<th class="td-actions">
+								Actions
+							</th>
+						</tr>
+					</thead>
+					<tbody>
+						<% @hosts.each do |host| %>
+						<tr>
+							<td>
+								<%=host%>
+							</td>
+							<td>
+								<% host_ok = all_ok(host) %>
+								<% if host_ok == 1 %>
+	              	<span class="label label-success">all ok</span>
+								<% elsif host_ok == 2 %>
+									<span class="label label-warning">warning</span>
+								<% elsif host_ok == 3 %>
+									<span class="label label-important">down</span>
+								<% end %>
+							</td>
+							<td class="td-actions">
+								<a data-toggle="tooltip" data-original-title="Details" href="/server/<%=host%>" class="btn btn-info btn-mini btn-icon-only hint"><i class="btn-icon-only icon-folder-open"></i></a>
+								<a data-toggle="tooltip" data-original-title="Remove" href="#delServer" class="btn btn-danger btn-mini btn-icon-only hint" onclick="passDataToModal('<%=host%>', '#delServer')"><i class="btn-icon-only icon-remove"></i></a>
+							</td>
+						</tr>
+						<% end %>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<div id="addServer" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="Add Host" aria-hidden="true">
+	<div class="modal-header">
+		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+		<h3 id="addServerLabel">Add new server</h3>
+	</div>
+	<form id="addServerform" action="/server/add" method="post">
+		<div class="modal-body">
+			<div class="control-group"><input autocomplete="off" name='name' type="text" class="input-xlarge" placeholder="Hostname" autofocus required></div>
+			<div class="control-group"><input autocomplete="off" name='host' type="text" class="input-xlarge" placeholder="IP address" data-validation-regex-regex="(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)" data-validation-regex-message="Must be a valid IP address" required><p class="help-block"></p></div>
+			<div class="control-group"><input name='password' type="password" class="input-xlarge" placeholder="root password" required></div>
+		</div>
+		<div class="modal-footer">
+			<button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+			<button type="submit" class="btn btn-primary">Deploy!</button>
+		</div>
+	</form>
+</div>
+
+
+<div id="addGroup" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="Add Hostgroup" aria-hidden="true">
+	<div class="modal-header">
+		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+		<h3 id="addServerLabel">Add new hostgroup</h3>
+	</div>
+	<form id="addGroupform" action="/groups/edit" method="post">
+		<div class="modal-body">
+			<input name='action' type="hidden" value="add_group">
+			<div class="control-group"><input autocomplete="off" name='params[group]' type="text" class="input-xlarge" placeholder="Name" autofocus required></div>
+		</div>
+		<div class="modal-footer">
+			<button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+			<button type="submit" class="btn btn-primary">Add</button>
+		</div>
+	</form>
+</div>
+
+
+<div id="delServer" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="Remove Host" aria-hidden="true">
+	<div class="modal-header">
+		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+		<h3 id="delServerLabel">Attention!</h3>
+	</div>
+	<div class="modal-body">
+		<p>Are you sure you want to delete <b id="dataInput"></b> from your server list?</p>
+	</div>
+	<div class="modal-footer">
+		<form id="delServerform" action="/server/del" method="post">
+			<input type="hidden" name="host" id="dataInput" value="">
+			<div style="float:left" class="control-group"><input type="checkbox" name="revoke" value="true"> Revoke SSH key</div>
+			<button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+			<button type="submit" class="btn btn-primary">Delete</button>
+		</form>
+	</div>
+</div>
+
+
+<div id="delGroup" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="Remove Hostgroup" aria-hidden="true">
+	<div class="modal-header">
+		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+		<h3 id="delGroupLabel">Attention!</h3>
+	</div>
+	<div class="modal-body">
+		<p>Are you sure you want to delete <b id="dataInput"></b> hostgroup?</p>
+	</div>
+	<div class="modal-footer">
+		<form id="delGroupform" action="/groups/edit" method="post">
+			<input type="hidden" name="action" value="del_group">
+			<input type="hidden" name="params[group]" id="dataInput" value="">
+			<button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+			<button type="submit" class="btn btn-primary">Delete</button>
+		</form>
+	</div>
+</div>
