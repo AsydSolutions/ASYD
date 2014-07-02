@@ -15,9 +15,11 @@ def install_pkg(host,pkg,dep)
       exit
     end
     if pkg_mgr == "apt"
-      cmd = pkg_mgr+"-get -y -q install "+pkg
-    else
+      cmd = pkg_mgr+"-get update && "pkg_mgr+"-get -y -q install "+pkg
+    elsif pkg_mgr == "yum"
       cmd = pkg_mgr+" install -y "+pkg		## NOT TESTED, DEVELOPMENT IN PROGRESS
+    elsif pkg_mgr == "pacman"
+      cmd = pkg_mgr+" -Sy --noconfirm --noprogressbar "+pkg    ## NOT TESTED, DEVELOPMENT IN PROGRESS
     end
 
     result = exec_cmd(ip, cmd)

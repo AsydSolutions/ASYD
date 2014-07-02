@@ -14,12 +14,16 @@ def srv_init(host, ip, password)
     distro = ssh.exec!("cat /etc/issue")
     distro = distro.split
     dist_host = distro[0]
-    dist_ver  = distro[2]
 
     if dist_host == "Debian" or dist_host == "Ubuntu"
       pkg_mgr = "apt"
+      dist_ver  = distro[2]
     elsif dist_host == "Fedora" or dist_host == "CentOS"
       pkg_mgr = "yum"
+      dist_ver  = distro[2]
+    elsif dist_host == "Arch"
+      pkg_mgr = "pacman"
+      dist_ver = 0
     else
       exit
     end
