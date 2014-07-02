@@ -180,11 +180,11 @@ end
 get '/deploys/deploy/:dep/:target' do  ##TODO: switch to POST
   target = params[:target].split(";")
   if target[0] == "host"
-    # inst = Spork.spork do
-    inst = Thread.fork do #debug
+    inst = Spork.spork do
+    # inst = Thread.fork do #debug
       deploy(target[1], params[:dep],false)
     end
-    inst.join #debug
+    # inst.join #debug
   end
   if target[0] == "group"
     inst = Spork.spork do
