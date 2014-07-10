@@ -9,16 +9,16 @@
         <tbody>
           <tr>
             <td><strong><%="load:"%></strong></td>
-            <td><%=@status[:load_1].to_s+" "+@status[:load_5].to_s+" "+@status[:load_15].to_s unless @status.nil? %></td>
+            <td><%=@host.status.load_1.to_s+" "+@host.status.load_5.to_s+" "+@host.status.load_15.to_s unless @host.status.nil? %></td>
           </tr>
           <tr>
             <td><strong><%="cpu:"%></strong></td>
-            <td><%=@status[:cpu_us].to_s+"%us, "+@status[:cpu_sy].to_s+"%sy, "+@status[:cpu_wa].to_s+"%wa" unless @status.nil? %></td>
+            <td><%=@host.status.cpu_us.to_s+"%us, "+@host.status.cpu_sy.to_s+"%sy, "+@host.status.cpu_wa.to_s+"%wa" unless @host.status.nil? %></td>
           </tr>
           <tr>
             <td><strong><%="mem:"%></strong></td>
-            <td><%=@status[:used_sysmem_mb].to_s+"MB used / "+@status[:total_memory].to_s+"MB total" unless @status.nil? %><div style="margin-top: 9px; margin-bottom: 9px; text-align: center" class="progress progress-success">
-                      <div style="width: <%=@status[:used_sysmem_percent].to_i.round.to_s unless @status.nil? %>%" class="bar"><%=@status[:used_sysmem_percent].to_s unless @status.nil? %>% used</div>
+            <td><%=@host.status.used_sysmem_mb.to_s+"MB used / "+@host.status.total_memory.to_s+"MB total" unless @host.status.nil? %><div style="margin-top: 9px; margin-bottom: 9px; text-align: center" class="progress progress-success">
+                      <div style="width: <%=@host.status.used_sysmem_percent.to_i.round.to_s unless @host.status.nil? %>%" class="bar"><%=@host.status.used_sysmem_percent.to_s unless @host.status.nil? %>% used</div>
             </div></td>
           </tr>
         </tbody>
@@ -36,19 +36,19 @@
         <tbody>
           <tr>
             <td><strong><%="hostname:"%></strong></td>
-            <td><%=@data[:hostname]%></td>
+            <td><%=@host.hostname%></td>
           </tr>
           <tr>
             <td><strong><%="ip:"%></strong></td>
-            <td><%=@data[:ip]%></td>
+            <td><%=@host.ip%></td>
           </tr>
           <tr>
             <td><strong><%="os:"%></strong></td>
-            <td><%=@data[:dist_name]+" "+@data[:dist_ver]%></td>
+            <td><%=@host.dist+" "+@host.dist_ver.to_s%></td>
           </tr>
           <tr>
             <td><strong><%="arch:"%></strong></td>
-            <td><%=@data[:arch]%></td>
+            <td><%=@host.arch%></td>
           </tr>
         </tbody>
         </table>
@@ -64,10 +64,10 @@
       </div>
       <div class="widget-content">
         <div class="control-group" id="fields">
-            <%@opt_vars.each do |var|%>
+            <%@host.opt_vars.each do |var|%>
             <div class="controls">
-              <form class="input-prepend input-append" id="add_host_var" action='/server/del-var' method='post'>
-                <input type="hidden" name="host" value="<%=@data[:hostname]%>">
+              <form class="input-prepend input-append" id="del_host_var" action='/host/del-var' method='post'>
+                <input type="hidden" name="hostname" value="<%=@host.hostname%>">
                 <input type="hidden" name="var_name" value="<%=var[0]%>">
                 <input type="text" class="span2 disabled" disabled="" name="dummy_var_name" value="<%=var[0]%>">
                 <input type="text" class="span2 disabled" disabled="" name="dummy_value" value="<%=var[1]%>">
@@ -76,10 +76,10 @@
             </div>
             <%end%>
 
-          <form id="add_host_var" action='/server/add-var' method='post'>
+          <form id="add_host_var" action='/host/add-var' method='post'>
             <div class="controls">
             <div class="input-append">
-              <input type="hidden" name="host" value="<%=@data[:hostname]%>">
+              <input type="hidden" name="hostname" value="<%=@host.hostname%>">
               <input autocomplete="off" class="input span2" id="var_name" name="var_name" type="text" placeholder="variable name" required/>
               <input autocomplete="off" class="input span2" id="value" name="value" type="text" placeholder="value" required/>
               <button class="btn btn-append" type="submit"><i class="icon-plus"></i></button></div>

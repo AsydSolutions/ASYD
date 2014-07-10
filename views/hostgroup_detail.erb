@@ -2,7 +2,7 @@
   <div class="span6">
     <div class="widget widget-table action-table">
       <div class="widget-header">
-        <i class="icon-sitemap"></i><h3>Group Members for <%=@group%></h3>
+        <i class="icon-sitemap"></i><h3>Group Members for <%=@hostgroup.name%></h3>
       </div>
       <div class="widget-content">
         <div style="position:absolute; margin:10px; z-index:90;">
@@ -26,24 +26,23 @@
             </tr>
           </thead>
           <tbody>
-            <% @members.each do |host| %>
+            <% @hostgroup.hosts.each do |host| %>
             <tr>
               <td>
-                <%=host%>
+                <%=host.hostname%>
               </td>
               <td>
-                <% host_ok = all_ok(host) %>
-                <% if host_ok == 1 %>
+                <% if @host_status[host.hostname] == 1 %>
                   <span class="label label-success">all ok</span>
-                <% elsif host_ok == 2 %>
+                <% elsif @host_status[host.hostname] == 2 %>
                   <span class="label label-warning">warning</span>
-                <% elsif host_ok == 3 %>
+                <% elsif @host_status[host.hostname] == 3 %>
                   <span class="label label-important">down</span>
                 <% end %>
               </td>
               <td class="td-actions">
-                <a data-toggle="tooltip" data-original-title="Details" href="/server/<%=host%>" class="btn btn-info btn-mini btn-icon-only hint"><i class="btn-icon-only icon-folder-open"></i></a>
-                <a data-toggle="tooltip" data-original-title="Remove from group" href="#delMember" class="btn btn-danger btn-mini btn-icon-only hint" onclick="passDataToModal('<%=host%>', '#delMember')"><i class="btn-icon-only icon-remove"></i></a>
+                <a data-toggle="tooltip" data-original-title="Details" href="/host/<%=host.hostname%>" class="btn btn-info btn-mini btn-icon-only hint"><i class="btn-icon-only icon-folder-open"></i></a>
+                <a data-toggle="tooltip" data-original-title="Remove from group" href="#delMember" class="btn btn-danger btn-mini btn-icon-only hint" onclick="passDataToModal('<%=host.hostname%>', '#delMember')"><i class="btn-icon-only icon-remove"></i></a>
               </td>
             </tr>
             <% end %>
@@ -59,10 +58,10 @@
       </div>
       <div class="widget-content">
         <div class="control-group" id="fields">
-            <%@opt_vars.each do |var|%>
+            <%@hostgroup.opt_vars.each do |var|%>
             <div class="controls">
-              <form class="input-prepend input-append" id="add_group_var" action='/groups/del-var' method='post'>
-                <input type="hidden" name="group" value="<%=@group%>">
+              <form class="input-prepend input-append" id="del_hostgroup_var" action='/hostgroup/del-var' method='post'>
+                <input type="hidden" name="hostgroup" value="<%=@hostgroup.name%>">
                 <input type="hidden" name="var_name" value="<%=var[0]%>">
                 <input type="text" class="span2 disabled" disabled="" name="dummy_var_name" value="<%=var[0]%>">
                 <input type="text" class="span2 disabled" disabled="" name="dummy_value" value="<%=var[1]%>">
@@ -71,10 +70,10 @@
             </div>
             <%end%>
 
-          <form id="add_group_var" action='/groups/add-var' method='post'>
+          <form id="add_hostgroup_var" action='/hostgroup/add-var' method='post'>
             <div class="controls">
             <div class="input-append">
-              <input type="hidden" name="group" value="<%=@group%>">
+              <input type="hidden" name="hostgroup" value="<%=@hostgroup.name%>">
               <input autocomplete="off" class="input span2" id="var_name" name="var_name" type="text" placeholder="variable name" required/>
               <input autocomplete="off" class="input span2" id="value" name="value" type="text" placeholder="value" required/>
               <button class="btn btn-append" type="submit"><i class="icon-plus"></i></button></div>
@@ -93,16 +92,15 @@
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
     <h3 id="addMemeberLabel">Add Member</h3>
   </div>
-  <form id="addMemeberform" action="/groups/edit" method="post">
+  <form id="addMemeberform" action="/hostgroup/add-member" method="post">
     <div class="modal-body">
-      <input name='action' type="hidden" value="add_member">
-      <input name='params[group]' type="hidden" value="<%=@group%>">
+      <input name='hostgroup' type="hidden" value="<%=@hostgroup.name%>">
       <div class="control-group">
-        <select name='params[server]' class="input-xlarge" id="selectMember">
+        <select name='hostname' class="input-xlarge" id="selectMember">
           <option></option>
-          <% get_server_list.each do |server| %>
-            <% if !@members.include?(server) %>
-              <option value="<%=server%>"><%=server%></option>
+          <% Host.all.each do |host| %>
+            <% if !@hostgroup.hosts.include?(host) %>
+              <option value="<%=host.hostname%>"><%=host.hostname%></option>
             <% end %>
           <% end %>
         </select>
@@ -122,13 +120,12 @@
     <h3 id="delDeployLabel">Attention!</h3>
   </div>
   <div class="modal-body">
-    <p>Are you sure you want to delete <b id="dataInput"></b> from the <b><%=@group%></b> hostgroup?</p>
+    <p>Are you sure you want to delete <b id="dataInput"></b> from the <b><%=@hostgroup.name%></b> hostgroup?</p>
   </div>
   <div class="modal-footer">
-    <form id="delMemberform" action="/groups/edit" method="post">
-      <input type="hidden" name="action" value="del_member">
-      <input type="hidden" name="params[group]" value="<%=@group%>">
-      <input type="hidden" name="params[server]" id="dataInput" value="">
+    <form id="delMemberform" action="/hostgroup/del-member" method="post">
+      <input type="hidden" name="hostgroup" value="<%=@hostgroup.name%>">
+      <input type="hidden" name="hostname" id="dataInput" value="">
       <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
       <button type="submit" class="btn btn-primary">Delete</button>
     </form>
