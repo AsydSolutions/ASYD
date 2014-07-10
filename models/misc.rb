@@ -103,3 +103,11 @@ module Misc
     end
   end
 end
+
+# Returns true if the string is not a number
+#
+class String
+  def nan?
+    self !~ /^\s*[+-]?((\d+_?)*\d+(\.(\d+_?)*\d+)?|\.(\d+_?)*\d+)(\s*|([eE][+-]?(\d+_?)*\d+)\s*)$/
+  end
+end

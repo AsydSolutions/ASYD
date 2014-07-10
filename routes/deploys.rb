@@ -12,26 +12,34 @@ class ASYD < Sinatra::Application
 
   post '/deploys/install-pkg' do
     target = params['target'].split(";")
-    task = Task.create(:action => :installing, :target => target[1])
-    notification = Notification.create(:type => :info, :message => task.action.to_s+" "+params['package']+" on "+task.target.to_s, :task => task)
-    inst = Spork.spork do
-      if target[0] == "host"
-        host = Host.first(:hostname => target[1])
+    if target[0] == "host"
+      host = Host.first(:hostname => target[1])
+      task = Task.create(:action => :installing, :target => host.hostname, :target_type => :host)
+      notification = Notification.create(:type => :info, :message => task.action.to_s+" "+params['package']+" on "+host.hostname, :task => task)
+      inst = Spork.spork do
         result = Deploy.install(host, params['package'])
         if result[0] == 1
           notification = Notification.create(:type => :success, :sticky => true, :message => result[1], :task => task)
+          task.update(:status => :finished)
         else
           notification = Notification.create(:type => :error, :sticky => true, :message => result[1], :task => task)
+          task.update(:status => :failed)
         end
-      elsif target[0] == "hostgroup"
-        hostgroup = Hostgroup.first(:name => target[1])
+      end
+    elsif target[0] == "hostgroup"
+      hostgroup = Hostgroup.first(:name => target[1])
+      task = Task.create(:action => :installing, :target => hostgroup.name, :target_type => :hostgroup)
+      notification = Notification.create(:type => :info, :message => task.action.to_s+" "+params['package']+" on "+hostgroup.name, :task => task)
+      inst = Spork.spork do
         if !hostgroup.hosts.nil? && !hostgroup.hosts.empty?
           hostgroup.hosts.each do |host|
             result = Deploy.install(host, params['package'])
             if result[0] == 1
               notification = Notification.create(:type => :success, :sticky => true, :message => result[1], :task => task)
+              task.update(:status => :finished)
             else
               notification = Notification.create(:type => :error, :sticky => true, :message => result[1], :task => task)
+              task.update(:status => :failed)
             end
           end
         end
@@ -43,30 +51,45 @@ class ASYD < Sinatra::Application
 
   post '/deploys/deploy' do
     target = params['target'].split(";")
-    task = Task.create(:action => :deploying, :target => target[1])
-    notification = Notification.create(:type => :info, :message => task.action.to_s+" "+params['deploy']+" on "+task.target.to_s, :task => task)
-    inst = Spork.spork do
-      if target[0] == "host"
-        host = Host.first(:hostname => target[1])
-        result = Deploy.launch(host, params['deploy'], nil)
+    if target[0] == "host"
+      host = Host.first(:hostname => target[1])
+      task = Task.create(:action => :deploying, :target => host.hostname, :target_type => :host)
+      notification = Notification.create(:type => :info, :message => task.action.to_s+" "+params['deploy']+" on "+host.hostname, :task => task)
+      inst = Spork.spork do
+        result = Deploy.launch(host, params['deploy'], task)
         if result == 1
           msg = "Deploy "+params['deploy']+" successfully deployed on "+target[0]+" "+target[1]
           notification = Notification.create(:type => :success, :sticky => true, :message => msg, :task => task)
+          task.update(:status => :finished)
         else
           notification = Notification.create(:type => :error, :sticky => true, :message => result[1], :task => task)
+          task.update(:status => :failed)
         end
-      elsif target[0] == "hostgroup"
-        hostgroup = Hostgroup.first(:name => target[1])
+      end
+    elsif target[0] == "hostgroup"
+      hostgroup = Hostgroup.first(:name => target[1])
+      task = Task.create(:action => :deploying, :target => hostgroup.name, :target_type => :hostgroup)
+      notification = Notification.create(:type => :info, :message => task.action.to_s+" "+params['deploy']+" on "+hostgroup.name, :task => task)
+      inst = Spork.spork do
+        success = true
         if !hostgroup.hosts.nil? && !hostgroup.hosts.empty?
           hostgroup.hosts.each do |host|
-            result = Deploy.launch(host, params['deploy'], nil)
-            if result == 1
-              msg = "Deploy "+params['deploy']+" successfully deployed on "+target[0]+" "+target[1]
-              notification = Notification.create(:type => :success, :sticky => true, :message => msg, :task => task)
-            else
+            result = Deploy.launch(host, params['deploy'], task)
+            if result != 1
+              msg = "Error when deploying "+params['deploy']+" on "+host.hostname+": "+result[1]
               notification = Notification.create(:type => :error, :sticky => true, :message => result[1], :task => task)
+              success = false
             end
           end
+        end
+        if success == true
+          msg = "Deploy "+params['deploy']+" successfully deployed on "+target[0]+" "+target[1]
+          notification = Notification.create(:type => :success, :sticky => true, :message => msg, :task => task)
+          task.update(:status => :finished)
+        else
+          msg = "Deploy "+params['deploy']+" had errors when deploying on "+target[0]+" "+target[1]
+          notification = Notification.create(:type => :error, :sticky => true, :message => msg, :task => task)
+          task.update(:status => :failed)
         end
       end
     end

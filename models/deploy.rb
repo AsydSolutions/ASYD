@@ -34,7 +34,10 @@ class Deploy
             line = line.split(':')
             pkgs = line[1].strip
             ret = Deploy.install(host, pkgs)
-            if ret[0] == 4
+            if ret[0] == 1
+              msg = "Installed "+pkgs+" on "+host.hostname+": "+ret[1]
+              notification = Notification.create(:type => :info, :dismiss => true, :message => msg, :task => task)
+            elsif ret[0] == 4
               raise ExecutionError, ret[1]
             elsif ret[0] == 5
               raise FormatException, ret[1]
@@ -56,6 +59,8 @@ class Deploy
             cfg_dst = cfg[1].strip
             host.upload_file(parsed_cfg.path, cfg_dst)
             parsed_cfg.unlink
+            msg = "Uploaded "+cfg_src+" to "+cfg_dst+" on "+host.hostname
+            notification = Notification.create(:type => :info, :dismiss => true, :message => msg, :task => task)
           end
         # /CONFIG FILE BLOCK
         # CONFIG DIR BLOCK
@@ -73,6 +78,8 @@ class Deploy
             parsed_cfg = parse_config_dir(host, cfg_src, nil)
             host.upload_dir(parsed_cfg, cfg_dst)
             FileUtils.rm_r parsed_cfg, :secure=>true
+            msg = "Uploaded "+cfg_src+" to "+cfg_dst+" on "+host.hostname
+            notification = Notification.create(:type => :info, :dismiss => true, :message => msg, :task => task)
           end
         # /CONFIG DIR BLOCK
         # EXEC BLOCK
@@ -94,14 +101,20 @@ class Deploy
                 if doit
                   line = line.split(':')
                   cmd = line[1].strip
-                  other_host.exec_cmd(cmd)
+                  ret = other_host.exec_cmd(cmd)
+                  msg = "Executed '"+cmd+"' on "+other_host.hostname
+                  msg = msg+": "+ret unless ret.nil?
+                  notification = Notification.create(:type => :info, :dismiss => true, :message => msg, :task => task)
                 end
               else
                 doit = check_condition(m2, host)
                 if doit
                   line = line.split(':')
                   cmd = line[1].strip
-                  host.exec_cmd(cmd)
+                  ret = host.exec_cmd(cmd)
+                  msg = "Executed '"+cmd+"' on "+host.hostname
+                  msg = msg+": "+ret unless ret.nil?
+                  notification = Notification.create(:type => :info, :dismiss => true, :message => msg, :task => task)
                 end
               end
             elsif !m2[0].nil? #no conditionals but remote execution
@@ -113,14 +126,20 @@ class Deploy
               if doit
                 line = line.split(':')
                 cmd = line[1].strip
-                other_host.exec_cmd(cmd)
+                ret = other_host.exec_cmd(cmd)
+                msg = "Executed '"+cmd+"' on "+other_host.hostname
+                msg = msg+": "+ret unless ret.nil?
+                notification = Notification.create(:type => :info, :dismiss => true, :message => msg, :task => task)
               end
             end
           else #just act normally, no params
             if doit
               line = line.split(':')
               cmd = line[1].strip
-              host.exec_cmd(cmd)
+              ret = host.exec_cmd(cmd)
+              msg = "Executed '"+cmd+"' on "+host.hostname
+              msg = msg+": "+ret unless ret.nil?
+              notification = Notification.create(:type => :info, :dismiss => true, :message => msg, :task => task)
             end
           end
         # /EXEC BLOCK
@@ -136,6 +155,8 @@ class Deploy
             services = line[1].split(' ')
             services.each do |service|
               host.monitor_service(service)
+              msg = "Monitoring service "+service+" on "+host.hostname
+              notification = Notification.create(:type => :info, :dismiss => true, :message => msg, :task => task)
             end
           end
         # /MONITOR BLOCK
@@ -151,7 +172,10 @@ class Deploy
               deploys = line[1].split(' ')
               deploys.each do |deploy|
                 ret = Deploy.launch(host, deploy, task)
-                if ret[0] == 5
+                if ret == 1
+                  msg = "Deploy "+deploy+" successfully deployed on "+host.hostname
+                  notification = Notification.create(:type => :info, :dismiss => true, :message => msg, :task => task)
+                elsif ret[0] == 5
                   raise FormatException, ret[1]
                 elsif ret[0] == 4
                   raise ExecutionError, ret[1]
@@ -192,6 +216,7 @@ class Deploy
       if result.include? "\nE: "
         raise ExecutionError, result
       else
+        result = result.split("\n").last
         return [1, result]
       end
     rescue FormatException
@@ -442,7 +467,7 @@ class Deploy
     st.gsub!('<%MONIT_PW%>', host.monit_pw)
     st.gsub!('<%IP%>', host.ip)
     st.gsub!('<%DIST%>', host.dist)
-    st.gsub!('<%DIST_VER%>', host.dist_ver)
+    st.gsub!('<%DIST_VER%>', host.dist_ver.to_s)
     st.gsub!('<%ARCH%>', host.arch)
     st.gsub!('<%HOSTNAME%>', host.hostname)
 

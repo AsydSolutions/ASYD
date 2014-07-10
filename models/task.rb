@@ -7,7 +7,8 @@ class Task
 
   property :id, Serial
   property :action, Enum[ :installing, :deploying ]
-  property :target, Object
+  property :target, String
+  property :target_type, Enum[ :host, :hostgroup ]
   property :status, Enum[ :in_progress, :finished, :failed ], :default => :in_progress
   property :created_at, DateTime
   property :created_on, Date

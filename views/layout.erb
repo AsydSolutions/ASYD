@@ -109,7 +109,11 @@
               <% elsif notification.type == :success %>
                 <div class="alert alert-success">
               <% end %>
-                <a href="#" class="close" data-dismiss="alert" onclick="dismissNotification('<%= notification.id %>')">&times;</a><%= notification.message %></div>
+                <a href="#" class="close" data-dismiss="alert" onclick="dismissNotification('<%= notification.id %>')">&times;</a><%= notification.message %>
+                <% if !notification.task.nil? %>
+                  (task <a href="/task/<%=notification.task.id%>">#<%=notification.task.id%></a>)
+                <% end %>
+                </div>
             <% end %>
           <% end %>
           <%= yield %>
