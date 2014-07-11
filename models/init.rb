@@ -29,4 +29,6 @@ require_relative "notification"
 DataMapper.setup(:default, 'sqlite3::memory:')
 require_relative "status"
 DataMapper.finalize
-DataMapper.auto_upgrade!
+if File.directory? 'data'
+  DataMapper.auto_upgrade!
+end
