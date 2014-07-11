@@ -1,6 +1,6 @@
 Installation on Debian:
 
-	apt-get update && apt-get install ruby1.9.1-full git libxslt-dev libxml2-dev libsqlite3-dev
+	apt-get update && apt-get install ruby1.9.1-full git libxslt-dev libxml2-dev libsqlite3-dev make
 	gem install bundler
 
 	git clone https://github.com/Choms/asyd.git
