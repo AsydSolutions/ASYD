@@ -79,7 +79,7 @@ input {
 .navbar-inner {
 	padding: 7px 0;
 
-	background: #1d9d74 !important;
+	background: #201f1f !important;
 
 	-moz-border-radius: 0;
 	-webkit-border-radius: 0;
@@ -98,6 +98,8 @@ input {
 	font-weight: 600;
 	position: relative;
 	top: 2px;
+	margin-top: -13px;
+	margin-bottom: -13px;
 }
 
 .navbar .search-query {
@@ -191,7 +193,7 @@ input {
 
 .subnavbar .container > ul > li.active > a {
 
-	border-bottom:3px solid #ff7f74;
+	border-bottom:3px solid #33b1c9;
 	color: #383838;
 }
 
@@ -332,7 +334,7 @@ body, html {
 	padding: 15px 0;
 
 	font-size: 12px;
-	background: #111;
+	background: #201f1f;
 	color: #999;
 }
 
@@ -369,15 +371,15 @@ body, html {
 	height: 40px;
 	line-height: 40px;
 
-	background: #f9f6f1;
-	background:-moz-linear-gradient(top, #f9f6f1 0%, #f2efea 100%); /* FF3.6+ */
-	background:-webkit-gradient(linear, left top, left bottom, color-stop(0%,#f9f6f1), color-stop(100%,#f2efea)); /* Chrome,Safari4+ */
-	background:-webkit-linear-gradient(top, #f9f6f1 0%,#f2efea 100%); /* Chrome10+,Safari5.1+ */
-	background:-o-linear-gradient(top, #f9f6f1 0%,#f2efea 100%); /* Opera11.10+ */
-	background:-ms-linear-gradient(top, #f9f6f1 0%,#f2efea 100%); /* IE10+ */
-	background:linear-gradient(top, #f9f6f1 0%,#f2efea 100%); /* W3C */
-	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#f9f6f1', endColorstr='#f2efea');
-	-ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr='#f9f6f1', endColorstr='#f2efea')";
+	background: #e8e8e8;
+	background:-moz-linear-gradient(top, #e8e8e8 0%, #ffffff 100%); /* FF3.6+ */
+	background:-webkit-gradient(linear, left top, left bottom, color-stop(0%,#e8e8e8), color-stop(100%,#ffffff)); /* Chrome,Safari4+ */
+	background:-webkit-linear-gradient(top, #e8e8e8 0%,#ffffff 100%); /* Chrome10+,Safari5.1+ */
+	background:-o-linear-gradient(top, #e8e8e8 0%,#ffffff 100%); /* Opera11.10+ */
+	background:-ms-linear-gradient(top, #e8e8e8 0%,#ffffff 100%); /* IE10+ */
+	background:linear-gradient(top, #e8e8e8 0%,#ffffff 100%); /* W3C */
+	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#e8e8e8', endColorstr='#ffffff');
+	-ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr='#e8e8e8', endColorstr='#ffffff')";
 
 
 	border: 1px solid #d6d6d6;

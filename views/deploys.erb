@@ -10,11 +10,11 @@
             <option></option>
             <optgroup label="Hosts">
             <% @hosts.each do |host| %>
-              <option value="host;<%=host%>"><%=host%></option>
+              <option value="host;<%=host.hostname%>"><%=host.hostname%></option>
             <% end %>
             <optgroup label="Hostgroups">
-            <% @groups.each do |group| %>
-              <option value="group;<%=group%>"><%=group%></option>
+            <% @hostgroups.each do |hostgroup| %>
+              <option value="hostgroup;<%=hostgroup.name%>"><%=hostgroup.name%></option>
             <% end %>
           </select>
         </div>
@@ -38,7 +38,7 @@
                 <%=deploy%>
               </td>
               <td class="td-actions">
-                <a data-toggle="tooltip" data-original-title="Deploy!" href="/deploys/deploy/<%=deploy%>/" class="btn btn-success btn-mini btn-icon-only hint" deploy-confirm="Do you want to deploy <%=deploy%> on "><i class="btn-icon-only icon-rocket"></i></a>
+                <a data-toggle="tooltip" data-original-title="Deploy!" href="<%=deploy%>" class="btn btn-success btn-mini btn-icon-only hint" deploy-confirm="Do you want to deploy <%=deploy%> on "><i class="btn-icon-only icon-rocket"></i></a>
                 <a data-toggle="tooltip" data-original-title="Details" href="/deploys/<%=deploy%>" class="btn btn-info btn-mini btn-icon-only hint"><i class="btn-icon-only icon-folder-open"></i></a>
                 <a data-toggle="tooltip" data-original-title="Delete" href="#delDeploy" class="btn btn-danger btn-mini btn-icon-only hint" onclick="passDataToModal('<%=deploy%>', '#delDeploy')"><i class="btn-icon-only icon-remove"></i></a>
               </td>
@@ -61,11 +61,11 @@
             <option></option>
             <optgroup label="Hosts">
             <% @hosts.each do |host| %>
-              <option value="host;<%=host%>"><%=host%></option>
+              <option value="host;<%=host.hostname%>"><%=host.hostname%></option>
             <% end %>
             <optgroup label="Hostgroups">
-            <% @groups.each do |group| %>
-              <option value="group;<%=group%>"><%=group%></option>
+            <% @hostgroups.each do |hostgroup| %>
+              <option value="hostgroup;<%=hostgroup.name%>"><%=hostgroup.name%></option>
             <% end %>
           </select></div>
           <div class="control-group"><input class="btn primary" type='submit' value='Install!'></div>

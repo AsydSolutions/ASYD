@@ -29,35 +29,32 @@
 						<% @groups.each do |group| %>
 						<tr>
 							<td>
-								<%=group%>
+								<%=group.name%>
 							</td>
 							<td>
 								<div class="accordion-group accordion-invisible">
 									<div class="accordion-heading accordion-invisible">
-										<% members_status = check_members_status(group) %>
-										<% if members_status[2] == 0 %>
-											<a data-toggle="collapse" href="#collapse<%=group%>" style="font-size: 8pt; color: #ffffff;" class="badge badge-success"><%=members_status[0]%>/<%=members_status[1]%></a>
+										<% if group.members_status(:failed) == 0 %>
+											<a data-toggle="collapse" href="#collapse<%=group.name%>" style="font-size: 8pt; color: #ffffff;" class="badge badge-success"><%=group.members_status(:total)%>/<%=group.members_status(:sane)%></a>
 										<% else %>
-											<a data-toggle="collapse" href="#collapse<%=group%>" data-placement="right" data-original-title="<%=members_status[2]%> host(s) on this group has issues" style="font-size: 8pt; color: #ffffff;" class="badge badge-warning hint "><%=members_status[0]%>/<%=members_status[1]%></a>
+											<a data-toggle="collapse" href="#collapse<%=group.name%>" data-placement="right" data-original-title="<%=group.members_status(:failed)%> host(s) on this group has issues" style="font-size: 8pt; color: #ffffff;" class="badge badge-warning hint "><%=group.members_status(:total)%>/<%=group.members_status(:sane)%></a>
 										<% end %>
 									</div>
-									<div id="collapse<%=group%>" class="accordion-body collapse accordion-invisible">
+									<div id="collapse<%=group.name%>" class="accordion-body collapse accordion-invisible">
 										<div class="accordion-inner accordion-invisible">
 											<table class="table table-condensed">
 												<tbody>
-													<% members = get_group_members(group) %>
-													<% members.each do |member| %>
+													<% group.hosts.each do |host| %>
 													<tr class="accordion-invisible"><td class="accordion-invisible">
 														<i class="icon-angle-right"></i>
-														<a href="/server/<%=member%>">
-														<% host_ok = all_ok(member) %>
-														<% if host_ok == 1 %>
-															<span class="label label-success"><%= member %></span>
-														<% elsif host_ok == 2 %>
-															<span class="label label-warning"><%= member %></span>
-														<% elsif host_ok == 3 %>
-															<span class="label label-important"><%= member %></span>
-														<% end %>
+														<a href="/host/<%=host.hostname%>">
+														<% if @host_status[host.hostname] == 1 %>
+															<span class="label label-success">
+														<% elsif @host_status[host.hostname] == 2 %>
+															<span class="label label-warning">
+														<% elsif@host_status[host.hostname] == 3 %>
+															<span class="label label-important">
+														<% end %><%= host.hostname %></span>
 														</a>
 													</td></tr>
 													<% end %>
@@ -68,8 +65,8 @@
 								</div>
 							</td>
 							<td class="td-actions">
-								<a data-toggle="tooltip" data-original-title="Details" href="/groups/<%=group%>" class="btn btn-info btn-mini btn-icon-only hint"><i class="btn-icon-only icon-folder-open"></i></a>
-								<a data-toggle="tooltip" data-original-title="Remove" href="#delGroup" class="btn btn-danger btn-mini btn-icon-only hint" onclick="passDataToModal('<%=group%>', '#delGroup')"><i class="btn-icon-only icon-remove"></i></a>
+								<a data-toggle="tooltip" data-original-title="Details" href="/hostgroup/<%=group.name%>" class="btn btn-info btn-mini btn-icon-only hint"><i class="btn-icon-only icon-folder-open"></i></a>
+								<a data-toggle="tooltip" data-original-title="Remove" href="#delGroup" class="btn btn-danger btn-mini btn-icon-only hint" onclick="passDataToModal('<%=group.name%>', '#delGroup')"><i class="btn-icon-only icon-remove"></i></a>
 							</td>
 						</tr>
 						<% end %>
@@ -108,21 +105,20 @@
 						<% @hosts.each do |host| %>
 						<tr>
 							<td>
-								<%=host%>
+								<%=host.hostname%>
 							</td>
 							<td>
-								<% host_ok = all_ok(host) %>
-								<% if host_ok == 1 %>
+								<% if @host_status[host.hostname] == 1 %>
 	              	<span class="label label-success">all ok</span>
-								<% elsif host_ok == 2 %>
+								<% elsif @host_status[host.hostname] == 2 %>
 									<span class="label label-warning">warning</span>
-								<% elsif host_ok == 3 %>
+								<% elsif @host_status[host.hostname] == 3 %>
 									<span class="label label-important">down</span>
 								<% end %>
 							</td>
 							<td class="td-actions">
-								<a data-toggle="tooltip" data-original-title="Details" href="/server/<%=host%>" class="btn btn-info btn-mini btn-icon-only hint"><i class="btn-icon-only icon-folder-open"></i></a>
-								<a data-toggle="tooltip" data-original-title="Remove" href="#delServer" class="btn btn-danger btn-mini btn-icon-only hint" onclick="passDataToModal('<%=host%>', '#delServer')"><i class="btn-icon-only icon-remove"></i></a>
+								<a data-toggle="tooltip" data-original-title="Details" href="/host/<%=host.hostname%>" class="btn btn-info btn-mini btn-icon-only hint"><i class="btn-icon-only icon-folder-open"></i></a>
+								<a data-toggle="tooltip" data-original-title="Remove" href="#delServer" class="btn btn-danger btn-mini btn-icon-only hint" onclick="passDataToModal('<%=host.hostname%>', '#delServer')"><i class="btn-icon-only icon-remove"></i></a>
 							</td>
 						</tr>
 						<% end %>
@@ -139,11 +135,13 @@
 		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
 		<h3 id="addServerLabel">Add new server</h3>
 	</div>
-	<form id="addServerform" action="/server/add" method="post">
+	<form id="addServerform" action="/host/add" method="post">
 		<div class="modal-body">
-			<div class="control-group"><input autocomplete="off" name='name' type="text" class="input-xlarge" placeholder="Hostname" autofocus required></div>
-			<div class="control-group"><input autocomplete="off" name='host' type="text" class="input-xlarge" placeholder="IP address" data-validation-regex-regex="(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)" data-validation-regex-message="Must be a valid IP address" required><p class="help-block"></p></div>
-			<div class="control-group"><input name='password' type="password" class="input-xlarge" placeholder="root password" required></div>
+			<div class="control-group"><input autocomplete="off" name='hostname' type="text" class="input" placeholder="Hostname" autofocus required><span class="help-inline">hostname (must be unique)</span></div>
+			<div class="control-group"><input autocomplete="off" name='ip' type="text" class="input" placeholder="IP address" data-validation-regex-regex="(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)" data-validation-regex-message="Must be a valid IP address" required><span class="help-inline">IP address (must be unique)</span><p class="help-block"></p></div>
+			<div class="control-group"><input autocomplete="off" name='user' type="text" class="input" placeholder="username" value="root" required><span class="help-inline">user (must have admin privileges)</span></div>
+			<div class="control-group"><input autocomplete="off" name='ssh_port' type="number" class="input" value="22" required><span class="help-inline">ssh port</span></div>
+			<div class="control-group"><input name='password' type="password" class="input" placeholder="password" required><span class="help-inline">password (won't be stored)</span></div>
 		</div>
 		<div class="modal-footer">
 			<button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
@@ -158,10 +156,9 @@
 		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
 		<h3 id="addServerLabel">Add new hostgroup</h3>
 	</div>
-	<form id="addGroupform" action="/groups/edit" method="post">
+	<form id="addGroupform" action="/hostgroup/add" method="post">
 		<div class="modal-body">
-			<input name='action' type="hidden" value="add_group">
-			<div class="control-group"><input autocomplete="off" name='params[group]' type="text" class="input-xlarge" placeholder="Name" autofocus required></div>
+			<div class="control-group"><input autocomplete="off" name='hostgroup' type="text" class="input-xlarge" placeholder="Name" autofocus required></div>
 		</div>
 		<div class="modal-footer">
 			<button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
@@ -180,8 +177,8 @@
 		<p>Are you sure you want to delete <b id="dataInput"></b> from your server list?</p>
 	</div>
 	<div class="modal-footer">
-		<form id="delServerform" action="/server/del" method="post">
-			<input type="hidden" name="host" id="dataInput" value="">
+		<form id="delServerform" action="/host/del" method="post">
+			<input type="hidden" name="hostname" id="dataInput" value="">
 			<div style="float:left" class="control-group"><input type="checkbox" name="revoke" value="true"> Revoke SSH key</div>
 			<button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
 			<button type="submit" class="btn btn-primary">Delete</button>
@@ -199,9 +196,8 @@
 		<p>Are you sure you want to delete <b id="dataInput"></b> hostgroup?</p>
 	</div>
 	<div class="modal-footer">
-		<form id="delGroupform" action="/groups/edit" method="post">
-			<input type="hidden" name="action" value="del_group">
-			<input type="hidden" name="params[group]" id="dataInput" value="">
+		<form id="delGroupform" action="/hostgroup/del" method="post">
+			<input type="hidden" name="hostgroup" id="dataInput" value="">
 			<button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
 			<button type="submit" class="btn btn-primary">Delete</button>
 		</form>

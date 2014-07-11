@@ -45,7 +45,7 @@ $(function() {
   $('.hint').tooltip();
 
   $('a[deploy-confirm]').click(function(ev) {
-    var href = $(this).attr('href');
+    var dep = $(this).attr('href');
     var e = document.getElementById('selectHostDeploy');
     var target = e.options[e.selectedIndex].value;
     if (!target) {
@@ -53,10 +53,9 @@ $(function() {
     }
     var host = target.split(";");
     if (!$('#dataConfirmModal').length) {
-      $('body').append('<div id="dataConfirmModal" class="modal fade" role="dialog" aria-labelledby="dataConfirmLabel" aria-hidden="true"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button><h3 id="dataConfirmLabel">Please Confirm</h3></div><div class="modal-body"></div><div class="modal-footer"><button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button><a class="btn btn-primary" id="dataConfirmOK">OK</a></div></div>');
+      $('body').append('<div id="dataConfirmModal" class="modal fade" role="dialog" aria-labelledby="dataConfirmLabel" aria-hidden="true"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button><h3 id="dataConfirmLabel">Please Confirm</h3></div><div class="modal-body"></div><div class="modal-footer"><form id="deployForm" action="/deploys/deploy" method="post"><input type="hidden" name="deploy" value="'+dep+'"><input type="hidden" name="target" value="'+target+'"><button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button><button type="submit" class="btn btn-primary">Deploy!</a></div></div>');
     }
     $('#dataConfirmModal').find('.modal-body').text($(this).attr('deploy-confirm')+host[0]+" "+host[1]+"?");
-    $('#dataConfirmOK').attr('href', href+target);
     $('#dataConfirmModal').modal({show:true});
     return false;
   });
@@ -118,7 +117,7 @@ $(function() {
             renderer: "bootstrap",
             "language": {
               search: "<i class=\"icon-search\"></i>",
-              "emptyTable": "You haven't added any members to this group yet",
+              "emptyTable": "You haven't added any deploys yet",
               "paginate": {
                 "next": "<i class=\"icon-arrow-right\"></i>",
                 "previous": "<i class=\"icon-arrow-left\"></i>"
@@ -175,7 +174,7 @@ function dismissNotification(msg_id)
   {// code for IE6, IE5
     xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
   }
-  xmlhttp.open("POST","/notifications/dismiss",true);
+  xmlhttp.open("POST","/notification/dismiss",true);
   xmlhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
   xmlhttp.send("msg_id=" + msg_id);
 }
