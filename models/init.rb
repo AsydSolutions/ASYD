@@ -26,7 +26,7 @@ require_relative "team"
 DataMapper.setup(:tasks_db,  "sqlite3:data/db/tasks.db") #load the tasks database
 require_relative "task"
 require_relative "notification"
-DataMapper.setup(:default, 'sqlite::memory:')
+DataMapper.setup(:default, 'sqlite3::memory:')
 require_relative "status"
 DataMapper.finalize
 DataMapper.auto_upgrade!
