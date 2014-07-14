@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,600italic,400,600">
   <link rel="stylesheet" href="/lib/css/font-awesome.min.css">
   <link rel="stylesheet" href="/lib/css/style.css">
+  <link rel="stylesheet" href="/lib/css/pages/signin.css">
   <script src="/lib/js/jquery-1.7.2.min.js" type="text/javascript"></script>
   <script src="/lib/js/bootstrap.js"></script>
   <script src="/lib/js/base.js"></script>
@@ -25,51 +26,58 @@
     </div>
   </div>
   <br />
-  <div class="container">
-
-    <form id="setup" action='/setup' method='post' enctype='multipart/form-data' class="form-inline well">
-      <h1> Setup </h1>
-      <legend></legend>
-      <div class="btn-group control-group" data-toggle-name="generate" data-toggle="buttons-radio" >
-        <button type="button" value="1" class="btn import_key active" data-toggle="button">Generate key pair</button>
-        <button type="button" value="0" class="btn import_key" data-toggle="button">Import key pair</button>
-      </div>
-      <input type="hidden" name="generate" value="1" />
-      <div id="gen" class="control-group"><p class="help-block"></p></div>
-      <div id="import" style="display:none">
-        <div class="control-group">
-          <label class="control-label" for="priv_key">Private key</label>
-          <div class="controls">
-            <input class="input-file" name="priv_key" type="file">
+  <div class="main">
+    <div class="main-inner">
+      <div class="container">
+        <div class="account-container">
+          <div class="content clearfix">
+            <form id="setup" action='/setup' method='post' enctype='multipart/form-data'>
+              <h1> Setup </h1>
+              <legend></legend>
+              <div class="btn-group control-group" data-toggle-name="generate" data-toggle="buttons-radio" >
+                <button type="button" value="1" class="btn import_key active" data-toggle="button">Generate key pair</button>
+                <button type="button" value="0" class="btn import_key" data-toggle="button">Import key pair</button>
+              </div>
+              <input type="hidden" name="generate" value="1" />
+              <div id="gen" class="control-group"><p class="help-block"></p></div>
+              <div id="import" style="display:none">
+                <div class="control-group">
+                  <label class="control-label" for="priv_key">Private key</label>
+                  <div class="controls">
+                    <input class="input-file" name="priv_key" type="file">
+                  </div>
+                </div>
+                <div class="control-group">
+                  <label class="control-label" for="pub_key">Public key</label>
+                  <div class="controls">
+                    <input class="input-file" name="pub_key" type="file">
+                  </div>
+                </div>
+              </div>
+              <div class="control-group">
+                <label class="control-label" for="username">Username</label>
+                <div class="controls">
+                  <input class="input" name="username" type="text" required>
+                </div>
+              </div>
+              <div class="control-group">
+                <label class="control-label" for="email">E-Mail</label>
+                <div class="controls">
+                  <input class="input" name="email" type="email" required>
+                </div>
+              </div>
+              <div class="control-group">
+                <label class="control-label" for="password">Password</label>
+                <div class="controls">
+                  <input class="input" name="password" type="password" required>
+                </div>
+              </div>
+              <div class="control-group"><input class="btn" type='submit' value='Setup!'></div>
+            </form>
           </div>
         </div>
-        <div class="control-group">
-          <label class="control-label" for="pub_key">Public key</label>
-          <div class="controls">
-            <input class="input-file" name="pub_key" type="file">
-          </div>
-        </div>
       </div>
-      <div class="control-group">
-        <label class="control-label" for="username">Username</label>
-        <div class="controls">
-          <input class="input" name="username" type="text" required>
-        </div>
-      </div>
-      <div class="control-group">
-        <label class="control-label" for="email">E-Mail</label>
-        <div class="controls">
-          <input class="input" name="email" type="email" required>
-        </div>
-      </div>
-      <div class="control-group">
-        <label class="control-label" for="password">Password</label>
-        <div class="controls">
-          <input class="input" name="password" type="password" required>
-        </div>
-      </div>
-      <div class="control-group"><input class="btn primary" type='submit' value='Setup!'></div>
-    </form>
+    </div>
   </div>
 </body>
 </html>
