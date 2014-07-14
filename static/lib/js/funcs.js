@@ -61,6 +61,9 @@ $(function() {
   });
 
   $(document).ready(function() {
+    if (navigator.appName == "Opera"){
+      $('.modal').removeClass('fade');
+    };
     var dttbl = $('script[src="/lib/js/datatables-bootstrap.js"]').length;
     var slct = $('script[src="/lib/js/select2.min.js"]').length;
     if (dttbl != 0) {
