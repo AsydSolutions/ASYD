@@ -5,7 +5,7 @@ module Monitoring
     TTL = 15 #store the status for 15 seconds
 
     def monitor
-      Deploy.install(self, "monit", nil)
+      Deploy.install(self, "monit")
       parsed_cfg = Deploy.parse_config(self, "data/monitors/monitrc")
       upload_file(parsed_cfg.path, "/etc/monit/monitrc")
       parsed_cfg.unlink
