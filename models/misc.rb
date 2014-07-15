@@ -88,7 +88,23 @@ module Misc
   # @param remote [String] remote path for uploading the directory
   def upload_dir(local, remote)
     Net::SSH.start(self.ip, self.user, :port => self.ssh_port, :keys => "data/ssh_key") do |ssh|
-      ssh.scp.upload!(local, remote, :recursive => true)
+      match = ssh.exec!("ls "+remote)
+      if !match.nil? && match.start_with?("ls:")
+        ssh.scp.upload!(local, remote, options={:recursive => true})
+      else
+        files = Misc.get_files(local)
+        files.each do |file|
+          newfile = local+file
+          newremote = remote+"/"+file
+          self.upload_file(newfile, newremote)
+        end
+        dirs = Misc.get_dirs(local)
+        dirs.each do |dir|
+          newdir = local+dir+"/"
+          newremote = remote+"/"+dir
+          self.upload_dir(newdir, newremote)
+        end
+      end
     end
   end
 
