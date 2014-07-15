@@ -55,13 +55,16 @@ $(function() {
     if (!$('#dataConfirmModal').length) {
       $('body').append('<div id="dataConfirmModal" class="modal fade" role="dialog" aria-labelledby="dataConfirmLabel" aria-hidden="true"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button><h3 id="dataConfirmLabel">Please Confirm</h3></div><div class="modal-body"></div><div class="modal-footer"><form id="deployForm" action="/deploys/deploy" method="post"><input type="hidden" name="deploy" value="'+dep+'"><input type="hidden" name="target" value="'+target+'"><button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button><button type="submit" class="btn btn-primary">Deploy!</a></div></div>');
     }
+    if (Modernizr.csstransforms3d == false){
+      $('#dataConfirmModal').removeClass('fade');
+    };
     $('#dataConfirmModal').find('.modal-body').text($(this).attr('deploy-confirm')+host[0]+" "+host[1]+"?");
     $('#dataConfirmModal').modal({show:true});
     return false;
   });
 
   $(document).ready(function() {
-    if (navigator.appName == "Opera"){
+    if (Modernizr.csstransforms3d == false){
       $('.modal').removeClass('fade');
     };
     var dttbl = $('script[src="/lib/js/datatables-bootstrap.js"]').length;
