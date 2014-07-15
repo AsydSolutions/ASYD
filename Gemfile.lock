@@ -84,7 +84,12 @@ GEM
       tilt (~> 1.3, >= 1.3.4)
     sqlite3 (1.3.9)
     stringex (1.5.1)
+    thread_safe (0.3.4)
     tilt (1.4.1)
+    tzinfo (1.2.1)
+      thread_safe (~> 0.1)
+    tzinfo-data (1.2014.5)
+      tzinfo (>= 1.0.0)
     uuidtools (2.1.4)
     yard (0.8.7.4)
 
@@ -103,4 +108,6 @@ DEPENDENCIES
   redcarpet
   sinatra
   sqlite3
+  tzinfo
+  tzinfo-data
   yard

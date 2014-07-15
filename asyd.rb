@@ -17,6 +17,9 @@ class ASYD < Sinatra::Application
         nil
       end
     end
+    def timezone
+      session[:timezone] ? session[:timezone] : "UTC"
+    end
   end
 
   # Check if ASYD was installed or user is logged in before doing anything

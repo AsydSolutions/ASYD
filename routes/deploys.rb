@@ -14,7 +14,7 @@ class ASYD < Sinatra::Application
     target = params['target'].split(";")
     if target[0] == "host"
       host = Host.first(:hostname => target[1])
-      task = Task.create(:action => :installing, :target => host.hostname, :target_type => :host)
+      task = Task.create(:action => :installing, :object => params['package'], :target => host.hostname, :target_type => :host)
       notification = Notification.create(:type => :info, :message => task.action.to_s+" "+params['package']+" on "+host.hostname, :task => task)
       inst = Spork.spork do
         result = Deploy.install(host, params['package'])
@@ -28,7 +28,7 @@ class ASYD < Sinatra::Application
       end
     elsif target[0] == "hostgroup"
       hostgroup = Hostgroup.first(:name => target[1])
-      task = Task.create(:action => :installing, :target => hostgroup.name, :target_type => :hostgroup)
+      task = Task.create(:action => :installing, :object => params['package'], :target => hostgroup.name, :target_type => :hostgroup)
       notification = Notification.create(:type => :info, :message => task.action.to_s+" "+params['package']+" on "+hostgroup.name, :task => task)
       inst = Spork.spork do
         if !hostgroup.hosts.nil? && !hostgroup.hosts.empty?
@@ -53,7 +53,7 @@ class ASYD < Sinatra::Application
     target = params['target'].split(";")
     if target[0] == "host"
       host = Host.first(:hostname => target[1])
-      task = Task.create(:action => :deploying, :target => host.hostname, :target_type => :host)
+      task = Task.create(:action => :deploying, :object => params['deploy'], :target => host.hostname, :target_type => :host)
       notification = Notification.create(:type => :info, :message => task.action.to_s+" "+params['deploy']+" on "+host.hostname, :task => task)
       inst = Spork.spork do
         result = Deploy.launch(host, params['deploy'], task)
@@ -68,7 +68,7 @@ class ASYD < Sinatra::Application
       end
     elsif target[0] == "hostgroup"
       hostgroup = Hostgroup.first(:name => target[1])
-      task = Task.create(:action => :deploying, :target => hostgroup.name, :target_type => :hostgroup)
+      task = Task.create(:action => :deploying, :object => params['deploy'], :target => hostgroup.name, :target_type => :hostgroup)
       notification = Notification.create(:type => :info, :message => task.action.to_s+" "+params['deploy']+" on "+hostgroup.name, :task => task)
       inst = Spork.spork do
         success = true

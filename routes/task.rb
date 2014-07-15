@@ -1,8 +1,7 @@
 class ASYD < Sinatra::Application
   get '/task/list' do
     @tasks_progress = Task.all(:status => :in_progress, :order => [ :id.desc ])
-    @tasks_finished = Task.all(:status => :finished, :order => [ :id.desc ], :limit => 10)
-    @tasks_failed = Task.all(:status => :failed, :order => [ :id.desc ], :limit => 10)
+    @tasks_completed = Task.all(:status => [ :finished, :failed ], :order => [ :id.desc ])
     erb :task_list
   end
 

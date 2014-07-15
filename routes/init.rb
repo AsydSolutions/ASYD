@@ -1,3 +1,4 @@
+require 'tzinfo'
 require_relative 'setup'
 require_relative 'login'
 require_relative 'dashboard'
