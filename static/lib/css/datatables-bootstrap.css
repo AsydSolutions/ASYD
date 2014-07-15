@@ -4,6 +4,7 @@ div.dataTables_length label {
 }
 
 div.dataTables_length select {
+	margin: 5px;
 	width: 75px;
 }
 

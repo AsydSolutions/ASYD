@@ -17,10 +17,10 @@
   <script src="/lib/js/jqBootstrapValidation.min.js"></script>
   <script src="/lib/js/funcs.js" type="text/javascript"></script>
   <!-- DataTables -->
-  <% if request.path_info.start_with?("/host") || request.path_info.start_with?("/deploys/list") %>
-    <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.0/css/jquery.dataTables.css">
+  <% if request.path_info.start_with?("/host") || request.path_info.start_with?("/deploys/list") || request.path_info.start_with?("/task/list") %>
+    <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.1/css/jquery.dataTables.css">
     <link rel="stylesheet" type="text/css" href="/lib/css/datatables-bootstrap.css">
-    <script type="text/javascript" language="javascript" src="//cdn.datatables.net/1.10.0/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" language="javascript" src="//cdn.datatables.net/1.10.1/js/jquery.dataTables.min.js"></script>
     <script type="text/javascript" language="javascript" src="/lib/js/datatables-bootstrap.js"></script>
   <% end %>
   <!-- DataTables -->

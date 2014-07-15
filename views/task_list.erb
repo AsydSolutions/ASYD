@@ -5,24 +5,35 @@
         <i class="icon-gears"></i><h3>Active Tasks</h3>
       </div>
       <div class="widget-content">
-        <table class="table table-striped table-bordered">
-        <tbody>
-          <% if @tasks_progress.empty? %>
+        <table id="attable" class="stripe">
+          <thead style="text-align:left;">
             <tr>
-              <td>No active tasks</td>
+              <th>
+                Task ID
+              </th>
+              <th>
+                Description
+              </th>
+              <th class="td-actions">
+                Status
+              </th>
+              <th>
+                Started on
+              </th>
             </tr>
-          <% end %>
-          <% @tasks_progress.each do |task| %>
-            <tr>
-              <td><a href="/task/<%=task.id%>">#<%=task.id%></a></td>
-              <td>
-                <%=task.action.to_s%> <% if task.action == :installing %>packages<% else %><%=task.object%><% end %> on <%=task.target_type%>: <%=task.target%>
-              </td>
-              <td><i class="icon-gear icon-spin icon-large"></i></td>
-              <td><%=task.created_at.in_time_zone(timezone).strftime("%F %T %Z")%></td>
-            </tr>
-          <% end %>
-        </tbody>
+          </thead>
+          <tbody>
+            <% @tasks_progress.each do |task| %>
+              <tr>
+                <td><a href="/task/<%=task.id%>">#<%=task.id%></a></td>
+                <td>
+                  <%=task.action.to_s%> <% if task.action == :installing %>packages<% else %><%=task.object%><% end %> on <%=task.target_type%>: <%=task.target%>
+                </td>
+                <td class="td-actions"><i class="icon-gear icon-spin icon-large"></i></td>
+                <td><%=task.created_at.in_time_zone(timezone).strftime("%F %T %Z")%></td>
+              </tr>
+            <% end %>
+          </tbody>
         </table>
       </div>
     </div>
@@ -35,25 +46,41 @@
         <i class="icon-archive"></i><h3>Completed Tasks</h3>
       </div>
       <div class="widget-content">
-        <table class="table table-striped table-bordered">
-        <tbody>
-          <% @tasks_completed.each do |task| %>
+        <table id="cttable" class="stripe">
+          <thead style="text-align:left;">
             <tr>
-              <td><a href="/task/<%=task.id%>">#<%=task.id%></a></td>
-              <td>
-                <%=task.action.to_s%> <% if task.action == :installing %>packages<% else %><%=task.object%><% end %> on <%=task.target_type%>: <%=task.target%>
-              </td>
-              <td>
-                <% if task.status == :failed %>
-                  <i class="icon-exclamation-sign icon-large text-error"></i>
-                <% else %>
-                  <i class="icon-ok-sign icon-large text-success"></i>
-                <% end %>
-              </td>
-              <td><%=task.updated_at.in_time_zone(timezone).strftime("%F %T %Z")%></td>
+              <th>
+                Task ID
+              </th>
+              <th>
+                Description
+              </th>
+              <th class="td-actions">
+                Status
+              </th>
+              <th>
+                Completed on
+              </th>
             </tr>
-          <% end %>
-        </tbody>
+          </thead>
+          <tbody>
+            <% @tasks_completed.each do |task| %>
+              <tr>
+                <td><a href="/task/<%=task.id%>">#<%=task.id%></a></td>
+                <td>
+                  <%=task.action.to_s%> <% if task.action == :installing %>packages<% else %><%=task.object%><% end %> on <%=task.target_type%>: <%=task.target%>
+                </td>
+                <td class="td-actions">
+                  <% if task.status == :failed %>
+                    <i class="icon-exclamation-sign icon-large text-error"></i>
+                  <% else %>
+                    <i class="icon-ok-sign icon-large text-success"></i>
+                  <% end %>
+                </td>
+                <td><%=task.updated_at.in_time_zone(timezone).strftime("%F %T %Z")%></td>
+              </tr>
+            <% end %>
+          </tbody>
         </table>
       </div>
     </div>
