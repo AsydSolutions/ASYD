@@ -40,6 +40,13 @@ module Misc
     return ip
   end
 
+  # Get max allocable forks
+  def self.get_max_forks
+    free_mem = %x(free -m |grep cache: |awk '{print $4}')
+    max_forks = free_mem.to_i / 25
+    return max_forks
+  end
+
   # Round number
   def round
       return (self+0.5).floor if self > 0.0
