@@ -118,6 +118,7 @@
 							</td>
 							<td class="td-actions">
 								<a data-toggle="tooltip" data-original-title="Details" href="/host/<%=host.hostname%>" class="btn btn-info btn-mini btn-icon-only hint"><i class="btn-icon-only icon-folder-open"></i></a>
+								<a data-toggle="tooltip" data-original-title="Reboot" href="#rebootServer" class="btn btn-inverse btn-mini btn-icon-only hint" onclick="passDataToModal('<%=host.hostname%>', '#rebootServer')"><i class="btn-icon-only icon-repeat"></i></a>
 								<a data-toggle="tooltip" data-original-title="Remove" href="#delServer" class="btn btn-danger btn-mini btn-icon-only hint" onclick="passDataToModal('<%=host.hostname%>', '#delServer')"><i class="btn-icon-only icon-remove"></i></a>
 							</td>
 						</tr>
@@ -165,6 +166,24 @@
 			<button type="submit" class="btn btn-primary">Add</button>
 		</div>
 	</form>
+</div>
+
+
+<div id="rebootServer" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="Reboot Host" aria-hidden="true">
+	<div class="modal-header">
+		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+		<h3 id="rebootServerLabel">Attention!</h3>
+	</div>
+	<div class="modal-body">
+		<p>Are you sure you want to reboot <b id="dataInput"></b>?</p>
+	</div>
+	<div class="modal-footer">
+		<form id="rebootServerform" action="/host/reboot" method="post">
+			<input type="hidden" name="hostname" id="dataInput" value="">
+			<button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+			<button type="submit" class="btn btn-primary">Reboot</button>
+		</form>
+	</div>
 </div>
 
 

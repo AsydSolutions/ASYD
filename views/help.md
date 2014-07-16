@@ -42,6 +42,7 @@ The def file structure is as follows:
     exec [host][if <condition>]: command
     monitor [if <condition>]: service
     deploy [if <condition>]: another_deploy
+    reboot [if <condition>]
 
 **Deploy example:**
 

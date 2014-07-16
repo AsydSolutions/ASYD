@@ -183,6 +183,19 @@ class Deploy
               end
             end
         # /DEPLOY BLOCK
+        # REBOOT BLOCK
+      elsif line.start_with?("reboot")
+            doit = true
+            m = line.match(/^reboot if (.+)/)
+            if !m.nil?
+              doit = check_condition(m, host)
+            end
+            if doit
+              host.exec_cmd("reboot")
+              msg = "Reboot "+host.hostname
+              notification = Notification.create(:type => :info, :dismiss => true, :message => msg, :task => task)
+            end
+        # /REBOOT BLOCK
         # undefined command
         else
           error = "Bad formatting, check your deploy file"
