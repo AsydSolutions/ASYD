@@ -35,8 +35,8 @@ module Misc
   end
 
   # Gets ASYD server IP address
-  def self.get_asyd_ip
-    ip = UDPSocket.open {|s| s.connect("8.8.8.8", 1); s.addr.last}
+  def get_asyd_ip
+    ip = UDPSocket.open {|s| s.connect(self.ip, 1); s.addr.last}
     return ip
   end
 

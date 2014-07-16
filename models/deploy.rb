@@ -251,7 +251,7 @@ class Deploy
   # @param cfg [String] config to be parsed
   # @return newconf [Object] temporal file with the parameters substituted by the values
   def self.parse_config(host, cfg)
-    asyd = Misc::get_asyd_ip
+    asyd = host.get_asyd_ip
 
     newconf = Tempfile.new('conf')
     begin
@@ -474,7 +474,7 @@ class Deploy
   # TODO: evaluate custom vars
   #
   def self.evaluate_condition(st, host)
-    asyd = Misc::get_asyd_ip
+    asyd = host.get_asyd_ip
 
     st.gsub!('<%ASYD%>', asyd)
     st.gsub!('<%MONIT_PW%>', host.monit_pw)

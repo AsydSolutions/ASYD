@@ -15,6 +15,7 @@ class Host
   property :arch, String
   property :pkg_mgr, String
   property :monit_pw, String
+  property :monitored, Boolean, :default => false
   property :opt_vars, Object
   has 0..1, :status, :repository => :default
   has n, :hostgroup_members
@@ -57,7 +58,11 @@ class Host
       if !self.save
         raise #couldn't save the object
       end
-      self.monitor()
+      mon = Spork.spork do #we fork the monitoring setup for saving time
+        self.monitor()
+      end
+      msg = "Monitoring setup for "+self.hostname+" in progress"
+      Notification.create(:type => :info, :message => msg)
       return self #return the object itself
     rescue Net::SSH::AuthenticationFailed
       return false

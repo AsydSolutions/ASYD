@@ -5,12 +5,22 @@ module Monitoring
     TTL = 15 #store the status for 15 seconds
 
     def monitor
-      Deploy.install(self, "monit")
-      parsed_cfg = Deploy.parse_config(self, "data/monitors/monitrc")
-      upload_file(parsed_cfg.path, "/etc/monit/monitrc")
-      parsed_cfg.unlink
-      exec_cmd('echo "startup=1" > /etc/default/monit')
-      exec_cmd('service monit restart')
+      begin
+        ret = Deploy.install(self, "monit")
+        if ret[0] != 1
+          raise ExecutionError, ret[1]
+        end
+        parsed_cfg = Deploy.parse_config(self, "data/monitors/monitrc")
+        upload_file(parsed_cfg.path, "/etc/monit/monitrc")
+        parsed_cfg.unlink
+        exec_cmd('echo "startup=1" > /etc/default/monit')
+        exec_cmd('service monit restart')
+        self.monitored = true
+        self.save
+      rescue ExecutionError => e
+        msg = "Unable to monitor host "+self.hostname+": "+e.message
+        Notification.create(:type => :error, :sticky => true, :message => msg)
+      end
     end
 
     def monitor_service(service)
@@ -51,20 +61,29 @@ module Monitoring
       end
     end
 
+    # Status codes:
+    # 4 == not monitored
+    # 3 == host down
+    # 2 == problem
+    # 1 == all ok
     def is_ok?
-      status = get_status
-      if status.nil?
-        return 3
+      if self.monitored == false
+        return 4
       else
-        if status.system_status != 'ok'
-          return 2
-        end
-        status.services.each do |service|
-          if service != 'ok'
+        status = get_status
+        if status.nil?
+          return 3
+        else
+          if status.system_status != 'ok'
             return 2
           end
+          status.services.each do |service|
+            if service != 'ok'
+              return 2
+            end
+          end
+          return 1
         end
-        return 1
       end
     end
   end

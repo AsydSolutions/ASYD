@@ -54,6 +54,8 @@
 															<span class="label label-warning">
 														<% elsif@host_status[host.hostname] == 3 %>
 															<span class="label label-important">
+														<% elsif @host_status[host.hostname] == 4 %>
+															<span class="label">
 														<% end %><%= host.hostname %></span>
 														</a>
 													</td></tr>
@@ -114,6 +116,8 @@
 									<span class="label label-warning">warning</span>
 								<% elsif @host_status[host.hostname] == 3 %>
 									<span class="label label-important">down</span>
+								<% elsif @host_status[host.hostname] == 4 %>
+									<span class="label">not monitored</span>
 								<% end %>
 							</td>
 							<td class="td-actions">
