@@ -78,7 +78,7 @@ module Monitoring
             return 2
           end
           status.services.each do |service|
-            if service != 'ok'
+            if service[1] != 'ok'
               return 2
             end
           end
