@@ -59,7 +59,7 @@ class ASYD < Sinatra::Application
       notification = Notification.create(:type => :info, :message => task.action.to_s+" "+params['deploy']+" on "+host.hostname, :task => task)
       sleep 0.1
       inst = Spork.spork do
-        result = Deploy.launch(host, params['deploy'], task)
+        result = Deploy.launch(host, params['deploy'], task, nil)
         if result == 1
           msg = "Deploy "+params['deploy']+" successfully deployed on "+target[0]+" "+target[1]
           notification = Notification.create(:type => :success, :sticky => true, :message => msg, :task => task)
@@ -75,6 +75,7 @@ class ASYD < Sinatra::Application
       notification = Notification.create(:type => :info, :message => task.action.to_s+" "+params['deploy']+" on "+hostgroup.name, :task => task)
       sleep 0.1
       inst = Spork.spork do
+        mutex = ProcessShared::Mutex.new #we create a POSIX mutex to synchronize the processes
         success = true
         if !hostgroup.hosts.nil? && !hostgroup.hosts.empty? #it's a valid hostgroup
           max_forks = Misc::get_max_forks #we get the "forkability"
@@ -85,10 +86,12 @@ class ASYD < Sinatra::Application
               forks.delete(id) #and we remove it from the forks array
             end
             frk = Spork.spork do #so we can continue executing a new fork
-              result = Deploy.launch(host, params['deploy'], task)
+                result = Deploy.launch(host, params['deploy'], task, mutex)
               if result != 1
                 msg = "Error when deploying "+params['deploy']+" on "+host.hostname+": "+result[1]
-                notification = Notification.create(:type => :error, :sticky => true, :message => result[1], :task => task)
+                mutex.synchronize do
+                  notification = Notification.create(:type => :error, :sticky => true, :message => result[1], :task => task)
+                end
                 success = false
               end
             end

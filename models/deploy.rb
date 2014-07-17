@@ -3,7 +3,7 @@ class Deploy
 
   # Deploy a deploy on the defined host
   #
-  def self.launch(host, dep, task)
+  def self.launch(host, dep, task, mutex)
     begin
       ret = check_deploy(dep)
       if ret[0] == 5
@@ -36,7 +36,9 @@ class Deploy
             ret = Deploy.install(host, pkgs)
             if ret[0] == 1
               msg = "Installed "+pkgs+" on "+host.hostname+": "+ret[1]
-              notification = Notification.create(:type => :info, :dismiss => true, :message => msg, :task => task)
+              mutex.synchronize do
+                notification = Notification.create(:type => :info, :dismiss => true, :message => msg, :task => task)
+              end
             elsif ret[0] == 4
               raise ExecutionError, ret[1]
             elsif ret[0] == 5
@@ -60,7 +62,9 @@ class Deploy
             host.upload_file(parsed_cfg.path, cfg_dst)
             parsed_cfg.unlink
             msg = "Uploaded "+cfg_src+" to "+cfg_dst+" on "+host.hostname
-            notification = Notification.create(:type => :info, :dismiss => true, :message => msg, :task => task)
+            mutex.synchronize do
+              notification = Notification.create(:type => :info, :dismiss => true, :message => msg, :task => task)
+            end
           end
         # /CONFIG FILE BLOCK
         # CONFIG DIR BLOCK
@@ -79,7 +83,9 @@ class Deploy
             host.upload_dir(parsed_cfg, cfg_dst)
             FileUtils.rm_r parsed_cfg, :secure=>true
             msg = "Uploaded "+cfg_src+" to "+cfg_dst+" on "+host.hostname
-            notification = Notification.create(:type => :info, :dismiss => true, :message => msg, :task => task)
+            mutex.synchronize do
+              notification = Notification.create(:type => :info, :dismiss => true, :message => msg, :task => task)
+            end
           end
         # /CONFIG DIR BLOCK
         # EXEC BLOCK
@@ -104,7 +110,9 @@ class Deploy
                   ret = other_host.exec_cmd(cmd)
                   msg = "Executed '"+cmd+"' on "+other_host.hostname
                   msg = msg+": "+ret unless ret.nil?
-                  notification = Notification.create(:type => :info, :dismiss => true, :message => msg, :task => task)
+                  mutex.synchronize do
+                    notification = Notification.create(:type => :info, :dismiss => true, :message => msg, :task => task)
+                  end
                 end
               else
                 doit = check_condition(m2, host)
@@ -114,7 +122,7 @@ class Deploy
                   ret = host.exec_cmd(cmd)
                   msg = "Executed '"+cmd+"' on "+host.hostname
                   msg = msg+": "+ret unless ret.nil?
-                  notification = Notification.create(:type => :info, :dismiss => true, :message => msg, :task => task)
+                    notification = Notification.create(:type => :info, :dismiss => true, :message => msg, :task => task)
                 end
               end
             elsif !m2[0].nil? #no conditionals but remote execution
@@ -129,7 +137,9 @@ class Deploy
                 ret = other_host.exec_cmd(cmd)
                 msg = "Executed '"+cmd+"' on "+other_host.hostname
                 msg = msg+": "+ret unless ret.nil?
-                notification = Notification.create(:type => :info, :dismiss => true, :message => msg, :task => task)
+                mutex.synchronize do
+                  notification = Notification.create(:type => :info, :dismiss => true, :message => msg, :task => task)
+                end
               end
             end
           else #just act normally, no params
@@ -139,7 +149,9 @@ class Deploy
               ret = host.exec_cmd(cmd)
               msg = "Executed '"+cmd+"' on "+host.hostname
               msg = msg+": "+ret unless ret.nil?
-              notification = Notification.create(:type => :info, :dismiss => true, :message => msg, :task => task)
+              mutex.synchronize do
+                notification = Notification.create(:type => :info, :dismiss => true, :message => msg, :task => task)
+              end
             end
           end
         # /EXEC BLOCK
@@ -156,7 +168,9 @@ class Deploy
             services.each do |service|
               host.monitor_service(service)
               msg = "Monitoring service "+service+" on "+host.hostname
-              notification = Notification.create(:type => :info, :dismiss => true, :message => msg, :task => task)
+              mutex.synchronize do
+                notification = Notification.create(:type => :info, :dismiss => true, :message => msg, :task => task)
+              end
             end
           end
         # /MONITOR BLOCK
@@ -174,7 +188,9 @@ class Deploy
                 ret = Deploy.launch(host, deploy, task)
                 if ret == 1
                   msg = "Deploy "+deploy+" successfully deployed on "+host.hostname
-                  notification = Notification.create(:type => :info, :dismiss => true, :message => msg, :task => task)
+                  mutex.synchronize do
+                    notification = Notification.create(:type => :info, :dismiss => true, :message => msg, :task => task)
+                  end
                 elsif ret[0] == 5
                   raise FormatException, ret[1]
                 elsif ret[0] == 4
@@ -193,7 +209,9 @@ class Deploy
             if doit
               host.exec_cmd("reboot")
               msg = "Reboot "+host.hostname
-              notification = Notification.create(:type => :info, :dismiss => true, :message => msg, :task => task)
+              mutex.synchronize do
+                notification = Notification.create(:type => :info, :dismiss => true, :message => msg, :task => task)
+              end
             end
         # /REBOOT BLOCK
         # undefined command

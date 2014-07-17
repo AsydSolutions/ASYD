@@ -1,4 +1,5 @@
 require 'tzinfo'
+require 'process_shared'
 require_relative 'setup'
 require_relative 'login'
 require_relative 'dashboard'

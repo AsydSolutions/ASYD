@@ -58,6 +58,7 @@ GEM
     do_sqlite3 (0.10.14)
       data_objects (= 0.10.14)
     fastercsv (1.5.5)
+    ffi (1.9.3)
     i18n (0.6.11)
     json (1.8.1)
     json_pure (1.8.1)
@@ -73,6 +74,8 @@ GEM
       daemon_controller (>= 1.2.0)
       rack
       rake (>= 0.8.1)
+    process_shared (0.2.0)
+      ffi (~> 1.0)
     rack (1.5.2)
     rack-protection (1.5.3)
       rack
@@ -105,6 +108,7 @@ DEPENDENCIES
   net-ssh
   nokogiri
   passenger
+  process_shared
   redcarpet
   sinatra
   sqlite3
