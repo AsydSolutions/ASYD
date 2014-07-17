@@ -6,10 +6,10 @@ class Notification
   end
 
   property :id, Serial
-  property :type, Enum[ :error, :info, :success ]
-  property :message, Text
-  property :sticky, Boolean, :default => false
-  property :dismiss, Boolean, :default => false
+  property :type, Enum[ :error, :info, :success ], :lazy => false
+  property :message, Text, :lazy => false
+  property :sticky, Boolean, :default => false, :lazy => false
+  property :dismiss, Boolean, :default => false, :lazy => false
   property :created_at, DateTime
   property :created_on, Date
   property :updated_at, DateTime
