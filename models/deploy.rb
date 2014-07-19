@@ -91,7 +91,7 @@ class Deploy
         # EXEC BLOCK
         elsif line.start_with?("exec")
           doit = true
-          m = line.match(/^exec (.+):/)
+          m = line.match(/^exec (.[^:]+)/)
           if !m.nil? #there's some param
             m2 = m[1].split(/if\s?/)
             if !m2[1].nil? #there's conditionals
@@ -106,7 +106,7 @@ class Deploy
                 # if complies then execute the command on remote host
                 if doit
                   line = line.split(':')
-                  cmd = line[1].strip
+                  cmd = parse(host, line[1].strip) #parse for vars
                   ret = other_host.exec_cmd(cmd)
                   msg = "Executed '"+cmd+"' on "+other_host.hostname
                   msg = msg+": "+ret unless ret.nil?
@@ -117,12 +117,14 @@ class Deploy
               else
                 doit = check_condition(m2, host)
                 if doit
-                  line = line.split(':')
-                  cmd = line[1].strip
+                  line = line.split(':', 2)
+                  cmd = parse(host, line[1].strip) #parse for vars
                   ret = host.exec_cmd(cmd)
                   msg = "Executed '"+cmd+"' on "+host.hostname
                   msg = msg+": "+ret unless ret.nil?
+                  mutex.synchronize do
                     notification = Notification.create(:type => :info, :dismiss => true, :message => msg, :task => task)
+                  end
                 end
               end
             elsif !m2[0].nil? #no conditionals but remote execution
@@ -133,7 +135,7 @@ class Deploy
               end
               if doit
                 line = line.split(':')
-                cmd = line[1].strip
+                cmd = parse(host, line[1].strip) #parse for vars
                 ret = other_host.exec_cmd(cmd)
                 msg = "Executed '"+cmd+"' on "+other_host.hostname
                 msg = msg+": "+ret unless ret.nil?
@@ -145,7 +147,7 @@ class Deploy
           else #just act normally, no params
             if doit
               line = line.split(':')
-              cmd = line[1].strip
+              cmd = parse(host, line[1].strip) #parse for vars
               ret = host.exec_cmd(cmd)
               msg = "Executed '"+cmd+"' on "+host.hostname
               msg = msg+": "+ret unless ret.nil?
@@ -200,7 +202,7 @@ class Deploy
             end
         # /DEPLOY BLOCK
         # REBOOT BLOCK
-      elsif line.start_with?("reboot")
+        elsif line.start_with?("reboot")
             doit = true
             m = line.match(/^reboot if (.+)/)
             if !m.nil?
@@ -262,48 +264,53 @@ class Deploy
     end
   end
 
+  # Parse a line (read the documentation for syntax reference)
+  #
+  # @param host [String] host to take the data from
+  # @param line [String] line to be parsed
+  # @return line [String] parsed line
+  def self.parse(host, line)
+    p line
+    asyd = host.get_asyd_ip
+    if !line.start_with?("#") #the line is a comment
+      if line.match(/^<%MONITOR:.+%>/)
+        service = line.match(/^<%MONITOR:(.+)%>/)[1]
+        host.monitor_service(service)
+      elsif line.match(/<%VAR:.+%>/)
+        varname = line.match(/<%VAR:(.+)%>/)[1]
+        if !host.opt_vars[varname].nil?
+          line.gsub!(/<%VAR:.+%>/, host.opt_vars[varname])
+        else
+          host.hostgroups.each do |hostgroup|
+            if !hostgroup.opt_vars[varname].nil?
+              line.gsub!(/<%VAR:.+%>/, hostgroup.opt_vars[varname])
+            end
+          end
+        end
+      else
+        line.gsub!('<%ASYD%>', asyd)
+        line.gsub!('<%MONIT_PW%>', host.monit_pw)
+        line.gsub!('<%IP%>', host.ip)
+        line.gsub!('<%DIST%>', host.dist)
+        line.gsub!('<%DIST_VER%>', host.dist_ver.to_s)
+        line.gsub!('<%ARCH%>', host.arch)
+        line.gsub!('<%HOSTNAME%>', host.hostname)
+      end
+    end
+    return line
+  end
+
   # Parse a config file (read the documentation for syntax reference)
   #
   # @param host [String] host to take the data from
-  # @see #get_host_data
   # @param cfg [String] config to be parsed
   # @return newconf [Object] temporal file with the parameters substituted by the values
   def self.parse_config(host, cfg)
-    asyd = host.get_asyd_ip
-
-    newconf = Tempfile.new('conf')
     begin
+    newconf = Tempfile.new('conf')
       File.open(cfg, "r").each do |line|
-        if !line.start_with?("#") #the line is a comment
-          if line.match(/^<%MONITOR:.+%>/)
-            service = line.match(/^<%MONITOR:(.+)%>/)[1]
-            host.monitor_service(service)
-          elsif line.match(/<%VAR:.+%>/)
-            varname = line.match(/<%VAR:(.+)%>/)[1]
-            if !host.opt_vars[varname].nil?
-              line.gsub!(/<%VAR:.+%>/, host.opt_vars[varname])
-              newconf << line
-            else
-              host.hostgroups.each do |hostgroup|
-                if !hostgroup.opt_vars[varname].nil?
-                  line.gsub!(/<%VAR:.+%>/, hostgroup.opt_vars[varname])
-                end
-              end
-              newconf << line
-            end
-          else
-            line.gsub!('<%ASYD%>', asyd)
-            line.gsub!('<%MONIT_PW%>', host.monit_pw)
-            line.gsub!('<%IP%>', host.ip)
-            line.gsub!('<%DIST%>', host.dist)
-            line.gsub!('<%DIST_VER%>', host.dist_ver.to_s)
-            line.gsub!('<%ARCH%>', host.arch)
-            line.gsub!('<%HOSTNAME%>', host.hostname)
-            newconf << line
-          end
-        else
-          newconf << line
-        end
+        newline = parse(line)
+        newconf << newline
       end
     ensure
       newconf.close

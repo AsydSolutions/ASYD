@@ -88,7 +88,8 @@ class ASYD < Sinatra::Application
       notification = Notification.create(:type => :info, :message => task.action.to_s+" "+params['deploy']+" on "+host.hostname, :task => task)
       inst = Spork.spork do
         sleep 0.2
-        result = Deploy.launch(host, params['deploy'], task, nil)
+        mutex = ProcessShared::Mutex.new #compatibility
+        result = Deploy.launch(host, params['deploy'], task, mutex)
         if result == 1
           msg = "Deploy "+params['deploy']+" successfully deployed on "+target[0]+" "+target[1]
           notification = Notification.create(:type => :success, :sticky => true, :message => msg, :task => task)
