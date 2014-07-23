@@ -17,7 +17,8 @@ class Host
   property :monit_pw, String
   property :monitored, Boolean, :default => false
   property :opt_vars, Object
-  has 0..1, :status, :repository => :default
+  has 0..1, :status, :repository => :status_db
+  has n, :notifications, :repository => :tasks_db
   has n, :hostgroup_members
   has n, :hostgroups, :through => :hostgroup_members
 

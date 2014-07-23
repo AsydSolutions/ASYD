@@ -14,6 +14,7 @@ class Notification
   property :created_on, Date
   property :updated_at, DateTime
   property :updated_on, Date
+  property :inclass, Discriminator, :default => Notification
 
   belongs_to :task, :required => false
 end

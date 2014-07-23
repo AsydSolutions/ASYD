@@ -38,4 +38,13 @@ class ASYD < Sinatra::Application
     status 404
     erb :oops
   end
+
+# host = Host.first
+# p host
+# mn = Monitoring::Notification.create(:type => :info, :message => "test", :host => host)
+# p mn
+
+  bgmonit = Spork.spork do
+    Monitoring.background
+  end
 end

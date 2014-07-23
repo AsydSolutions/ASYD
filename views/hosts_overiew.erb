@@ -34,10 +34,11 @@
 							<td>
 								<div class="accordion-group accordion-invisible">
 									<div class="accordion-heading accordion-invisible">
-										<% if group.members_status(:failed) == 0 %>
-											<a data-toggle="collapse" href="#collapse<%=group.name%>" style="font-size: 8pt; color: #ffffff;" class="badge badge-success"><%=group.members_status(:total)%>/<%=group.members_status(:sane)%></a>
+										<% members_status = group.members_status %>
+										<% if members_status[:failed] == 0 %>
+											<a data-toggle="collapse" href="#collapse<%=group.name%>" style="font-size: 8pt; color: #ffffff;" class="badge badge-success"><%=members_status[:sane]%>/<%=members_status[:total]%></a>
 										<% else %>
-											<a data-toggle="collapse" href="#collapse<%=group.name%>" data-placement="right" data-original-title="<%=group.members_status(:failed)%> host(s) on this group has issues" style="font-size: 8pt; color: #ffffff;" class="badge badge-warning hint "><%=group.members_status(:total)%>/<%=group.members_status(:sane)%></a>
+											<a data-toggle="collapse" href="#collapse<%=group.name%>" data-placement="right" data-original-title="<%=members_status[:failed]%> host(s) on this group has issues" style="font-size: 8pt; color: #ffffff;" class="badge badge-warning hint "><%=members_status[:total]%>/<%=members_status[:sane]%></a>
 										<% end %>
 									</div>
 									<div id="collapse<%=group.name%>" class="accordion-body collapse accordion-invisible">
