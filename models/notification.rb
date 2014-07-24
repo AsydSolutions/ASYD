@@ -11,9 +11,7 @@ class Notification
   property :sticky, Boolean, :default => false, :lazy => false
   property :dismiss, Boolean, :default => false, :lazy => false
   property :created_at, DateTime
-  property :created_on, Date
   property :updated_at, DateTime
-  property :updated_on, Date
   property :inclass, Discriminator
 
   belongs_to :task, :required => false

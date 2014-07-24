@@ -8,6 +8,8 @@ class Team
   property :name, String, :key => true
   property :capabilities, Flag[ :admin ]
   property :notifications_enabled, Boolean, :default => true
+  property :created_at, DateTime
+  property :updated_at, DateTime
   has n, :team_members
   has n, :users, :through => :team_members
 

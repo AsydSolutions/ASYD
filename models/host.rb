@@ -17,6 +17,8 @@ class Host
   property :monit_pw, String
   property :monitored, Boolean, :default => false
   property :opt_vars, Object
+  property :created_at, DateTime
+  property :updated_at, DateTime
   has 0..1, :status, :repository => :status_db
   has n, :hostgroup_members
   has n, :hostgroups, :through => :hostgroup_members
@@ -103,9 +105,7 @@ class Host
       cmd1 = '/bin/grep -v "'+ssh_key+'" /root/.ssh/authorized_keys > /tmp/auth_keys'
       cmd2 = 'mv /tmp/auth_keys /root/.ssh/authorized_keys'
       exec_cmd(cmd1)
-      p 1
       exec_cmd(cmd2)
-      p 2
     end
     self.hostgroup_members.all.destroy
     if !status.nil?

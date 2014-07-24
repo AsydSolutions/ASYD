@@ -125,7 +125,7 @@ module Monitoring
       hosts = ::Host.all
       hosts.each do |host|
         stat = host.get_status
-        if stat.nil?
+        if stat.nil? && host.monitored
           NOTEX.synchronize do
             error = "Unable to get monitoring status for host "+host.hostname
             Monitoring::Notification.create(:type => :error, :message => error, :sticky => true, :host_hostname => host.hostname, :service => "system")

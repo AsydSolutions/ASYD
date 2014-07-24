@@ -124,9 +124,7 @@ class ASYD < Sinatra::Application
       p task
       NOTEX.synchronize do
         task = Task.create(:action => :deploying, :object => params['deploy'], :target => hostgroup.name, :target_type => :hostgroup)
-        p task
         notification = Notification.create(:type => :info, :message => task.action.to_s+" "+params['deploy']+" on "+hostgroup.name, :task => task)
-        p notification
       end
       inst = Spork.spork do
         sleep 0.2
