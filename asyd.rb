@@ -38,4 +38,9 @@ class ASYD < Sinatra::Application
     status 404
     erb :oops
   end
+
+  #monitoring on the background
+  bgmonit = Spork.spork do
+    Monitoring.background
+  end
 end

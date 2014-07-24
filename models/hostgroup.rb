@@ -9,6 +9,8 @@ class Hostgroup
   property :name, String, :key => true
   property :autodeploy, Object
   property :opt_vars, Object, :default  => {}
+  property :created_at, DateTime
+  property :updated_at, DateTime
   has n, :hostgroup_members
   has n, :hosts, :through => :hostgroup_members
 

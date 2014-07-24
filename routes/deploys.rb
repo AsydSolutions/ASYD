@@ -15,27 +15,36 @@ class ASYD < Sinatra::Application
     target = params['target'].split(";")
     if target[0] == "host"
       host = Host.first(:hostname => target[1])
-      task = Task.create(:action => :installing, :object => params['package'], :target => host.hostname, :target_type => :host)
-      notification = Notification.create(:type => :info, :message => task.action.to_s+" "+params['package']+" on "+host.hostname, :task => task)
+      task = nil
+      NOTEX.synchronize do
+        task = Task.create(:action => :installing, :object => params['package'], :target => host.hostname, :target_type => :host)
+        notification = Notification.create(:type => :info, :message => task.action.to_s+" "+params['package']+" on "+host.hostname, :task => task)
+      end
       inst = Spork.spork do
         sleep 0.2
         result = Deploy.install(host, params['package'])
         if result[0] == 1
-          notification = Notification.create(:type => :success, :sticky => true, :message => result[1], :task => task)
-          task.update(:status => :finished)
+          NOTEX.synchronize do
+            notification = Notification.create(:type => :success, :sticky => true, :message => result[1], :task => task)
+            task.update(:status => :finished)
+          end
         else
-          notification = Notification.create(:type => :error, :sticky => true, :message => result[1], :task => task)
-          task.update(:status => :failed)
+          NOTEX.synchronize do
+            notification = Notification.create(:type => :error, :sticky => true, :message => result[1], :task => task)
+            task.update(:status => :failed)
+          end
         end
       end
     elsif target[0] == "hostgroup"
       hostgroup = Hostgroup.first(:name => target[1])
-      task = Task.create(:action => :installing, :object => params['package'], :target => hostgroup.name, :target_type => :hostgroup)
-      notification = Notification.create(:type => :info, :message => task.action.to_s+" "+params['package']+" on "+hostgroup.name, :task => task)
+      task = nil
+      NOTEX.synchronize do
+        task = Task.create(:action => :installing, :object => params['package'], :target => hostgroup.name, :target_type => :hostgroup)
+        notification = Notification.create(:type => :info, :message => task.action.to_s+" "+params['package']+" on "+hostgroup.name, :task => task)
+      end
       inst = Spork.spork do
         sleep 0.2
-        mutex = ProcessShared::Mutex.new #we create a POSIX mutex to synchronize the processes
-        success = ProcessShared::SharedMemory.new(:int)
+        success = ProcessShared::SharedMemory.new(:int) #shared with the forks
         success.put_int(0, 1)
         if !hostgroup.hosts.nil? && !hostgroup.hosts.empty? #it's a valid hostgroup
           max_forks = Misc::get_max_forks #we get the "forkability"
@@ -48,12 +57,12 @@ class ASYD < Sinatra::Application
             frk = Spork.spork do #so we can continue executing a new fork
               result = Deploy.install(host, params['package'])
               if result[0] == 1
-                mutex.synchronize do
+                NOTEX.synchronize do
                   msg = "Installed "+params['package']+" on "+host.hostname+": "+result[1]
                   notification = Notification.create(:type => :success, :dismiss => true, :message => msg, :task => task)
                 end
               else
-                mutex.synchronize do
+                NOTEX.synchronize do
                   msg = "Error installing "+params['package']+" on "+host.hostname+": "+result[1]
                   notification = Notification.create(:type => :error, :dismiss => true, :message => msg, :task => task)
                 end
@@ -65,13 +74,17 @@ class ASYD < Sinatra::Application
         end
         Process.waitall
         if success.get_int(0) == 1
-          msg = "Packages successfully installed on "+target[0]+" "+target[1]
-          notification = Notification.create(:type => :success, :sticky => true, :message => msg, :task => task)
-          task.update(:status => :finished)
+          NOTEX.synchronize do
+            msg = "Packages successfully installed on "+target[0]+" "+target[1]
+            notification = Notification.create(:type => :success, :sticky => true, :message => msg, :task => task)
+            task.update(:status => :finished)
+          end
         else
-          msg = "Error installing packages on "+target[0]+" "+target[1]
-          notification = Notification.create(:type => :error, :sticky => true, :message => msg, :task => task)
-          task.update(:status => :failed)
+          NOTEX.synchronize do
+            msg = "Error installing packages on "+target[0]+" "+target[1]
+            notification = Notification.create(:type => :error, :sticky => true, :message => msg, :task => task)
+            task.update(:status => :failed)
+          end
         end
         success.close
       end
@@ -84,29 +97,38 @@ class ASYD < Sinatra::Application
     target = params['target'].split(";")
     if target[0] == "host"
       host = Host.first(:hostname => target[1])
-      task = Task.create(:action => :deploying, :object => params['deploy'], :target => host.hostname, :target_type => :host)
-      notification = Notification.create(:type => :info, :message => task.action.to_s+" "+params['deploy']+" on "+host.hostname, :task => task)
+      task = nil
+      NOTEX.synchronize do
+        task = Task.create(:action => :deploying, :object => params['deploy'], :target => host.hostname, :target_type => :host)
+        notification = Notification.create(:type => :info, :message => task.action.to_s+" "+params['deploy']+" on "+host.hostname, :task => task)
+      end
       inst = Spork.spork do
         sleep 0.2
-        mutex = ProcessShared::Mutex.new #compatibility
-        result = Deploy.launch(host, params['deploy'], task, mutex)
+        result = Deploy.launch(host, params['deploy'], task)
         if result == 1
-          msg = "Deploy "+params['deploy']+" successfully deployed on "+target[0]+" "+target[1]
-          notification = Notification.create(:type => :success, :sticky => true, :message => msg, :task => task)
-          task.update(:status => :finished)
+          NOTEX.synchronize do
+            msg = "Deploy "+params['deploy']+" successfully deployed on "+target[0]+" "+target[1]
+            notification = Notification.create(:type => :success, :sticky => true, :message => msg, :task => task)
+            task.update(:status => :finished)
+          end
         else
-          notification = Notification.create(:type => :error, :sticky => true, :message => result[1], :task => task)
-          task.update(:status => :failed)
+          NOTEX.synchronize do
+            notification = Notification.create(:type => :error, :sticky => true, :message => result[1], :task => task)
+            task.update(:status => :failed)
+          end
         end
       end
     elsif target[0] == "hostgroup"
       hostgroup = Hostgroup.first(:name => target[1])
-      task = Task.create(:action => :deploying, :object => params['deploy'], :target => hostgroup.name, :target_type => :hostgroup)
-      notification = Notification.create(:type => :info, :message => task.action.to_s+" "+params['deploy']+" on "+hostgroup.name, :task => task)
+      task = nil
+      p task
+      NOTEX.synchronize do
+        task = Task.create(:action => :deploying, :object => params['deploy'], :target => hostgroup.name, :target_type => :hostgroup)
+        notification = Notification.create(:type => :info, :message => task.action.to_s+" "+params['deploy']+" on "+hostgroup.name, :task => task)
+      end
       inst = Spork.spork do
         sleep 0.2
-        mutex = ProcessShared::Mutex.new #we create a POSIX mutex to synchronize the processes
-        success = ProcessShared::SharedMemory.new(:int)
+        success = ProcessShared::SharedMemory.new(:int) #shared with the forks
         success.put_int(0, 1)
         if !hostgroup.hosts.nil? && !hostgroup.hosts.empty? #it's a valid hostgroup
           max_forks = Misc::get_max_forks #we get the "forkability"
@@ -117,10 +139,10 @@ class ASYD < Sinatra::Application
               forks.delete(id) #and we remove it from the forks array
             end
             frk = Spork.spork do #so we can continue executing a new fork
-                result = Deploy.launch(host, params['deploy'], task, mutex)
+                result = Deploy.launch(host, params['deploy'], task)
               if result != 1
-                msg = "Error when deploying "+params['deploy']+" on "+host.hostname+": "+result[1]
-                mutex.synchronize do
+                NOTEX.synchronize do
+                  msg = "Error when deploying "+params['deploy']+" on "+host.hostname+": "+result[1]
                   notification = Notification.create(:type => :error, :dismiss => true, :message => result[1], :task => task)
                 end
                 success.put_int(0, 0)
@@ -131,13 +153,17 @@ class ASYD < Sinatra::Application
         end
         Process.waitall
         if success.get_int(0) == 1
-          msg = "Deploy "+params['deploy']+" successfully deployed on "+target[0]+" "+target[1]
-          notification = Notification.create(:type => :success, :sticky => true, :message => msg, :task => task)
-          task.update(:status => :finished)
+          NOTEX.synchronize do
+            msg = "Deploy "+params['deploy']+" successfully deployed on "+target[0]+" "+target[1]
+            notification = Notification.create(:type => :success, :sticky => true, :message => msg, :task => task)
+            task.update(:status => :finished)
+          end
         else
-          msg = "Deploy "+params['deploy']+" had errors when deploying on "+target[0]+" "+target[1]
-          notification = Notification.create(:type => :error, :sticky => true, :message => msg, :task => task)
-          task.update(:status => :failed)
+          NOTEX.synchronize do
+            msg = "Deploy "+params['deploy']+" had errors when deploying on "+target[0]+" "+target[1]
+            notification = Notification.create(:type => :error, :sticky => true, :message => msg, :task => task)
+            task.update(:status => :failed)
+          end
         end
         success.close
       end

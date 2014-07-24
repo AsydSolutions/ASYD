@@ -1,6 +1,10 @@
 class Status
   include DataMapper::Resource
 
+  def self.default_repository_name #here we use the status_db for the Status objects
+   :status_db
+  end
+
   property :id, Serial
   property :total_cpu, Integer
   property :total_memory, Integer

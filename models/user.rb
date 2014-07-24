@@ -8,6 +8,8 @@ class User
   property :username, String, :key => true
   property :email, String
   property :password, BCryptHash
+  property :created_at, DateTime
+  property :updated_at, DateTime
   has n, :team_members
   has n, :teams, :through => :team_members
 

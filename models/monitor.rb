@@ -1,8 +1,15 @@
 module Monitoring
+
+  TTL = 15 #store/refresh the status for 15 seconds
+
+  class Notification < ::Notification
+    property :acknowledge, Boolean, :default => false
+    property :host_hostname, String
+    property :service, String
+  end
+
   module Host
     include Misc
-
-    TTL = 15 #store the status for 15 seconds
 
     def monitor
       begin
@@ -18,8 +25,10 @@ module Monitoring
         self.monitored = true
         self.save
       rescue ExecutionError => e
-        msg = "Unable to monitor host "+self.hostname+": "+e.message
-        Notification.create(:type => :error, :sticky => true, :message => msg)
+        NOTEX.synchronize do
+          msg = "Unable to monitor host "+self.hostname+": "+e.message
+          Notification.create(:type => :error, :sticky => true, :message => msg)
+        end
       end
     end
 
@@ -35,11 +44,12 @@ module Monitoring
     def get_status
       if !self.status.nil?
         if ((DateTime.now - status.created_at)  * 24 * 60 * 60).to_i > TTL
-          status.destroy
-          stat = Status.new(self)
+          stat = nil
+          MOTEX.synchronize do
+            status.destroy
+            stat = Status.new(self)
+          end
           if stat.id.nil?
-            error = "Unable to get monitoring status for host "+self.hostname
-            Notification.create(:type => :error, :message => error)
             self.status = nil
           else
             self.status = stat
@@ -49,10 +59,11 @@ module Monitoring
           return self.status
         end
       else
-        stat = Status.new(self)
+        stat = nil
+        MOTEX.synchronize do
+          stat = Status.new(self)
+        end
         if stat.id.nil?
-          error = "Unable to get monitoring status for host "+self.hostname
-          Notification.create(:type => :error, :message => error)
           self.status = nil
         else
           self.status = stat
@@ -61,6 +72,7 @@ module Monitoring
       end
     end
 
+    # @param refresh [Boolean] refresh the status?
     # Status codes:
     # 4 == not monitored
     # 3 == host down
@@ -70,14 +82,13 @@ module Monitoring
       if self.monitored == false
         return 4
       else
-        status = get_status
-        if status.nil?
+        if self.status.nil?
           return 3
         else
-          if status.system_status != 'ok'
+          if self.status.system_status != 'ok'
             return 2
           end
-          status.services.each do |service|
+          self.status.services.each do |service|
             if service[1] != 'ok'
               return 2
             end
@@ -89,13 +100,14 @@ module Monitoring
   end
 
   module Hostgroup
-    def members_status(q)
-      if self.hosts.nil?
-        return 0
+    def members_status
+      stat = {}
+      stat[:total] = self.hosts.count
+      stat[:failed] = 0
+      stat[:sane] = 0
+      if stat[:total] == 0
+        return stat
       else
-        stat = {}
-        stat[:total] = self.hosts.count
-        stat[:failed] = 0
         self.hosts.each do |host|
           ret = host.is_ok?
           if ret != 1
@@ -103,8 +115,51 @@ module Monitoring
           end
         end
         stat[:sane] = stat[:total] - stat[:failed]
-        return stat[q]
+        return stat
       end
+    end
+  end
+
+  def self.background
+    while true
+      max_forks = 15 #we hard limit the max checks to 15 at a time
+      forks = [] #and initialize an empty array
+      hosts = ::Host.all
+      hosts.each do |host|
+        if forks.count >= max_forks #if we reached the "forkability" limit
+          id = Process.wait #then we wait for some child to finish
+          forks.delete(id) #and we remove it from the forks array
+        end
+        frk = Spork.spork do #so we can continue executing a new fork
+          stat = host.get_status
+          if host.monitored #do things
+            if stat.nil? #the host is down
+              NOTEX.synchronize do
+                last = Monitoring::Notification.last(:host_hostname => host.hostname)
+                if last.nil? #no previous notification
+                  error = "Unable to get monitoring status for host "+host.hostname
+                  Monitoring::Notification.create(:type => :error, :message => error, :sticky => true, :host_hostname => host.hostname, :service => "system")
+                else
+                  if last.acknowledge == false && last.dismiss == true #the last notification was already dismissed and is not acknowledged
+                    error = "Unable to get monitoring status for host "+host.hostname
+                    Monitoring::Notification.create(:type => :error, :message => error, :sticky => true, :host_hostname => host.hostname, :service => "system")
+                  end
+                end
+              end
+            else #the host recovered?
+              NOTEX.synchronize do
+                last = Monitoring::Notification.last(:host_hostname => host.hostname)
+                if !last.nil?
+                  last.update(:acknowledge => false, :dismiss => true)
+                end
+              end
+            end
+          end
+        end
+        forks << frk #and store the fork id on the forks array
+      end
+      Process.waitall
+      sleep TTL
     end
   end
 end
