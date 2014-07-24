@@ -105,7 +105,7 @@ class Deploy
                 doit = check_condition(m2, other_host)
                 # if complies then execute the command on remote host
                 if doit
-                  line = line.split(':')
+                  line = line.split(':', 2)
                   cmd = parse(host, line[1].strip) #parse for vars
                   ret = other_host.exec_cmd(cmd)
                   msg = "Executed '"+cmd+"' on "+other_host.hostname
@@ -134,7 +134,7 @@ class Deploy
                 raise FormatException, error
               end
               if doit
-                line = line.split(':')
+                line = line.split(':', 2)
                 cmd = parse(host, line[1].strip) #parse for vars
                 ret = other_host.exec_cmd(cmd)
                 msg = "Executed '"+cmd+"' on "+other_host.hostname
@@ -146,7 +146,7 @@ class Deploy
             end
           else #just act normally, no params
             if doit
-              line = line.split(':')
+              line = line.split(':', 2)
               cmd = parse(host, line[1].strip) #parse for vars
               ret = host.exec_cmd(cmd)
               msg = "Executed '"+cmd+"' on "+host.hostname
