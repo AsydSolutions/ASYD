@@ -125,10 +125,24 @@ module Monitoring
       hosts = ::Host.all
       hosts.each do |host|
         stat = host.get_status
-        if stat.nil? && host.monitored
-          NOTEX.synchronize do
-            error = "Unable to get monitoring status for host "+host.hostname
-            Monitoring::Notification.create(:type => :error, :message => error, :sticky => true, :host_hostname => host.hostname, :service => "system")
+        if host.monitored #do things
+          if stat.nil? #the host is down
+            NOTEX.synchronize do
+              last = Monitoring::Notification.last(:host_hostname => host.hostname)
+              if last.acknowledge == false #if is not acknowledged
+                if last.nil? || last.dismiss == true #and the last notification was already dismissed or doesnt exists, create the notification
+                  error = "Unable to get monitoring status for host "+host.hostname
+                  Monitoring::Notification.create(:type => :error, :message => error, :sticky => true, :host_hostname => host.hostname, :service => "system")
+                end
+              end
+            end
+          else #the host recovered?
+            NOTEX.synchronize do
+              last = Monitoring::Notification.last(:host_hostname => host.hostname)
+              if !last.nil?
+                last.update(:acknowledge => false, :dismiss => true)
+              end
+            end
           end
         end
       end
