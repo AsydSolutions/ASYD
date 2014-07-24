@@ -272,29 +272,30 @@ class Deploy
   def self.parse(host, line)
     asyd = host.get_asyd_ip
     if !line.start_with?("#") #the line is a comment
-      if line.match(/^<%MONITOR:.+%>/)
-        service = line.match(/^<%MONITOR:(.+)%>/)[1]
+      if line.match(/^<%MONITOR:.+%>/i)
+        service = line.match(/^<%MONITOR:(.+)%>/i)[1]
         host.monitor_service(service)
         line = ""
-      elsif line.match(/<%VAR:.+%>/)
-        varname = line.match(/<%VAR:(.+)%>/)[1]
+      elsif line.match(/<%VAR:.+%>/i)
+        varname = line.match(/<%VAR:(.+)%>/i)[1]
         if !host.opt_vars[varname].nil?
-          line.gsub!(/<%VAR:.+%>/, host.opt_vars[varname])
+          line.gsub!(/<%VAR:.+%>/i, host.opt_vars[varname])
         else
           host.hostgroups.each do |hostgroup|
             if !hostgroup.opt_vars[varname].nil?
-              line.gsub!(/<%VAR:.+%>/, hostgroup.opt_vars[varname])
+              line.gsub!(/<%VAR:.+%>/i, hostgroup.opt_vars[varname])
             end
           end
         end
       else
-        line.gsub!('<%ASYD%>', asyd)
-        line.gsub!('<%MONIT_PW%>', host.monit_pw)
-        line.gsub!('<%IP%>', host.ip)
-        line.gsub!('<%DIST%>', host.dist)
-        line.gsub!('<%DIST_VER%>', host.dist_ver.to_s)
-        line.gsub!('<%ARCH%>', host.arch)
-        line.gsub!('<%HOSTNAME%>', host.hostname)
+        line.gsub!('/<%ASYD%>/i', asyd)
+        line.gsub!('/<%MONIT_PW%>/i', host.monit_pw)
+        line.gsub!('/<%IP%>/i', host.ip)
+        line.gsub!('/<%DIST%>/i', host.dist)
+        line.gsub!('/<%DIST_VER%>/i', host.dist_ver.to_s)
+        line.gsub!('/<%ARCH%>/i', host.arch)
+        line.gsub!('/<%HOSTNAME%>/i', host.hostname)
+        line.gsub!('/<%PKG_MANAGER%>/i', host.pkg_mgr)
       end
     end
     return line
