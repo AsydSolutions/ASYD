@@ -122,30 +122,43 @@ module Monitoring
 
   def self.background
     while true
+      max_forks = 15 #we hard limit the max checks to 15 at a time
+      forks = [] #and initialize an empty array
       hosts = ::Host.all
       hosts.each do |host|
-        stat = host.get_status
-        if host.monitored #do things
-          if stat.nil? #the host is down
-            NOTEX.synchronize do
-              last = Monitoring::Notification.last(:host_hostname => host.hostname)
-              if last.acknowledge == false #if is not acknowledged
-                if last.nil? || last.dismiss == true #and the last notification was already dismissed or doesnt exists, create the notification
+        if forks.count >= max_forks #if we reached the "forkability" limit
+          id = Process.wait #then we wait for some child to finish
+          forks.delete(id) #and we remove it from the forks array
+        end
+        frk = Spork.spork do #so we can continue executing a new fork
+          stat = host.get_status
+          if host.monitored #do things
+            if stat.nil? #the host is down
+              NOTEX.synchronize do
+                last = Monitoring::Notification.last(:host_hostname => host.hostname)
+                if last.nil? #no previous notification
                   error = "Unable to get monitoring status for host "+host.hostname
                   Monitoring::Notification.create(:type => :error, :message => error, :sticky => true, :host_hostname => host.hostname, :service => "system")
+                else
+                  if last.acknowledge == false && last.dismiss == true #the last notification was already dismissed and is not acknowledged
+                    error = "Unable to get monitoring status for host "+host.hostname
+                    Monitoring::Notification.create(:type => :error, :message => error, :sticky => true, :host_hostname => host.hostname, :service => "system")
+                  end
                 end
               end
-            end
-          else #the host recovered?
-            NOTEX.synchronize do
-              last = Monitoring::Notification.last(:host_hostname => host.hostname)
-              if !last.nil?
-                last.update(:acknowledge => false, :dismiss => true)
+            else #the host recovered?
+              NOTEX.synchronize do
+                last = Monitoring::Notification.last(:host_hostname => host.hostname)
+                if !last.nil?
+                  last.update(:acknowledge => false, :dismiss => true)
+                end
               end
             end
           end
         end
+        forks << frk #and store the fork id on the forks array
       end
+      Process.waitall
       sleep TTL
     end
   end
