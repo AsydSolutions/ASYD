@@ -18,7 +18,6 @@ class Host
   property :monitored, Boolean, :default => false
   property :opt_vars, Object
   has 0..1, :status, :repository => :status_db
-  has n, :notifications, :repository => :tasks_db
   has n, :hostgroup_members
   has n, :hostgroups, :through => :hostgroup_members
 
@@ -60,10 +59,14 @@ class Host
         raise #couldn't save the object
       end
       mon = Spork.spork do #we fork the monitoring setup for saving time
-        self.monitor()
+        MOTEX.synchronize do
+          self.monitor()
+        end
       end
-      msg = "Monitoring setup for "+self.hostname+" in progress"
-      Notification.create(:type => :info, :message => msg)
+      NOTEX.synchronize do
+        msg = "Monitoring setup for "+self.hostname+" in progress"
+        Notification.create(:type => :info, :message => msg)
+      end
       return self #return the object itself
     rescue Net::SSH::AuthenticationFailed
       return false
@@ -97,8 +100,12 @@ class Host
   def delete(revoke)
     if revoke == true
       ssh_key = File.open("data/ssh_key.pub", "r").read.strip
-      cmd = '/bin/grep -v "'+ssh_key+'" /root/.ssh/authorized_keys > /tmp/auth_keys && mv /tmp/auth_keys /root/.ssh/authorized_keys'
-      exec_cmd(cmd)
+      cmd1 = '/bin/grep -v "'+ssh_key+'" /root/.ssh/authorized_keys > /tmp/auth_keys'
+      cmd2 = 'mv /tmp/auth_keys /root/.ssh/authorized_keys'
+      exec_cmd(cmd1)
+      p 1
+      exec_cmd(cmd2)
+      p 2
     end
     self.hostgroup_members.all.destroy
     if !status.nil?

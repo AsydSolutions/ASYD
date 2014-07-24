@@ -4,8 +4,8 @@ module Monitoring
 
   class Notification < ::Notification
     property :acknowledge, Boolean, :default => false
+    property :host_hostname, String
     property :service, String
-    belongs_to :host, '::Host', :required => true
   end
 
   module Host
@@ -25,8 +25,10 @@ module Monitoring
         self.monitored = true
         self.save
       rescue ExecutionError => e
-        msg = "Unable to monitor host "+self.hostname+": "+e.message
-        Notification.create(:type => :error, :sticky => true, :message => msg)
+        NOTEX.synchronize do
+          msg = "Unable to monitor host "+self.hostname+": "+e.message
+          Notification.create(:type => :error, :sticky => true, :message => msg)
+        end
       end
     end
 
@@ -52,7 +54,6 @@ module Monitoring
           else
             self.status = stat
           end
-          self.save
           return self.status
         else
           return self.status
@@ -67,7 +68,6 @@ module Monitoring
         else
           self.status = stat
         end
-        self.save
         return self.status
       end
     end
@@ -128,7 +128,7 @@ module Monitoring
         if stat.nil?
           NOTEX.synchronize do
             error = "Unable to get monitoring status for host "+host.hostname
-            Monitoring::Notification.create(:type => :error, :message => error, :sticky => true, :host => host, :service => "system")
+            Monitoring::Notification.create(:type => :error, :message => error, :sticky => true, :host_hostname => host.hostname, :service => "system")
           end
         end
       end

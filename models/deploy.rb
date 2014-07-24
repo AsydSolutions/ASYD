@@ -3,7 +3,7 @@ class Deploy
 
   # Deploy a deploy on the defined host
   #
-  def self.launch(host, dep, task, mutex)
+  def self.launch(host, dep, task)
     begin
       ret = check_deploy(dep)
       if ret[0] == 5
@@ -36,7 +36,7 @@ class Deploy
             ret = Deploy.install(host, pkgs)
             if ret[0] == 1
               msg = "Installed "+pkgs+" on "+host.hostname+": "+ret[1]
-              mutex.synchronize do
+              NOTEX.synchronize do
                 notification = Notification.create(:type => :info, :dismiss => true, :message => msg, :task => task)
               end
             elsif ret[0] == 4
@@ -62,7 +62,7 @@ class Deploy
             host.upload_file(parsed_cfg.path, cfg_dst)
             parsed_cfg.unlink
             msg = "Uploaded "+cfg_src+" to "+cfg_dst+" on "+host.hostname
-            mutex.synchronize do
+            NOTEX.synchronize do
               notification = Notification.create(:type => :info, :dismiss => true, :message => msg, :task => task)
             end
           end
@@ -83,7 +83,7 @@ class Deploy
             host.upload_dir(parsed_cfg, cfg_dst)
             FileUtils.rm_r parsed_cfg, :secure=>true
             msg = "Uploaded "+cfg_src+" to "+cfg_dst+" on "+host.hostname
-            mutex.synchronize do
+            NOTEX.synchronize do
               notification = Notification.create(:type => :info, :dismiss => true, :message => msg, :task => task)
             end
           end
@@ -110,7 +110,7 @@ class Deploy
                   ret = other_host.exec_cmd(cmd)
                   msg = "Executed '"+cmd+"' on "+other_host.hostname
                   msg = msg+": "+ret unless ret.nil?
-                  mutex.synchronize do
+                  NOTEX.synchronize do
                     notification = Notification.create(:type => :info, :dismiss => true, :message => msg, :task => task)
                   end
                 end
@@ -122,7 +122,7 @@ class Deploy
                   ret = host.exec_cmd(cmd)
                   msg = "Executed '"+cmd+"' on "+host.hostname
                   msg = msg+": "+ret unless ret.nil?
-                  mutex.synchronize do
+                  NOTEX.synchronize do
                     notification = Notification.create(:type => :info, :dismiss => true, :message => msg, :task => task)
                   end
                 end
@@ -139,7 +139,7 @@ class Deploy
                 ret = other_host.exec_cmd(cmd)
                 msg = "Executed '"+cmd+"' on "+other_host.hostname
                 msg = msg+": "+ret unless ret.nil?
-                mutex.synchronize do
+                NOTEX.synchronize do
                   notification = Notification.create(:type => :info, :dismiss => true, :message => msg, :task => task)
                 end
               end
@@ -151,7 +151,7 @@ class Deploy
               ret = host.exec_cmd(cmd)
               msg = "Executed '"+cmd+"' on "+host.hostname
               msg = msg+": "+ret unless ret.nil?
-              mutex.synchronize do
+              NOTEX.synchronize do
                 notification = Notification.create(:type => :info, :dismiss => true, :message => msg, :task => task)
               end
             end
@@ -170,7 +170,7 @@ class Deploy
             services.each do |service|
               host.monitor_service(service)
               msg = "Monitoring service "+service+" on "+host.hostname
-              mutex.synchronize do
+              NOTEX.synchronize do
                 notification = Notification.create(:type => :info, :dismiss => true, :message => msg, :task => task)
               end
             end
@@ -190,7 +190,7 @@ class Deploy
                 ret = Deploy.launch(host, deploy, task)
                 if ret == 1
                   msg = "Deploy "+deploy+" successfully deployed on "+host.hostname
-                  mutex.synchronize do
+                  NOTEX.synchronize do
                     notification = Notification.create(:type => :info, :dismiss => true, :message => msg, :task => task)
                   end
                 elsif ret[0] == 5
@@ -211,7 +211,7 @@ class Deploy
             if doit
               host.exec_cmd("reboot")
               msg = "Reboot "+host.hostname
-              mutex.synchronize do
+              NOTEX.synchronize do
                 notification = Notification.create(:type => :info, :dismiss => true, :message => msg, :task => task)
               end
             end
@@ -270,12 +270,12 @@ class Deploy
   # @param line [String] line to be parsed
   # @return line [String] parsed line
   def self.parse(host, line)
-    p line
     asyd = host.get_asyd_ip
     if !line.start_with?("#") #the line is a comment
       if line.match(/^<%MONITOR:.+%>/)
         service = line.match(/^<%MONITOR:(.+)%>/)[1]
         host.monitor_service(service)
+        line = ""
       elsif line.match(/<%VAR:.+%>/)
         varname = line.match(/<%VAR:(.+)%>/)[1]
         if !host.opt_vars[varname].nil?
@@ -307,9 +307,9 @@ class Deploy
   # @return newconf [Object] temporal file with the parameters substituted by the values
   def self.parse_config(host, cfg)
     begin
-    newconf = Tempfile.new('conf')
+      newconf = Tempfile.new('conf')
       File.open(cfg, "r").each do |line|
-        newline = parse(line)
+        newline = parse(host, line)
         newconf << newline
       end
     ensure
