@@ -39,11 +39,7 @@ class ASYD < Sinatra::Application
     erb :oops
   end
 
-# host = Host.first
-# p host
-# mn = Monitoring::Notification.create(:type => :info, :message => "test", :host => host)
-# p mn
-
+  #monitoring on the background
   bgmonit = Spork.spork do
     Monitoring.background
   end
