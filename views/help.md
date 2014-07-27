@@ -37,12 +37,14 @@ Deploys on ASYD have the following structure:
 The def file structure is as follows:
 
     install [if <condition>]: package_a package_b package_c
-    config file [if <condition>]: file.conf, /destination/file.conf
-    config dir [if <condition>]: confdir, /destination/dir
-    exec [host][if <condition>]: command
+    [noparse] config file [if <condition>]: file.conf, /destination/file.conf
+    [noparse] config dir [if <condition>]: confdir, /destination/dir
+    exec [host] [if <condition>]: command
     monitor [if <condition>]: service
     deploy [if <condition>]: another_deploy
     reboot [if <condition>]
+
+The "noparse" optional parameter indicates if ASYD should or should not parse the config file/directory
 
 **Deploy example:**
 
@@ -64,7 +66,7 @@ Variables
 ---------
 
 You can use the following global variables on any configuration file, they will
-get automatically replaced with it's value.
+get automatically replaced with it's value. The variables are case-insensitive.
 
     <%ASYD%> - ASYD IP
     <%HOSTNAME%> - Target host name
@@ -72,6 +74,7 @@ get automatically replaced with it's value.
     <%DIST%> - Target host linux distribution
     <%DIST_VER%> - Target host distribution version
     <%ARCH%> - Target host architecture
+    <%PKG_MANAGER%> - Target host package manager (actually supported: apt, yum, pacman)
     <%MONITOR:service%> - Monitors the service 'service'
 
 You can define custom variables on both hosts and hostgroups, if a host has the
@@ -81,8 +84,8 @@ variables on selected hosts inside a group
     <%VAR:varname%> - Replaces the value assigned to "varname"
 
 All this variables can be used on any configuration file inside the "configs"
-directory on a deploy, inside the "data/monitors/" directory, or as conditionals
-for "def" files on a deploy.
+directory on a deploy, inside the "data/monitors/" directory, as conditionals
+for "def" files on a deploy and as variables for the "exec" command on a "def" file.
 
 Conditionals
 ------------
