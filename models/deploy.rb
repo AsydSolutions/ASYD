@@ -47,9 +47,13 @@ class Deploy
           end
         # /INSTALL BLOCK
         # CONFIG FILE BLOCK
-        elsif line.start_with?("config file")
+        elsif line.match(/^(noparse )?config file/)
+          noparse = false
+          if line.start_with?("noparse")
+            noparse = true
+          end
           doit = true
-          m = line.match(/^config file if (.+):/)
+          m = line.match(/config file if (.+):/)
           if !m.nil?
             doit = check_condition(m, host)
           end
@@ -57,10 +61,14 @@ class Deploy
             line = line.split(':')
             cfg = line[1].split(',')
             cfg_src = cfg_root+cfg[0].strip
-            parsed_cfg = parse_config(host, cfg_src)
+            parsed_cfg = parse_config(host, cfg_src) unless noparse
             cfg_dst = cfg[1].strip
-            host.upload_file(parsed_cfg.path, cfg_dst)
-            parsed_cfg.unlink
+            if noparse
+              host.upload_file(cfg_src, cfg_dst)
+            else
+              host.upload_file(parsed_cfg.path, cfg_dst)
+            end
+            parsed_cfg.unlink unless noparse
             msg = "Uploaded "+cfg_src+" to "+cfg_dst+" on "+host.hostname
             NOTEX.synchronize do
               notification = Notification.create(:type => :info, :dismiss => true, :message => msg, :task => task)
@@ -68,9 +76,13 @@ class Deploy
           end
         # /CONFIG FILE BLOCK
         # CONFIG DIR BLOCK
-        elsif line.start_with?("config dir")
+        elsif line.match(/^(noparse )?config dir/)
+          noparse = false
+          if line.start_with?("noparse")
+            noparse = true
+          end
           doit = true
-          m = line.match(/^config dir if (.+):/)
+          m = line.match(/config dir if (.+):/)
           if !m.nil?
             doit = check_condition(m, host)
           end
@@ -79,9 +91,13 @@ class Deploy
             cfg = line[1].split(',')
             cfg_src = cfg_root+cfg[0].strip
             cfg_dst = cfg[1].strip
-            parsed_cfg = parse_config_dir(host, cfg_src, nil)
-            host.upload_dir(parsed_cfg, cfg_dst)
-            FileUtils.rm_r parsed_cfg, :secure=>true
+            parsed_cfg = parse_config_dir(host, cfg_src, nil) unless noparse
+            if noparse
+              host.upload_dir(cfg_src, cfg_dst)
+            else
+              host.upload_dir(parsed_cfg, cfg_dst)
+            end
+            FileUtils.rm_r parsed_cfg, :secure=>true unless noparse
             msg = "Uploaded "+cfg_src+" to "+cfg_dst+" on "+host.hostname
             NOTEX.synchronize do
               notification = Notification.create(:type => :info, :dismiss => true, :message => msg, :task => task)
@@ -288,14 +304,14 @@ class Deploy
           end
         end
       else
-        line.gsub!('/<%ASYD%>/i', asyd)
-        line.gsub!('/<%MONIT_PW%>/i', host.monit_pw)
-        line.gsub!('/<%IP%>/i', host.ip)
-        line.gsub!('/<%DIST%>/i', host.dist)
-        line.gsub!('/<%DIST_VER%>/i', host.dist_ver.to_s)
-        line.gsub!('/<%ARCH%>/i', host.arch)
-        line.gsub!('/<%HOSTNAME%>/i', host.hostname)
-        line.gsub!('/<%PKG_MANAGER%>/i', host.pkg_mgr)
+        line.gsub!(/<%ASYD%>/i, asyd)
+        line.gsub!(/<%MONIT_PW%>/i, host.monit_pw)
+        line.gsub!(/<%IP%>/i, host.ip)
+        line.gsub!(/<%DIST%>/i, host.dist)
+        line.gsub!(/<%DIST_VER%>/i, host.dist_ver.to_s)
+        line.gsub!(/<%ARCH%>/i, host.arch)
+        line.gsub!(/<%HOSTNAME%>/i, host.hostname)
+        line.gsub!(/<%PKG_MANAGER%>/i, host.pkg_mgr)
       end
     end
     return line
@@ -372,7 +388,7 @@ class Deploy
             error = "Invalid characters found: "+line.strip
             exit
           end
-        elsif line.start_with?("config file")
+        elsif line.match(/^(noparse )?config file/)
           l = line.split(':')
           cfg = l[1].split(',')
           cfg_src = cfg_root+cfg[0].strip
@@ -385,7 +401,7 @@ class Deploy
             error = "Local config file not found: "+cfg_src
             exit
           end
-        elsif line.start_with?("config dir")
+        elsif line.match(/^(noparse )?config dir/)
           l = line.split(':')
           cfg = l[1].split(',')
           cfg_src = cfg_root+cfg[0].strip
@@ -500,15 +516,7 @@ class Deploy
   # TODO: evaluate custom vars
   #
   def self.evaluate_condition(st, host)
-    asyd = host.get_asyd_ip
-
-    st.gsub!('<%ASYD%>', asyd)
-    st.gsub!('<%MONIT_PW%>', host.monit_pw)
-    st.gsub!('<%IP%>', host.ip)
-    st.gsub!('<%DIST%>', host.dist)
-    st.gsub!('<%DIST_VER%>', host.dist_ver.to_s)
-    st.gsub!('<%ARCH%>', host.arch)
-    st.gsub!('<%HOSTNAME%>', host.hostname)
+    st = parse(host, st)
 
     condition = st.match(/(.+)(==|!=|>=|<=)(.+)/)
     case condition[2]

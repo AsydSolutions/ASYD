@@ -101,13 +101,13 @@ module Misc
       else
         files = Misc.get_files(local)
         files.each do |file|
-          newfile = local+file
+          newfile = local+"/"+file
           newremote = remote+"/"+file
           self.upload_file(newfile, newremote)
         end
         dirs = Misc.get_dirs(local)
         dirs.each do |dir|
-          newdir = local+dir+"/"
+          newdir = local+"/"+dir+"/"
           newremote = remote+"/"+dir
           self.upload_dir(newdir, newremote)
         end
