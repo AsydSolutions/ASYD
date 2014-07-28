@@ -324,10 +324,44 @@ class Deploy
   # @return newconf [Object] temporal file with the parameters substituted by the values
   def self.parse_config(host, cfg)
     begin
+      noparse = false
+      condition = false
+      doit = true
+      skip = false
       newconf = Tempfile.new('conf')
       File.open(cfg, "r").each do |line|
-        newline = parse(host, line)
-        newconf << newline
+        if !noparse
+          if !condition
+            m = line.match(/^<%if (.+)%>$/)
+            if !m.nil?
+              doit = check_condition(m, host)
+              condition = true
+              skip = true
+            end
+          else
+            if line.match(/^<%endif%>$/)
+              condition = false
+              doit = true
+              skip = true
+            end
+          end
+        end
+        if !noparse
+          if line.match(/^<%noparse%>$/)
+            noparse = true
+            skip = true
+          end
+        else
+          if line.match(/^<%\/noparse%>$/)
+            noparse = false
+            skip = true
+          end
+        end
+        if doit && !skip
+          line = parse(host, line) unless noparse
+          newconf << line
+        end
+        skip = false
       end
     ensure
       newconf.close
