@@ -46,6 +46,25 @@ The def file structure is as follows:
 
 The "noparse" optional parameter indicates if ASYD should or should not parse the config file/directory
 
+**Configuration files:**
+
+The configuration files are automatically parsed and the variables replaced (see Variables below).
+
+You can override this behavior by appending the "noparse" parameter on the def file, or for a certain block
+inside the configuration file using the `<%noparse%>``<%/noparse%>` tags.
+
+You can also use conditionals inside the configuration files to define parts of the configuration that should
+only be included if certain condition complies. This conditional blocks are defined within the
+`<%if condition%>``<%endif%>` tags. Conditionals inside the noparse tags are not evaluated either.
+
+Please note each of this special tags for noparse and conditionals must be written on a single line without
+any other character on the same line to work, i.e:
+
+    <%noparse%>
+    tags to scape
+    <%/noparse%>
+    rest of the file
+
 **Deploy example:**
 
 `cat data/deploys/LAMP/def`
