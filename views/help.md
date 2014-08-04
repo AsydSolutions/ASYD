@@ -37,6 +37,7 @@ Deploys on ASYD have the following structure:
 The def file structure is as follows:
 
     install [if <condition>]: package_a package_b package_c
+    uninstall [if <condition>]: package_a package_b package_c
     [noparse] config file [if <condition>]: file.conf, /destination/file.conf
     [noparse] config dir [if <condition>]: confdir, /destination/dir
     exec [host] [if <condition>]: command

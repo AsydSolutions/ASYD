@@ -31,7 +31,7 @@ class Deploy
             doit = check_condition(m, host)
           end
           if doit
-            line = line.split(':')
+            line = line.split(':', 2)
             pkgs = line[1].strip
             ret = Deploy.install(host, pkgs)
             if ret[0] == 1
@@ -46,6 +46,29 @@ class Deploy
             end
           end
         # /INSTALL BLOCK
+        # UNINSTALL BLOCK
+        elsif line.start_with?("uninstall")
+          doit = true
+          m = line.match(/^uninstall if (.+):/)
+          if !m.nil?
+            doit = check_condition(m, host)
+          end
+          if doit
+            line = line.split(':', 2)
+            pkgs = line[1].strip
+            ret = Deploy.uninstall(host, pkgs)
+            if ret[0] == 1
+              msg = "Removed "+pkgs+" from "+host.hostname+": "+ret[1]
+              NOTEX.synchronize do
+                notification = Notification.create(:type => :info, :dismiss => true, :message => msg, :task => task)
+              end
+            elsif ret[0] == 4
+              raise ExecutionError, ret[1]
+            elsif ret[0] == 5
+              raise FormatException, ret[1]
+            end
+          end
+        # /UNINSTALL BLOCK
         # CONFIG FILE BLOCK
         elsif line.match(/^(noparse )?config file/)
           noparse = false
@@ -58,7 +81,7 @@ class Deploy
             doit = check_condition(m, host)
           end
           if doit
-            line = line.split(':')
+            line = line.split(':', 2)
             cfg = line[1].split(',')
             cfg_src = cfg_root+cfg[0].strip
             parsed_cfg = parse_config(host, cfg_src) unless noparse
@@ -87,7 +110,7 @@ class Deploy
             doit = check_condition(m, host)
           end
           if doit
-            line = line.split(':')
+            line = line.split(':', 2)
             cfg = line[1].split(',')
             cfg_src = cfg_root+cfg[0].strip
             cfg_dst = cfg[1].strip
@@ -181,7 +204,7 @@ class Deploy
             doit = check_condition(m, host)
           end
           if doit
-            line = line.split(':')
+            line = line.split(':', 2)
             services = line[1].split(' ')
             services.each do |service|
               host.monitor_service(service)
@@ -200,7 +223,7 @@ class Deploy
               doit = check_condition(m, host)
             end
             if doit
-              line = line.split(':')
+              line = line.split(':', 2)
               deploys = line[1].split(' ')
               deploys.each do |deploy|
                 ret = Deploy.launch(host, deploy, task)
@@ -276,6 +299,40 @@ class Deploy
       return [4, error.last]
     rescue
       error = "Something really bad happened when installing "+pkg+" on "+host.hostname
+      return [4, error]
+    end
+  end
+
+  # Uninstall package or packages on defined host
+  #
+  def self.uninstall(host, pkg)
+    begin
+      if pkg.include? "&" or pkg.include? "|" or pkg.include? ">" or pkg.include? "<" or pkg.include? "`" or pkg.include? "$"
+        raise FormatException
+      end
+      pkg_mgr = host.pkg_mgr
+      if pkg_mgr == "apt"
+        cmd = pkg_mgr+"-get -y -q remove "+pkg
+      elsif pkg_mgr == "yum"
+        cmd = pkg_mgr+" remove -y "+pkg		## NOT TESTED, DEVELOPMENT IN PROGRESS
+      elsif pkg_mgr == "pacman"
+        cmd = pkg_mgr+" -R --noconfirm --noprogressbar "+pkg    ## NOT TESTED, DEVELOPMENT IN PROGRESS
+      end
+      result = host.exec_cmd(cmd)
+      if result.include? "\nE: "
+        raise ExecutionError, result
+      else
+        result = result.split("\n").last
+        return [1, result]
+      end
+    rescue FormatException
+      error = "Invalid characters detected on package name: "+pkg
+      return [5, error]
+    rescue ExecutionError => e
+      error = e.message.split("\n")
+      return [4, error.last]
+    rescue
+      error = "Something really bad happened when uninstalling "+pkg+" on "+host.hostname
       return [4, error]
     end
   end
