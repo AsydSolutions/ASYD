@@ -9,16 +9,16 @@
         <tbody>
           <tr>
             <td><strong><%="load:"%></strong></td>
-            <td><%=@host.status.load_1.to_s+" "+@host.status.load_5.to_s+" "+@host.status.load_15.to_s unless @host.status.nil? %></td>
+            <td><%=@status.load_1.to_s+" "+@status.load_5.to_s+" "+@status.load_15.to_s unless @status.nil? %></td>
           </tr>
           <tr>
             <td><strong><%="cpu:"%></strong></td>
-            <td><%=@host.status.cpu_us.to_s+"%us, "+@host.status.cpu_sy.to_s+"%sy, "+@host.status.cpu_wa.to_s+"%wa" unless @host.status.nil? %></td>
+            <td><%=@status.cpu_us.to_s+"%us, "+@status.cpu_sy.to_s+"%sy, "+@status.cpu_wa.to_s+"%wa" unless @status.nil? %></td>
           </tr>
           <tr>
             <td><strong><%="mem:"%></strong></td>
-            <td><%=@host.status.used_sysmem_mb.to_s+"MB used / "+@host.status.total_memory.to_s+"MB total" unless @host.status.nil? %><div style="margin-top: 9px; margin-bottom: 9px; text-align: center" class="progress progress-success">
-                      <div style="width: <%=@host.status.used_sysmem_percent.to_i.round.to_s unless @host.status.nil? %>%" class="bar"><%=@host.status.used_sysmem_percent.to_s unless @host.status.nil? %>% used</div>
+            <td><%=@status.used_sysmem_mb.to_s+"MB used / "+@status.total_memory.to_s+"MB total" unless @status.nil? %><div style="margin-top: 9px; margin-bottom: 9px; text-align: center" class="progress progress-success">
+                      <div style="width: <%=@status.used_sysmem_percent.to_i.round.to_s unless @status.nil? %>%" class="bar"><%=@status.used_sysmem_percent.to_s unless @status.nil? %>% used</div>
             </div></td>
           </tr>
         </tbody>

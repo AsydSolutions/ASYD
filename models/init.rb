@@ -7,6 +7,7 @@ require 'pathname'
 require 'find'
 require 'tempfile'
 require 'socket'
+require 'timeout'
 require 'sqlite3'
 require 'redcarpet'
 require 'bcrypt'
@@ -19,6 +20,7 @@ require_relative "deploy"
 DataMapper.setup(:tasks_db,  "sqlite3:data/db/tasks.db") #load the tasks database
 require_relative "task"
 require_relative "notification"
+DataMapper.setup(:monitoring_db,  "sqlite3:data/db/monitoring.db") #load the tasks database
 require_relative "monitor"
 DataMapper.setup(:hosts_db,  "sqlite3:data/db/hosts.db") #load the hosts database
 require_relative "host"
@@ -34,4 +36,5 @@ if File.directory? 'data'
 end
 
 MOTEX = ProcessShared::Mutex.new #mutex for monitoring handling
+MNOTEX = ProcessShared::Mutex.new #mutex for monitoring::notification handling
 NOTEX = ProcessShared::Mutex.new #mutex for notification handling

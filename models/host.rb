@@ -19,7 +19,6 @@ class Host
   property :opt_vars, Object
   property :created_at, DateTime
   property :updated_at, DateTime
-  has 0..1, :status, :repository => :status_db
   has n, :hostgroup_members
   has n, :hostgroups, :through => :hostgroup_members
 
