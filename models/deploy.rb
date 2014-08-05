@@ -277,6 +277,9 @@ class Deploy
         raise FormatException
       end
       pkg_mgr = host.pkg_mgr
+      if host.user != "root"
+        pkg_mgr = "sudo "+pkg_mgr
+      end
       if pkg_mgr == "apt"
         cmd = pkg_mgr+"-get update && "+pkg_mgr+"-get -y -q install "+pkg
       elsif pkg_mgr == "yum"
