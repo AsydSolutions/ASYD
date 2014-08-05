@@ -39,13 +39,13 @@ class Host
         distro = distro.split
         self.dist = distro[0]
         #check OS for package manager and add dist_ver
-        if self.dist == "Debian" or self.dist == "Ubuntu"
+        if !(ssh.exec!("which apt-get") =~ /\/bin\/apt-get$/).nil?
           self.pkg_mgr = "apt"
           self.dist_ver  = distro[2]
-        elsif self.dist == "Fedora" or self.dist == "CentOS"
+        elsif !(ssh.exec!("which yum") =~ /\/bin\/yum$/).nil?
           self.pkg_mgr = "yum"
           self.dist_ver  = distro[2]
-        elsif self.dist == "Arch"
+        elsif !(ssh.exec!("which pacman") =~ /\/bin\/pacman$/).nil?
           self.pkg_mgr = "pacman"
           self.dist_ver = 0
         else
@@ -107,10 +107,6 @@ class Host
       exec_cmd(cmd2)
     end
     self.hostgroup_members.all.destroy
-    if !status.nil?
-      self.status.destroy
-      self.save
-    end
     reload
     return self.destroy
   end

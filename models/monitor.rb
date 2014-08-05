@@ -51,7 +51,7 @@ module Monitoring
         parsed_cfg = Deploy.parse_config(self, "data/monitors/modules/"+service)
         upload_file(parsed_cfg.path, "/etc/monit/conf.d/"+service)
         parsed_cfg.unlink
-        exec_cmd("service monit restart")
+        exec_cmd("monit reload")
       end
     end
 
@@ -98,7 +98,9 @@ module Monitoring
       if self.monitored == false
         return 4
       else
-        hoststatus = HostStatus.first(:host_hostname => self.hostname)
+        MOTEX.synchronize do
+          hoststatus = HostStatus.first(:host_hostname => self.hostname)
+        end
         if hoststatus.nil?
           return self.get_status
         else

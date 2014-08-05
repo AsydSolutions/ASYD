@@ -56,7 +56,7 @@ module Misc
 
   def self.is_port_open?(ip, port)
     begin
-      Timeout::timeout(1) do
+      Timeout::timeout(2) do
         begin
           s = TCPSocket.new(ip, port)
           s.close
