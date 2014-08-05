@@ -60,9 +60,7 @@ class Host
         raise #couldn't save the object
       end
       mon = Spork.spork do #we fork the monitoring setup for saving time
-        MOTEX.synchronize do
-          self.monitor()
-        end
+        self.monitor()
       end
       NOTEX.synchronize do
         msg = "Monitoring setup for "+self.hostname+" in progress"

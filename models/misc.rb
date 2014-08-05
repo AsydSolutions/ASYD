@@ -141,6 +141,12 @@ module Misc
       ssh.scp.download!(remote, local, :recursive => true)
     end
   end
+
+  def reboot
+    Net::SSH.start(self.ip, self.user, :port => self.ssh_port, :keys => "data/ssh_key") do |ssh|
+      ssh.exec("reboot")
+    end
+  end
 end
 
 # Returns true if the string is not a number

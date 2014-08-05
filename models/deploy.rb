@@ -21,8 +21,8 @@ class Deploy
       f.gsub!(/\r\n?/, "\n")
       f.each_line do |line|
         # COMMENT
-        if line.start_with?("#")
-          # Ignore comments
+        if line.start_with?("#") || line.strip.empty?
+          # Ignore comments and empty lines
         # INSTALL BLOCK
         elsif line.start_with?("install")
           doit = true
@@ -248,7 +248,7 @@ class Deploy
               doit = check_condition(m, host)
             end
             if doit
-              host.exec_cmd("reboot")
+              host.reboot
               msg = "Reboot "+host.hostname
               NOTEX.synchronize do
                 notification = Notification.create(:type => :info, :dismiss => true, :message => msg, :task => task)
@@ -470,17 +470,17 @@ class Deploy
       f = File.open(path, "r").read
       f.gsub!(/\r\n?/, "\n")
       f.each_line do |line|
-        if line.start_with?("#")
+        if line.start_with?("#") || line.strip.empty?
           # Ignore comments
         elsif line.start_with?("install")
-          l = line.split(':')
+          l = line.split(':', 2)
           pkgs = l[1].strip
           if pkgs.include? "&" or pkgs.include? "|" or pkgs.include? ">" or pkgs.include? "<" or pkgs.include? "`" or pkgs.include? "$"
             error = "Invalid characters found: "+line.strip
             exit
           end
         elsif line.match(/^(noparse )?config file/)
-          l = line.split(':')
+          l = line.split(':', 2)
           cfg = l[1].split(',')
           cfg_src = cfg_root+cfg[0].strip
           cfg_dst = cfg[1].strip
@@ -493,7 +493,7 @@ class Deploy
             exit
           end
         elsif line.match(/^(noparse )?config dir/)
-          l = line.split(':')
+          l = line.split(':', 2)
           cfg = l[1].split(',')
           cfg_src = cfg_root+cfg[0].strip
           cfg_dst = cfg[1].strip
@@ -508,7 +508,7 @@ class Deploy
         elsif line.start_with?("exec")
           #just imply we actually WANT to execute the command
         elsif line.start_with?("monitor")
-          line = line.split(':')
+          line = line.split(':', 2)
           services = line[1].split(' ')
           services.each do |service|
             unless File.exists?("data/monitors/modules/"+service)

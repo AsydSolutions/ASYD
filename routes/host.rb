@@ -43,7 +43,7 @@ class ASYD < Sinatra::Application
 
   post '/host/reboot' do
     host = Host.first(:hostname => params['hostname'])
-    host.exec_cmd("reboot")
+    host.reboot
     hostlist = '/hosts/overiew'
     redirect to hostlist
   end

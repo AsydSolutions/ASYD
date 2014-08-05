@@ -27,15 +27,10 @@ module Monitoring
 
     def monitor
       begin
-        ret = Deploy.install(self, "monit")
-        if ret[0] != 1
+        ret = Deploy.launch(self, "monit", nil)
+        if ret != 1
           raise ExecutionError, ret[1]
         end
-        parsed_cfg = Deploy.parse_config(self, "data/monitors/monitrc")
-        upload_file(parsed_cfg.path, "/etc/monit/monitrc")
-        parsed_cfg.unlink
-        exec_cmd('echo "startup=1" > /etc/default/monit')
-        exec_cmd('service monit restart')
         self.monitored = true
         self.save
       rescue ExecutionError => e
@@ -48,10 +43,10 @@ module Monitoring
 
     def monitor_service(service)
       begin
-        parsed_cfg = Deploy.parse_config(self, "data/monitors/modules/"+service)
+        parsed_cfg = Deploy.parse_config(self, "data/monitors/"+service)
         upload_file(parsed_cfg.path, "/etc/monit/conf.d/"+service)
         parsed_cfg.unlink
-        exec_cmd("monit reload")
+        exec_cmd("/usr/bin/monit -c /etc/monit/monitrc reload")
       end
     end
 
