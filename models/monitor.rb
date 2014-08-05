@@ -98,6 +98,7 @@ module Monitoring
       if self.monitored == false
         return 4
       else
+        hoststatus = nil
         MOTEX.synchronize do
           hoststatus = HostStatus.first(:host_hostname => self.hostname)
         end
