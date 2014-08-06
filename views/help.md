@@ -31,6 +31,7 @@ Deploys on ASYD have the following structure:
 * A directory named with the name of the deploy (i.e. data/deploys/LAMP/)
 * A "def" file with the definition of the packages to be installed,
   configurations, commands to be executed, etc. (i.e. data/deploys/LAMP/def)
+* Optionally a "def.sudo" file in case we want to execute a deploy with a non-root user
 * A "configs" directory with the configuration files and folders to be uploaded
   (i.e. data/deploys/LAMP/configs/apache/apache.conf)
 
@@ -46,6 +47,12 @@ The def file structure is as follows:
     reboot [if <condition>]
 
 The "noparse" optional parameter indicates if ASYD should or should not parse the config file/directory
+
+**Note about "def.sudo":** this definition file will be executed instead of the normal "def" file in case
+the user executing on the remote machine is not root and this file is present. This is specially useful on
+Ubuntu machines which doesn't use the root user. For the machines which user is "root", the standard
+"def" file will be executed regardless. If the file is not present, the standard "def" file will be executed also
+for non-root users.
 
 **Configuration files:**
 
