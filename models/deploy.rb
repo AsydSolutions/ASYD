@@ -3,9 +3,9 @@ class Deploy
 
   # Deploy a deploy on the defined host
   #
-  def self.launch(host, dep, task)
+  def self.launch(host, dep, sudo, task)
     begin
-      ret = check_deploy(dep)
+      ret = check_deploy(dep, sudo)
       if ret[0] == 5
         raise FormatException, ret[1]
       end
@@ -16,13 +16,19 @@ class Deploy
       end
 
       cfg_root = "data/deploys/"+dep+"/configs/"
-      path = "data/deploys/"+dep+"/def"
+      if sudo
+        path = "data/deploys/"+dep+"/def.sudo"
+      else
+        path = "data/deploys/"+dep+"/def"
+      end
       f = File.open(path, "r").read
       f.gsub!(/\r\n?/, "\n")
       f.each_line do |line|
+        line = line.strip
         # COMMENT
         if line.start_with?("#") || line.strip.empty?
           # Ignore comments and empty lines
+        # /COMMENT
         # INSTALL BLOCK
         elsif line.start_with?("install")
           doit = true
@@ -226,7 +232,7 @@ class Deploy
               line = line.split(':', 2)
               deploys = line[1].split(' ')
               deploys.each do |deploy|
-                ret = Deploy.launch(host, deploy, task)
+                ret = Deploy.launch(host, deploy, sudo, task)
                 if ret == 1
                   msg = "Deploy "+deploy+" successfully deployed on "+host.hostname
                   NOTEX.synchronize do
@@ -277,14 +283,20 @@ class Deploy
         raise FormatException
       end
       pkg_mgr = host.pkg_mgr
-      if host.user != "root"
-        pkg_mgr = "sudo "+pkg_mgr
-      end
       if pkg_mgr == "apt"
+        if host.user != "root"
+          pkg_mgr = "sudo "+pkg_mgr
+        end
         cmd = pkg_mgr+"-get update && "+pkg_mgr+"-get -y -q install "+pkg
       elsif pkg_mgr == "yum"
+        if host.user != "root"
+          pkg_mgr = "sudo "+pkg_mgr
+        end
         cmd = pkg_mgr+" install -y "+pkg		## NOT TESTED, DEVELOPMENT IN PROGRESS
       elsif pkg_mgr == "pacman"
+        if host.user != "root"
+          pkg_mgr = "sudo "+pkg_mgr
+        end
         cmd = pkg_mgr+" -Sy --noconfirm --noprogressbar "+pkg    ## NOT TESTED, DEVELOPMENT IN PROGRESS
       end
       result = host.exec_cmd(cmd)
@@ -465,11 +477,15 @@ class Deploy
 
   # Validate deploy file
   #
-  def self.check_deploy(dep)
+  def self.check_deploy(dep, sudo)
     begin
       error = nil
       cfg_root = "data/deploys/"+dep+"/configs/"
-      path = "data/deploys/"+dep+"/def"
+      if sudo
+        path = "data/deploys/"+dep+"/def.sudo"
+      else
+        path = "data/deploys/"+dep+"/def"
+      end
       f = File.open(path, "r").read
       f.gsub!(/\r\n?/, "\n")
       f.each_line do |line|
@@ -514,7 +530,7 @@ class Deploy
           line = line.split(':', 2)
           services = line[1].split(' ')
           services.each do |service|
-            unless File.exists?("data/monitors/modules/"+service)
+            unless File.exists?("data/monitors/"+service)
               error = "Monitor file not found for service "+service
               exit
             end

@@ -95,6 +95,9 @@ class ASYD < Sinatra::Application
 
   post '/deploys/deploy' do
     target = params['target'].split(";")
+    dep = params['deploy']
+    sudo = false
+    
     if target[0] == "host"
       host = Host.first(:hostname => target[1])
       task = nil
@@ -104,7 +107,7 @@ class ASYD < Sinatra::Application
       end
       inst = Spork.spork do
         sleep 0.2
-        result = Deploy.launch(host, params['deploy'], task)
+        result = Deploy.launch(host, dep, sudo, task)
         if result == 1
           NOTEX.synchronize do
             msg = "Deploy "+params['deploy']+" successfully deployed on "+target[0]+" "+target[1]
@@ -139,7 +142,7 @@ class ASYD < Sinatra::Application
               forks.delete(id) #and we remove it from the forks array
             end
             frk = Spork.spork do #so we can continue executing a new fork
-                result = Deploy.launch(host, params['deploy'], task)
+                result = Deploy.launch(host, dep, sudo, task)
               if result != 1
                 NOTEX.synchronize do
                   msg = "Error when deploying "+params['deploy']+" on "+host.hostname+": "+result[1]

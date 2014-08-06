@@ -35,18 +35,33 @@ class Host
       self.opt_vars = {} #initialize opt_vars as an empty hash
       #start connection to remote host
       Net::SSH.start(ip, user, :port => self.ssh_port, :password => password, :timeout => 10) do |ssh|
-        distro = ssh.exec!("cat /etc/issue")
-        distro = distro.split
-        self.dist = distro[0]
-        #check OS for package manager and add dist_ver
+        #check for package manager and add distro
         if !(ssh.exec!("which apt-get") =~ /\/bin\/apt-get$/).nil?
           self.pkg_mgr = "apt"
-          self.dist_ver  = distro[2]
+          if user != "root"
+            ssh.exec!("sudo apt-get update && sudo apt-get -y -q install lsb-release")
+          else
+            ssh.exec!("apt-get update && apt-get -y -q install lsb-release")
+          end
+          self.dist = ssh.exec!("lsb_release -s -i").strip
+          self.dist_ver = ssh.exec!("lsb_release -s -r").strip.to_f
         elsif !(ssh.exec!("which yum") =~ /\/bin\/yum$/).nil?
           self.pkg_mgr = "yum"
-          self.dist_ver  = distro[2]
+          if user != "root"
+            ssh.exec!("sudo yum install -y dkms")
+          else
+            ssh.exec!("yum install -y dkms")
+          end
+          self.dist = ssh.exec!("/usr/lib/dkms/lsb_release -s -i").strip
+          self.dist_ver = ssh.exec!("/usr/lib/dkms/lsb_release -s -r").strip.to_f
         elsif !(ssh.exec!("which pacman") =~ /\/bin\/pacman$/).nil?
           self.pkg_mgr = "pacman"
+          if user != "root"
+            ssh.exec!("sudo pacman -Sy lsb-release")
+          else
+            ssh.exec!("pacman -Sy --noconfirm --noprogressbar lsb-release")
+          end
+          self.dist = ssh.exec!("lsb_release -s -i").strip
           self.dist_ver = 0
         else
           raise #OS not supported yet

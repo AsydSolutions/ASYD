@@ -27,7 +27,11 @@ module Monitoring
 
     def monitor
       begin
-        ret = Deploy.launch(self, "monit", nil)
+        if self.user != "root"
+          ret = Deploy.launch(self, "monit", true, nil) #use def.sudo
+        else
+          ret = Deploy.launch(self, "monit", false, nil) #use normal def
+        end
         if ret != 1
           raise ExecutionError, ret[1]
         end
@@ -41,12 +45,27 @@ module Monitoring
       end
     end
 
-    def monitor_service(service)
+    def monitor_service(service) #TODO if not exist
       begin
+        unless File.exists?("data/monitors/"+service)
+          raise
+        end
         parsed_cfg = Deploy.parse_config(self, "data/monitors/"+service)
-        upload_file(parsed_cfg.path, "/etc/monit/conf.d/"+service)
+        if self.user != "root"
+          upload_file(parsed_cfg.path, "/tmp/"+service)
+          exec_cmd("sudo mv /tmp/"+service+" /etc/monit/conf.d/"+service)
+          exec_cmd("sudo chown root:root /etc/monit/conf.d/"+service)
+          exec_cmd("sudo /usr/bin/monit -c /etc/monit/monitrc reload")
+        else
+          upload_file(parsed_cfg.path, "/etc/monit/conf.d/"+service)
+          exec_cmd("/usr/bin/monit -c /etc/monit/monitrc reload")
+        end
         parsed_cfg.unlink
-        exec_cmd("/usr/bin/monit -c /etc/monit/monitrc reload")
+      rescue
+        NOTEX.synchronize do
+          msg = "Monitor file not found for service "+service
+          ::Notification.create(:type => :error, :sticky => true, :message => msg)
+        end
       end
     end
 

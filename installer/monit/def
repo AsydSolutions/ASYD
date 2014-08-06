@@ -23,4 +23,5 @@ config file if <%PKG_MANAGER%> == yum or <%PKG_MANAGER%> == pacman: initscript, 
 exec if <%PKG_MANAGER%> == yum or <%PKG_MANAGER%> == pacman: chmod +x /usr/lib/systemd/system/monit.service
 exec if <%PKG_MANAGER%> == yum or <%PKG_MANAGER%> == pacman: systemctl enable monit
 
+exec: /usr/bin/monit -c /etc/monit/monitrc quit
 exec: /usr/bin/monit -c /etc/monit/monitrc
