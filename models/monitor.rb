@@ -27,11 +27,7 @@ module Monitoring
 
     def monitor
       begin
-        if self.user != "root"
-          ret = Deploy.launch(self, "monit", true, nil) #use def.sudo
-        else
-          ret = Deploy.launch(self, "monit", false, nil) #use normal def
-        end
+        ret = Deploy.launch(self, "monit", nil)
         if ret != 1
           raise ExecutionError, ret[1]
         end

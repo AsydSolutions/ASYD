@@ -3,7 +3,7 @@ class Deploy
 
   # Deploy a deploy on the defined host
   #
-  def self.launch(host, dep, sudo, task)
+  def self.launch(host, dep, task)
     begin
       ret = check_deploy(dep, sudo)
       if ret[0] == 5
@@ -16,7 +16,7 @@ class Deploy
       end
 
       cfg_root = "data/deploys/"+dep+"/configs/"
-      if sudo
+      if host.user != "root" && File.exists?("data/deploys/"+dep+"/def.sudo")
         path = "data/deploys/"+dep+"/def.sudo"
       else
         path = "data/deploys/"+dep+"/def"
@@ -232,7 +232,7 @@ class Deploy
               line = line.split(':', 2)
               deploys = line[1].split(' ')
               deploys.each do |deploy|
-                ret = Deploy.launch(host, deploy, sudo, task)
+                ret = Deploy.launch(host, deploy, task)
                 if ret == 1
                   msg = "Deploy "+deploy+" successfully deployed on "+host.hostname
                   NOTEX.synchronize do
@@ -477,11 +477,11 @@ class Deploy
 
   # Validate deploy file
   #
-  def self.check_deploy(dep, sudo)
+  def self.check_deploy(dep)
     begin
       error = nil
       cfg_root = "data/deploys/"+dep+"/configs/"
-      if sudo
+      if host.user != "root" && File.exists?("data/deploys/"+dep+"/def.sudo")
         path = "data/deploys/"+dep+"/def.sudo"
       else
         path = "data/deploys/"+dep+"/def"
