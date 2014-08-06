@@ -41,7 +41,7 @@ module Monitoring
       end
     end
 
-    def monitor_service(service) #TODO if not exist
+    def monitor_service(service)
       begin
         unless File.exists?("data/monitors/"+service)
           raise
