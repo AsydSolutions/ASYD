@@ -117,6 +117,31 @@
                 </div>
             <% end %>
           <% end %>
+
+          <% notifications = Monitoring::Notification.all(:dismiss => false, :acknowledge => false) %>
+          <% notifications.each do |notification| %>
+            <% if notification.sticky == false %>
+              <% notification.update(:dismiss => true) %>
+              <% if notification.type == :info %>
+                <div class="alert alert-info">
+              <% elsif notification.type == :error %>
+                <div class="alert alert-error">
+              <% elsif notification.type == :success %>
+                <div class="alert alert-success">
+              <% end %>
+                <%= notification.message %></div>
+            <% else %>
+              <% if notification.type == :info %>
+                <div class="alert alert-info">
+              <% elsif notification.type == :error %>
+                <div class="alert alert-error">
+              <% elsif notification.type == :success %>
+                <div class="alert alert-success">
+              <% end %>
+                <a href="#" class="close" data-dismiss="alert" onclick="dismissNotification('<%= notification.id %>')">&times;</a><%= notification.message %>
+                </div>
+            <% end %>
+          <% end %>
           <%= yield %>
         </div>
       </div>

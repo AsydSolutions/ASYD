@@ -31,18 +31,47 @@ Deploys on ASYD have the following structure:
 * A directory named with the name of the deploy (i.e. data/deploys/LAMP/)
 * A "def" file with the definition of the packages to be installed,
   configurations, commands to be executed, etc. (i.e. data/deploys/LAMP/def)
+* Optionally a "def.sudo" file in case we want to execute a deploy with a non-root user
 * A "configs" directory with the configuration files and folders to be uploaded
   (i.e. data/deploys/LAMP/configs/apache/apache.conf)
 
 The def file structure is as follows:
 
     install [if <condition>]: package_a package_b package_c
-    config file [if <condition>]: file.conf, /destination/file.conf
-    config dir [if <condition>]: confdir, /destination/dir
-    exec [host][if <condition>]: command
+    uninstall [if <condition>]: package_a package_b package_c
+    [noparse] config file [if <condition>]: file.conf, /destination/file.conf
+    [noparse] config dir [if <condition>]: confdir, /destination/dir
+    exec [host] [if <condition>]: command
     monitor [if <condition>]: service
     deploy [if <condition>]: another_deploy
     reboot [if <condition>]
+
+The "noparse" optional parameter indicates if ASYD should or should not parse the config file/directory
+
+**Note about "def.sudo":** this definition file will be executed instead of the normal "def" file in case
+the user executing on the remote machine is not root and this file is present. This is specially useful on
+Ubuntu machines which doesn't use the root user. For the machines which user is "root", the standard
+"def" file will be executed regardless. If the file is not present, the standard "def" file will be executed also
+for non-root users.
+
+**Configuration files:**
+
+The configuration files are automatically parsed and the variables replaced (see Variables below).
+
+You can override this behavior by appending the "noparse" parameter on the def file, or for a certain block
+inside the configuration file using the `<%noparse%>``<%/noparse%>` tags.
+
+You can also use conditionals inside the configuration files to define parts of the configuration that should
+only be included if certain condition complies. This conditional blocks are defined within the
+`<%if condition%>``<%endif%>` tags. Conditionals inside the noparse tags are not evaluated either.
+
+Please note each of this special tags for noparse and conditionals must be written on a single line without
+any other character on the same line to work, i.e:
+
+    <%noparse%>
+    tags to scape
+    <%/noparse%>
+    rest of the file
 
 **Deploy example:**
 
@@ -64,7 +93,7 @@ Variables
 ---------
 
 You can use the following global variables on any configuration file, they will
-get automatically replaced with it's value.
+get automatically replaced with it's value. The variables are case-insensitive.
 
     <%ASYD%> - ASYD IP
     <%HOSTNAME%> - Target host name
@@ -72,6 +101,7 @@ get automatically replaced with it's value.
     <%DIST%> - Target host linux distribution
     <%DIST_VER%> - Target host distribution version
     <%ARCH%> - Target host architecture
+    <%PKG_MANAGER%> - Target host package manager (actually supported: apt, yum, pacman)
     <%MONITOR:service%> - Monitors the service 'service'
 
 You can define custom variables on both hosts and hostgroups, if a host has the
@@ -81,8 +111,8 @@ variables on selected hosts inside a group
     <%VAR:varname%> - Replaces the value assigned to "varname"
 
 All this variables can be used on any configuration file inside the "configs"
-directory on a deploy, inside the "data/monitors/" directory, or as conditionals
-for "def" files on a deploy.
+directory on a deploy, inside the "data/monitors/" directory, as conditionals
+for "def" files on a deploy and as variables for the "exec" command on a "def" file.
 
 Conditionals
 ------------

@@ -54,6 +54,22 @@ module Misc
       return 0
   end
 
+  def self.is_port_open?(ip, port)
+    begin
+      Timeout::timeout(2) do
+        begin
+          s = TCPSocket.new(ip, port)
+          s.close
+          return true
+        rescue Errno::ECONNREFUSED, Errno::EHOSTUNREACH
+          return false
+        end
+      end
+    rescue Timeout::Error
+    end
+    return false
+  end
+
   # Executes a command on a remote host
   #
   # @param ip [String] target ip address
@@ -101,13 +117,13 @@ module Misc
       else
         files = Misc.get_files(local)
         files.each do |file|
-          newfile = local+file
+          newfile = local+"/"+file
           newremote = remote+"/"+file
           self.upload_file(newfile, newremote)
         end
         dirs = Misc.get_dirs(local)
         dirs.each do |dir|
-          newdir = local+dir+"/"
+          newdir = local+"/"+dir+"/"
           newremote = remote+"/"+dir
           self.upload_dir(newdir, newremote)
         end
@@ -123,6 +139,12 @@ module Misc
   def download_dir(remote, local)
     Net::SSH.start(self.ip, self.user, :port => self.ssh_port, :keys => "data/ssh_key") do |ssh|
       ssh.scp.download!(remote, local, :recursive => true)
+    end
+  end
+
+  def reboot
+    Net::SSH.start(self.ip, self.user, :port => self.ssh_port, :keys => "data/ssh_key") do |ssh|
+      ssh.exec("reboot")
     end
   end
 end

@@ -13,10 +13,10 @@ class ASYD < Sinatra::Application
   get '/host/:host' do
     status 200
     @host = Host.first(:hostname => params[:host])
-    @host.get_status
     if @host.nil?
       erb :oops
     else
+      @status = @host.get_full_status
       erb :host_detail
     end
   end
@@ -43,7 +43,7 @@ class ASYD < Sinatra::Application
 
   post '/host/reboot' do
     host = Host.first(:hostname => params['hostname'])
-    host.exec_cmd("reboot")
+    host.reboot
     hostlist = '/hosts/overiew'
     redirect to hostlist
   end

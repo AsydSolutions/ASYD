@@ -2,10 +2,24 @@ module Monitoring
 
   TTL = 15 #store/refresh the status for 15 seconds
 
-  class Notification < ::Notification
+  class Notification
+    include DataMapper::Resource
+
+    def self.default_repository_name #here we use the monitoring_db for the Monitoring::Notification objects
+     :monitoring_db
+    end
+
+    property :id, Serial
+    property :type, Enum[ :error, :info, :success ], :lazy => false
     property :acknowledge, Boolean, :default => false
     property :host_hostname, String
     property :service, String
+    property :message, Text, :lazy => false
+    property :sticky, Boolean, :default => false, :lazy => false
+    property :dismiss, Boolean, :default => false, :lazy => false
+    property :created_at, DateTime
+    property :updated_at, DateTime
+    property :inclass, Discriminator
   end
 
   module Host
@@ -13,63 +27,75 @@ module Monitoring
 
     def monitor
       begin
-        ret = Deploy.install(self, "monit")
-        if ret[0] != 1
+        ret = Deploy.launch(self, "monit", nil)
+        if ret != 1
           raise ExecutionError, ret[1]
         end
-        parsed_cfg = Deploy.parse_config(self, "data/monitors/monitrc")
-        upload_file(parsed_cfg.path, "/etc/monit/monitrc")
-        parsed_cfg.unlink
-        exec_cmd('echo "startup=1" > /etc/default/monit')
-        exec_cmd('service monit restart')
         self.monitored = true
         self.save
       rescue ExecutionError => e
         NOTEX.synchronize do
           msg = "Unable to monitor host "+self.hostname+": "+e.message
-          Notification.create(:type => :error, :sticky => true, :message => msg)
+          ::Notification.create(:type => :error, :sticky => true, :message => msg)
         end
       end
     end
 
     def monitor_service(service)
       begin
-        parsed_cfg = Deploy.parse_config(self, "data/monitors/modules/"+service)
-        upload_file(parsed_cfg.path, "/etc/monit/conf.d/"+service)
+        unless File.exists?("data/monitors/"+service)
+          raise
+        end
+        parsed_cfg = Deploy.parse_config(self, "data/monitors/"+service)
+        if self.user != "root"
+          upload_file(parsed_cfg.path, "/tmp/"+service)
+          exec_cmd("sudo mv /tmp/"+service+" /etc/monit/conf.d/"+service)
+          exec_cmd("sudo chown root:root /etc/monit/conf.d/"+service)
+          exec_cmd("sudo /usr/bin/monit -c /etc/monit/monitrc reload")
+        else
+          upload_file(parsed_cfg.path, "/etc/monit/conf.d/"+service)
+          exec_cmd("/usr/bin/monit -c /etc/monit/monitrc reload")
+        end
         parsed_cfg.unlink
-        exec_cmd("service monit restart")
+      rescue
+        NOTEX.synchronize do
+          msg = "Monitor file not found for service "+service
+          ::Notification.create(:type => :error, :sticky => true, :message => msg)
+        end
       end
     end
 
     def get_status
-      if !self.status.nil?
-        if ((DateTime.now - status.created_at)  * 24 * 60 * 60).to_i > TTL
-          stat = nil
-          MOTEX.synchronize do
-            status.destroy
-            stat = Status.new(self)
-          end
-          if stat.id.nil?
-            self.status = nil
-          else
-            self.status = stat
-          end
-          return self.status
-        else
-          return self.status
-        end
+      short = true
+      stat = Status.new(self, short)
+      status = 1
+      if stat.nil? || stat.system_status == 'down'
+        status = 3
       else
-        stat = nil
-        MOTEX.synchronize do
-          stat = Status.new(self)
+        if stat.system_status != 'ok'
+          status = 2
         end
-        if stat.id.nil?
-          self.status = nil
-        else
-          self.status = stat
+        stat.services.each do |service|
+          if service[1] != 'ok'
+            status = 2
+          end
         end
-        return self.status
       end
+      MOTEX.synchronize do
+        hoststatus = HostStatus.first(:host_hostname => self.hostname)
+        if hoststatus.nil?
+          hoststatus = HostStatus.create(:host_hostname => self.hostname, :status => status)
+        else
+          hoststatus.update(:status => status)
+        end
+      end
+      return status
+    end
+
+    def get_full_status
+      short = false
+      stat = Status.new(self, short)
+      return stat
     end
 
     # @param refresh [Boolean] refresh the status?
@@ -82,18 +108,14 @@ module Monitoring
       if self.monitored == false
         return 4
       else
-        if self.status.nil?
-          return 3
+        hoststatus = nil
+        MOTEX.synchronize do
+          hoststatus = HostStatus.first(:host_hostname => self.hostname)
+        end
+        if hoststatus.nil?
+          return self.get_status
         else
-          if self.status.system_status != 'ok'
-            return 2
-          end
-          self.status.services.each do |service|
-            if service[1] != 'ok'
-              return 2
-            end
-          end
-          return 1
+          return hoststatus.status
         end
       end
     end
@@ -126,15 +148,15 @@ module Monitoring
       forks = [] #and initialize an empty array
       hosts = ::Host.all
       hosts.each do |host|
-        if forks.count >= max_forks #if we reached the "forkability" limit
+        if forks.count >= max_forks #if we reached the max forks
           id = Process.wait #then we wait for some child to finish
           forks.delete(id) #and we remove it from the forks array
         end
         frk = Spork.spork do #so we can continue executing a new fork
-          stat = host.get_status
           if host.monitored #do things
-            if stat.nil? #the host is down
-              NOTEX.synchronize do
+            stat = host.get_status
+            if stat == 3 #the host is down
+              MNOTEX.synchronize do
                 last = Monitoring::Notification.last(:host_hostname => host.hostname)
                 if last.nil? #no previous notification
                   error = "Unable to get monitoring status for host "+host.hostname
@@ -147,7 +169,7 @@ module Monitoring
                 end
               end
             else #the host recovered?
-              NOTEX.synchronize do
+              MNOTEX.synchronize do
                 last = Monitoring::Notification.last(:host_hostname => host.hostname)
                 if !last.nil?
                   last.update(:acknowledge => false, :dismiss => true)

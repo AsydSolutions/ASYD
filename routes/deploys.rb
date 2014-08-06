@@ -95,6 +95,8 @@ class ASYD < Sinatra::Application
 
   post '/deploys/deploy' do
     target = params['target'].split(";")
+    dep = params['deploy']
+
     if target[0] == "host"
       host = Host.first(:hostname => target[1])
       task = nil
@@ -104,7 +106,7 @@ class ASYD < Sinatra::Application
       end
       inst = Spork.spork do
         sleep 0.2
-        result = Deploy.launch(host, params['deploy'], task)
+        result = Deploy.launch(host, dep, task)
         if result == 1
           NOTEX.synchronize do
             msg = "Deploy "+params['deploy']+" successfully deployed on "+target[0]+" "+target[1]
@@ -120,8 +122,8 @@ class ASYD < Sinatra::Application
       end
     elsif target[0] == "hostgroup"
       hostgroup = Hostgroup.first(:name => target[1])
+      hostgroup_hosts = hostgroup.hosts
       task = nil
-      p task
       NOTEX.synchronize do
         task = Task.create(:action => :deploying, :object => params['deploy'], :target => hostgroup.name, :target_type => :hostgroup)
         notification = Notification.create(:type => :info, :message => task.action.to_s+" "+params['deploy']+" on "+hostgroup.name, :task => task)
@@ -130,16 +132,16 @@ class ASYD < Sinatra::Application
         sleep 0.2
         success = ProcessShared::SharedMemory.new(:int) #shared with the forks
         success.put_int(0, 1)
-        if !hostgroup.hosts.nil? && !hostgroup.hosts.empty? #it's a valid hostgroup
+        if !hostgroup_hosts.nil? && !hostgroup_hosts.empty? #it's a valid hostgroup
           max_forks = Misc::get_max_forks #we get the "forkability"
           forks = [] #and initialize an empty array
-          hostgroup.hosts.each do |host| #for each host
+          hostgroup_hosts.each do |host| #for each host
             if forks.count >= max_forks #if we reached the "forkability" limit
               id = Process.wait #then we wait for some child to finish
               forks.delete(id) #and we remove it from the forks array
             end
             frk = Spork.spork do #so we can continue executing a new fork
-                result = Deploy.launch(host, params['deploy'], task)
+                result = Deploy.launch(host, dep, task)
               if result != 1
                 NOTEX.synchronize do
                   msg = "Error when deploying "+params['deploy']+" on "+host.hostname+": "+result[1]

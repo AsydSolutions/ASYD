@@ -1,0 +1,27 @@
+# Deploy file for installing monit
+# Will be executed on every new system added to ASYD
+# Modify accordingly to your systems (i.e. firewall rules, etc)
+
+# install monit:
+install: curl tar gzip
+exec: mkdir -p /etc/monit/conf.d
+exec if <%ARCH%> == x86_64: curl -o /tmp/monit.tar.gz http://mmonit.com/monit/dist/binary/5.8.1/monit-5.8.1-linux-x64.tar.gz
+exec if <%ARCH%> == i686: curl -o /tmp/monit.tar.gz http://mmonit.com/monit/dist/binary/5.8.1/monit-5.8.1-linux-x86.tar.gz
+exec: cd /tmp && tar xzf /tmp/monit.tar.gz
+exec: mv /tmp/monit-5.8.1/bin/monit /usr/bin/
+exec: rm -r /tmp/monit*
+
+config file: monitrc, /etc/monit/monitrc
+
+# if it's debian-based:
+config file if <%PKG_MANAGER%> == apt: initscript, /etc/init.d/monit
+exec if <%PKG_MANAGER%> == apt: chmod +x /etc/init.d/monit
+exec if <%PKG_MANAGER%> == apt: update-rc.d monit defaults
+
+# if it's redhat or arch based:
+config file if <%PKG_MANAGER%> == yum or <%PKG_MANAGER%> == pacman: initscript, /usr/lib/systemd/system/monit.service
+exec if <%PKG_MANAGER%> == yum or <%PKG_MANAGER%> == pacman: chmod +x /usr/lib/systemd/system/monit.service
+exec if <%PKG_MANAGER%> == yum or <%PKG_MANAGER%> == pacman: systemctl enable monit
+
+exec: /usr/bin/monit -c /etc/monit/monitrc quit
+exec: /usr/bin/monit -c /etc/monit/monitrc

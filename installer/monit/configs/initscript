@@ -1,0 +1,124 @@
+<%if <%PKG_MANAGER%> == apt%>
+#!/bin/sh
+
+### BEGIN INIT INFO
+# Provides:          monit
+# Required-Start:    $remote_fs
+# Required-Stop:     $remote_fs
+# Should-Start:      $all
+# Should-Stop:       $all
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: service and resource monitoring daemon
+# Description:       monit is a utility for managing and monitoring
+#                    processes, programs, files, directories and filesystems
+#                    on a Unix system. Monit conducts automatic maintenance
+#                    and repair and can execute meaningful causal actions
+#                    in error situations.
+### END INIT INFO
+
+set -e
+
+. /lib/lsb/init-functions
+
+DAEMON=/usr/bin/monit
+CONFIG="/etc/monit/monitrc"
+NAME=monit
+DESC="daemon monitor"
+MONIT_OPTS=
+PID="/var/run/$NAME.pid"
+
+# Check if DAEMON binary exist
+[ -f $DAEMON ] || exit 0
+
+MONIT_OPTS="-c $CONFIG $MONIT_OPTS"
+
+monit_check_config () {
+  # Check for emtpy config.
+  if [ "`grep -s -v \"^#\" $CONFIG`" = "" ]
+  then
+    echo "empty config, please edit $CONFIG."
+    exit 0
+  fi
+}
+
+monit_check_perms () {
+  # Check the permission on configfile.
+  # The permission must not have more than -rwx------ (0700) permissions.
+
+  # Skip checking, fix perms instead.
+  /bin/chmod go-rwx $CONFIG
+}
+
+monit_checks () {
+  # Check for emtpy configfile
+  monit_check_config
+  # Check permissions of configfile
+  monit_check_perms
+}
+
+case "$1" in
+  start)
+    log_daemon_msg "Starting $DESC" "$NAME"
+    monit_checks $1
+    if start-stop-daemon --start --quiet --oknodo \
+                         --pidfile $PID --exec $DAEMON \
+                         -- $MONIT_OPTS
+    then
+      log_end_msg 0
+    else
+      log_end_msg 1
+    fi
+    ;;
+  stop)
+    log_daemon_msg "Stopping $DESC" "$NAME"
+    if start-stop-daemon --retry TERM/5/KILL/5 --oknodo --stop --quiet \
+                         --pidfile $PID --exec $DAEMON
+    then
+      log_end_msg 0
+    else
+      log_end_msg 1
+    fi
+    ;;
+  reload)
+    log_daemon_msg "Reloading $DESC configuration" "$NAME"
+    if start-stop-daemon --stop --signal HUP --quiet \
+                                --oknodo --pidfile $PID \
+                                --exec $DAEMON -- $MONIT_OPTS
+    then
+      log_end_msg 0
+    else
+      log_end_msg 1
+	fi
+    ;;
+  restart|force-reload)
+    $0 stop
+    $0 start
+    ;;
+  syntax)
+    $DAEMON $MONIT_OPTS -t
+    ;;
+  status)
+    status_of_proc -p $PID $DAEMON $NAME
+    ;;
+  *)
+    log_action_msg "Usage: /etc/init.d/$NAME {start|stop|reload|restart|force-reload|syntax|status}"
+    ;;
+esac
+
+exit 0
+<%endif%>
+<%if <%PKG_MANAGER%> == yum or <%PKG_MANAGER%> == pacman%>
+[Unit]
+Description=Pro-active monitoring utility for unix systems
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/monit -Ic /etc/monit/monitrc
+ExecStop=/usr/bin/monit quit
+ExecReload=/usr/bin/monit reload
+
+[Install]
+WantedBy=multi-user.target
+<%endif%>

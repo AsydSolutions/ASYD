@@ -3,6 +3,7 @@ class Setup
     # Create directories
     FileUtils.mkdir_p("data/db")
     FileUtils.mkdir_p("data/deploys")
+    FileUtils.mv("installer/monit", "data/deploys/monit") # Move deploy for monit
     FileUtils.mv("installer/monitors", "data/monitors") # Move predefined monitors
     FileUtils.remove_dir("installer") # Remove installer directory
     # Create or upload an SSH key
