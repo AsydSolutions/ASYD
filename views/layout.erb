@@ -120,42 +120,39 @@
 
           <% notifications = Monitoring::Notification.all(:dismiss => false, :acknowledge => false) %>
           <% notifications.each do |notification| %>
-            <% if notification.sticky == false %>
-              <% notification.update(:dismiss => true) %>
-              <% if notification.type == :info %>
-                <div class="alert alert-info">
-              <% elsif notification.type == :error %>
-                <div class="alert alert-error">
-              <% elsif notification.type == :success %>
-                <div class="alert alert-success">
-              <% end %>
-                <%= notification.message %></div>
-            <% else %>
-              <% if notification.type == :info %>
-                <div class="alert alert-info">
-              <% elsif notification.type == :error %>
-                <div class="alert alert-error">
-              <% elsif notification.type == :success %>
-                <div class="alert alert-success">
-              <% end %>
-                <a href="#" class="close" data-dismiss="alert" onclick="dismissNotification('<%= notification.id %>')">&times;</a><%= notification.message %>
-                </div>
+            <% if notification.type == :info %>
+              <div id="<%= notification.id %>" class="alert alert-info">
+            <% elsif notification.type == :error %>
+              <div id="<%= notification.id %>" class="alert alert-error">
+            <% elsif notification.type == :success %>
+              <div id="<%= notification.id %>" class="alert alert-success">
             <% end %>
+              <span class="dropdown" style="float: right">
+                <a href="#" class="close dropdown-toggle" data-toggle="dropdown">
+                  &times;
+                </a>
+                <ul class="dropdown-menu" style="left: -100px">
+                  <li><a href="#" onclick="dismissMonitoringNotification('<%= notification.id %>')">Dismiss</a></li>
+                  <li><a href="#" onclick="acknowledgeMonitoringNotification('<%= notification.id %>')">Acknowledge</a></li>
+                </ul>
+              </span>
+              <%= notification.message %>
+              </div>
           <% end %>
           <%= yield %>
         </div>
       </div>
     </div>
     <div class="footer">
-    	<div class="footer-inner">
-    		<div class="container">
-    			<div class="row">
-      			<div class="span12">
-      				2014 - ASYD Solutions
-      			</div>
-      		</div>
-    		</div>
-    	</div>
+      <div class="footer-inner">
+        <div class="container">
+          <div class="row">
+            <div class="span12">
+              2014 - ASYD Solutions
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </body>

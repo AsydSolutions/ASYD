@@ -2,7 +2,7 @@ class Notification
   include DataMapper::Resource
 
   def self.default_repository_name #here we use the tasks_db for the Notification objects
-   :tasks_db
+   :notifications_db
   end
 
   property :id, Serial
@@ -14,5 +14,5 @@ class Notification
   property :updated_at, DateTime
   property :inclass, Discriminator
 
-  belongs_to :task, :required => false
+  belongs_to :task, :required => false, :repository => :tasks_db
 end

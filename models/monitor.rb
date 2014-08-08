@@ -15,7 +15,7 @@ module Monitoring
     property :host_hostname, String
     property :service, String
     property :message, Text, :lazy => false
-    property :sticky, Boolean, :default => false, :lazy => false
+    property :sticky, Boolean, :default => true #keep for compatibility
     property :dismiss, Boolean, :default => false, :lazy => false
     property :created_at, DateTime
     property :updated_at, DateTime
@@ -69,7 +69,7 @@ module Monitoring
       short = true
       stat = Status.new(self, short)
       status = 1
-      if stat.nil? || stat.system_status == 'down'
+      if stat.system_status.nil? || stat.system_status == 'down'
         status = 3
       else
         if stat.system_status != 'ok'
@@ -160,11 +160,11 @@ module Monitoring
                 last = Monitoring::Notification.last(:host_hostname => host.hostname)
                 if last.nil? #no previous notification
                   error = "Unable to get monitoring status for host "+host.hostname
-                  Monitoring::Notification.create(:type => :error, :message => error, :sticky => true, :host_hostname => host.hostname, :service => "system")
+                  Monitoring::Notification.create(:type => :error, :message => error, :host_hostname => host.hostname, :service => "system")
                 else
                   if last.acknowledge == false && last.dismiss == true #the last notification was already dismissed and is not acknowledged
                     error = "Unable to get monitoring status for host "+host.hostname
-                    Monitoring::Notification.create(:type => :error, :message => error, :sticky => true, :host_hostname => host.hostname, :service => "system")
+                    Monitoring::Notification.create(:type => :error, :message => error, :host_hostname => host.hostname, :service => "system")
                   end
                 end
               end

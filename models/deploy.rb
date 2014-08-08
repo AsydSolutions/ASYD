@@ -5,11 +5,6 @@ class Deploy
   #
   def self.launch(host, dep, task)
     begin
-      ret = check_deploy(dep, sudo)
-      if ret[0] == 5
-        raise FormatException, ret[1]
-      end
-
       if host.nil?
         error = "host not found"
         raise ExecutionError, error
@@ -18,9 +13,17 @@ class Deploy
       cfg_root = "data/deploys/"+dep+"/configs/"
       if host.user != "root" && File.exists?("data/deploys/"+dep+"/def.sudo")
         path = "data/deploys/"+dep+"/def.sudo"
+        sudo = true
       else
         path = "data/deploys/"+dep+"/def"
+        sudo = false
       end
+
+      ret = check_deploy(dep, sudo)
+      if ret[0] == 5
+        raise FormatException, ret[1]
+      end
+
       f = File.open(path, "r").read
       f.gsub!(/\r\n?/, "\n")
       f.each_line do |line|
@@ -477,11 +480,11 @@ class Deploy
 
   # Validate deploy file
   #
-  def self.check_deploy(dep)
+  def self.check_deploy(dep, sudo)
     begin
       error = nil
       cfg_root = "data/deploys/"+dep+"/configs/"
-      if host.user != "root" && File.exists?("data/deploys/"+dep+"/def.sudo")
+      if sudo
         path = "data/deploys/"+dep+"/def.sudo"
       else
         path = "data/deploys/"+dep+"/def"

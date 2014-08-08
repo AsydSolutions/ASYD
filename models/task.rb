@@ -14,5 +14,5 @@ class Task
   property :created_at, DateTime
   property :updated_at, DateTime
 
-  has n, :notifications
+  has n, :notifications, :repository => :notifications_db
 end

@@ -215,3 +215,41 @@ function dismissNotification(msg_id)
   xmlhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
   xmlhttp.send("msg_id=" + msg_id);
 }
+
+function dismissMonitoringNotification(msg_id)
+{
+  var element = document.getElementById(msg_id);
+  element.parentNode.removeChild(element);
+
+  var xmlhttp;
+  if (window.XMLHttpRequest)
+  {// code for IE7+, Firefox, Chrome, Opera, Safari
+    xmlhttp=new XMLHttpRequest();
+  }
+  else
+  {// code for IE6, IE5
+    xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+  }
+  xmlhttp.open("POST","/notification/monitoring/dismiss",true);
+  xmlhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+  xmlhttp.send("msg_id=" + msg_id);
+}
+
+function acknowledgeMonitoringNotification(msg_id)
+{
+  var element = document.getElementById(msg_id);
+  element.parentNode.removeChild(element);
+  
+  var xmlhttp;
+  if (window.XMLHttpRequest)
+  {// code for IE7+, Firefox, Chrome, Opera, Safari
+    xmlhttp=new XMLHttpRequest();
+  }
+  else
+  {// code for IE6, IE5
+    xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+  }
+  xmlhttp.open("POST","/notification/monitoring/acknowledge",true);
+  xmlhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+  xmlhttp.send("msg_id=" + msg_id);
+}
