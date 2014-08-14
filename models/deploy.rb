@@ -19,19 +19,43 @@ class Deploy
         sudo = false
       end
 
-      ret = check_deploy(dep, sudo)
-      if ret[0] == 5
-        raise FormatException, ret[1]
-      end
+      # TODO
+      # ret = check_deploy(dep, sudo)
+      # if ret[0] == 5
+      #   raise FormatException, ret[1]
+      # end
+
+      condition = false
+      gdoit = true
+      skip = false
 
       f = File.open(path, "r").read
       f.gsub!(/\r\n?/, "\n")
       f.each_line do |line|
         line = line.strip
-        # COMMENT
-        if line.start_with?("#") || line.strip.empty?
-          # Ignore comments and empty lines
-        # /COMMENT
+
+        # Check for deploy global conditionals
+        if !condition
+          m = line.match(/^if (.+)$/)
+          if !m.nil?
+            gdoit = check_condition(m, host)
+            condition = true
+            skip = true
+          end
+        else
+          if line.match(/^endif$/)
+            condition = false
+            gdoit = true
+            skip = true
+          end
+        end
+
+        # IGNORE
+        if line.start_with?("#") || line.strip.empty? || skip || !gdoit
+          # Ignore comments, empty lines, if it's a "skip" (conditional) line or if the global "doit" for the block is false
+          skip = false #and reset the skip
+        # /IGNORE
+
         # INSTALL BLOCK
         elsif line.start_with?("install")
           doit = true
@@ -55,6 +79,7 @@ class Deploy
             end
           end
         # /INSTALL BLOCK
+
         # UNINSTALL BLOCK
         elsif line.start_with?("uninstall")
           doit = true
@@ -78,6 +103,7 @@ class Deploy
             end
           end
         # /UNINSTALL BLOCK
+
         # CONFIG FILE BLOCK
         elsif line.match(/^(noparse )?config file/)
           noparse = false
@@ -107,6 +133,7 @@ class Deploy
             end
           end
         # /CONFIG FILE BLOCK
+
         # CONFIG DIR BLOCK
         elsif line.match(/^(noparse )?config dir/)
           noparse = false
@@ -136,6 +163,7 @@ class Deploy
             end
           end
         # /CONFIG DIR BLOCK
+
         # EXEC BLOCK
         elsif line.start_with?("exec")
           doit = true
@@ -205,6 +233,7 @@ class Deploy
             end
           end
         # /EXEC BLOCK
+
         # MONITOR BLOCK
         elsif line.start_with?("monitor")
           doit = true
@@ -249,6 +278,7 @@ class Deploy
               end
             end
         # /DEPLOY BLOCK
+
         # REBOOT BLOCK
         elsif line.start_with?("reboot")
             doit = true
@@ -264,6 +294,7 @@ class Deploy
               end
             end
         # /REBOOT BLOCK
+
         # undefined command
         else
           error = "Bad formatting, check your deploy file"
@@ -280,27 +311,52 @@ class Deploy
 
   # Install package or packages on defined host
   #
-  def self.install(host, pkg)
+  def self.install(host, pkg, pkg_mgr = nil)
     begin
       if pkg.include? "&" or pkg.include? "|" or pkg.include? ">" or pkg.include? "<" or pkg.include? "`" or pkg.include? "$"
         raise FormatException
       end
-      pkg_mgr = host.pkg_mgr
+      if host.dist == "Solaris" || host.dist == "OpenIndiana"
+        if pkg_mgr == "pkgadd"  #ok
+        elsif pkg_mgr == "pkgutil"  #ok
+        elsif pkg_mgr == "pkg"  #ok
+        else
+          pkg_mgr = host.pkg_mgr  #use standard
+        end
+      else
+        pkg_mgr = host.pkg_mgr
+      end
+      cmd = ""
+      #1. apt
       if pkg_mgr == "apt"
         if host.user != "root"
-          pkg_mgr = "sudo "+pkg_mgr
+          cmd = "sudo "+pkg_mgr
         end
-        cmd = pkg_mgr+"-get update && "+pkg_mgr+"-get -y -q install "+pkg
+        cmd = cmd+"-get update && "+pkg_mgr+"-get -y -q install "+pkg
+      #2. yum
       elsif pkg_mgr == "yum"
         if host.user != "root"
-          pkg_mgr = "sudo "+pkg_mgr
+          cmd = "sudo "+pkg_mgr
         end
-        cmd = pkg_mgr+" install -y "+pkg		## NOT TESTED, DEVELOPMENT IN PROGRESS
+        cmd = cmd+" install -y "+pkg
+      #3. pacman
       elsif pkg_mgr == "pacman"
         if host.user != "root"
-          pkg_mgr = "sudo "+pkg_mgr
+          cmd = "sudo "+pkg_mgr
         end
-        cmd = pkg_mgr+" -Sy --noconfirm --noprogressbar "+pkg    ## NOT TESTED, DEVELOPMENT IN PROGRESS
+        cmd = cmd+" -Sy --noconfirm --noprogressbar "+pkg    ## NOT TESTED, DEVELOPMENT IN PROGRESS
+      #5.1. solaris pkgadd
+      elsif pkg_mgr == "pkgadd"
+        if host.user != "root"
+          cmd = "sudo "+pkg_mgr
+        end
+        cmd = cmd+" -aadmin -d "+pkg    ## NOT TESTED, DEVELOPMENT IN PROGRESS
+      #5.2. solaris pkg
+      elsif pkg_mgr == "pkg"
+        if host.user != "root"
+          cmd = "sudo "+pkg_mgr
+        end
+        cmd = cmd+" install --accept "+pkg    ## NOT TESTED, DEVELOPMENT IN PROGRESS
       end
       result = host.exec_cmd(cmd)
       if result.include? "\nE: "
@@ -322,6 +378,7 @@ class Deploy
   end
 
   # Uninstall package or packages on defined host
+  # TODO
   #
   def self.uninstall(host, pkg)
     begin
@@ -332,7 +389,7 @@ class Deploy
       if pkg_mgr == "apt"
         cmd = pkg_mgr+"-get -y -q remove "+pkg
       elsif pkg_mgr == "yum"
-        cmd = pkg_mgr+" remove -y "+pkg		## NOT TESTED, DEVELOPMENT IN PROGRESS
+        cmd = pkg_mgr+" remove -y "+pkg
       elsif pkg_mgr == "pacman"
         cmd = pkg_mgr+" -R --noconfirm --noprogressbar "+pkg    ## NOT TESTED, DEVELOPMENT IN PROGRESS
       end
@@ -444,6 +501,8 @@ class Deploy
     return newconf
   end
 
+  # Parse recursively an entire config directory
+  #
   def self.parse_config_dir(host, cfg_dir, tmpath)
     if tmpath.nil?
       o = [('a'..'z'), ('A'..'Z')].map { |i| i.to_a }.flatten
@@ -479,6 +538,7 @@ class Deploy
   private
 
   # Validate deploy file
+  # TODO: review and improve
   #
   def self.check_deploy(dep, sudo)
     begin
@@ -626,7 +686,6 @@ class Deploy
   end
 
   # Evaluate conditional
-  # TODO: evaluate custom vars
   #
   def self.evaluate_condition(st, host)
     st = parse(host, st)

@@ -36,6 +36,7 @@ class Host
       #start connection to remote host
       Net::SSH.start(ip, user, :port => self.ssh_port, :password => password, :timeout => 10) do |ssh|
         #check for package manager and add distro
+        #1. debian-based
         if !(ssh.exec!("which apt-get") =~ /\/bin\/apt-get$/).nil?
           self.pkg_mgr = "apt"
           if user != "root"
@@ -45,6 +46,7 @@ class Host
           end
           self.dist = ssh.exec!("lsb_release -s -i").strip
           self.dist_ver = ssh.exec!("lsb_release -s -r").strip.to_f
+        #2. redhat-based
         elsif !(ssh.exec!("which yum") =~ /\/bin\/yum$/).nil?
           self.pkg_mgr = "yum"
           if user != "root"
@@ -54,6 +56,7 @@ class Host
           end
           self.dist = ssh.exec!("/usr/lib/dkms/lsb_release -s -i").strip
           self.dist_ver = ssh.exec!("/usr/lib/dkms/lsb_release -s -r").strip.to_f
+        #3. arch-based
         elsif !(ssh.exec!("which pacman") =~ /\/bin\/pacman$/).nil?
           self.pkg_mgr = "pacman"
           if user != "root"
@@ -63,6 +66,28 @@ class Host
           end
           self.dist = ssh.exec!("lsb_release -s -i").strip
           self.dist_ver = 0
+        #4. solaris
+        elsif !(ssh.exec!("which pkgadd") =~ /\/sbin\/pkgadd$/).nil?
+          self.pkg_mgr = "pkgadd"
+          if !(ssh.exec!("which pkg") =~ /\/bin\/pkg$/).nil?
+            self.pkg_mgr = "pkg"
+          end
+          ret = ssh.exec!("cat /etc/release").lines.first.strip
+          if ret.include? "OpenIndiana"
+            self.dist = "OpenIndiana"
+            ret.split(" ")
+            ret.each do |item|
+              if item =~ /oi_/
+                dv = item.gsub(/oi_/, '')
+                self.dist_ver = dv.to_f
+              end
+            end
+          else
+            self.dist = "Solaris"
+            ret.split("Solaris ")
+            dv = ret[1].split(" ")
+            self.dist_ver = dv[0]
+          end
         else
           raise #OS not supported yet
         end
