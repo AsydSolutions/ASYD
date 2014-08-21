@@ -1,0 +1,9 @@
+basedir=default
+conflict=quit
+setuid=nocheck
+action=nocheck
+partial=nocheck
+instance=overwrite
+idepend=quit
+rdepend=quit
+space=quit

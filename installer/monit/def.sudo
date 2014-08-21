@@ -2,6 +2,10 @@
 # Will be executed on every new system added to ASYD
 # Modify accordingly to your systems (i.e. firewall rules, etc)
 
+###
+# For Linux:
+if <%PKG_MANAGER%> == apt or <%PKG_MANAGER%> == yum or <%PKG_MANAGER%> == pacman
+
 # install monit:
 install: curl tar gzip
 exec: sudo mkdir -p /etc/monit/conf.d
@@ -29,3 +33,44 @@ exec if <%PKG_MANAGER%> == yum or <%PKG_MANAGER%> == pacman: sudo systemctl enab
 
 exec: sudo /usr/bin/monit -c /etc/monit/monitrc quit
 exec: sudo /usr/bin/monit -c /etc/monit/monitrc
+
+endif
+###
+
+
+###
+# For Solaris:
+if <%DIST%> == Solaris or <%DIST%> == OpenIndiana
+
+# first upload the admin file for non-interactive pkgadd
+config file: solaris-admin, /tmp/admin
+exec: sudo mv /tmp/admin /etc/admin
+exec: chmod 666 /etc/admin
+
+# install OpenCSW
+install pkgadd if <%DIST_VER%> >= 10: http://get.opencsw.org/now
+exec if <%DIST_VER%> <= 9: wget http://mirror.opencsw.org/opencsw/pkgutil.pkg -O /tmp/pkgutil.pkg
+install pkgadd if <%DIST_VER%> <= 9: /tmp/pkgutil.pkg
+
+# install wget and gzip in case they are not there using pkgutil
+install pkgutil: wget gzip
+
+# install monit
+exec: sudo mkdir -p /etc/monit/conf.d
+exec if <%ARCH%> == sparc: wget http://mmonit.com/monit/dist/binary/5.8.1/monit-5.8.1-solaris-sparc.tar.gz -O /tmp/monit.tar.gz
+exec if <%ARCH%> != sparc: wget http://mmonit.com/monit/dist/binary/5.8.1/monit-5.8.1-solaris-x64.tar.gz -O /tmp/monit.tar.gz
+exec: cd /tmp && gzip -dc /tmp/monit.tar.gz | tar xf -
+exec: sudo mv /tmp/monit-5.8.1/bin/monit /usr/bin/
+exec: rm -r /tmp/monit*
+
+config file: monitrc, /tmp/monitrc
+exec: sudo mv /tmp/monitrc /etc/monit/monitrc
+exec: sudo chown -R root:root /etc/monit
+
+exec: cp /etc/inittab /tmp/inittab
+exec: echo "mo:2345:respawn:/usr/bin/monit -Ic /etc/monit/monitrc" >> /tmp/inittab
+exec: sudo mv /tmp/inittab /etc/inittab
+exec: sudo init q
+
+endif
+###

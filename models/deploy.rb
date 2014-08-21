@@ -57,16 +57,18 @@ class Deploy
         # /IGNORE
 
         # INSTALL BLOCK
+        # TODO: custom vars on conditionals
         elsif line.start_with?("install")
           doit = true
-          m = line.match(/^install if (.+):/)
+          pkg_mgr = line.match(/^install (pkgutil|pkg|pkgadd)?(?: if .+)?:/)[1]
+          m = line.match(/^install (?:pkgutil |pkg |pkgadd )?if (.[^:]+)/)
           if !m.nil?
             doit = check_condition(m, host)
           end
           if doit
             line = line.split(':', 2)
             pkgs = line[1].strip
-            ret = Deploy.install(host, pkgs)
+            ret = Deploy.install(host, pkgs, pkg_mgr)
             if ret[0] == 1
               msg = "Installed "+pkgs+" on "+host.hostname+": "+ret[1]
               NOTEX.synchronize do
@@ -81,6 +83,7 @@ class Deploy
         # /INSTALL BLOCK
 
         # UNINSTALL BLOCK
+        # TODO
         elsif line.start_with?("uninstall")
           doit = true
           m = line.match(/^uninstall if (.+):/)
@@ -165,6 +168,7 @@ class Deploy
         # /CONFIG DIR BLOCK
 
         # EXEC BLOCK
+        # TODO: custom vars on conditionals
         elsif line.start_with?("exec")
           doit = true
           m = line.match(/^exec (.[^:]+)/)
@@ -326,13 +330,13 @@ class Deploy
       else
         pkg_mgr = host.pkg_mgr
       end
-      cmd = ""
+      cmd = pkg_mgr
       #1. apt
       if pkg_mgr == "apt"
         if host.user != "root"
           cmd = "sudo "+pkg_mgr
         end
-        cmd = cmd+"-get update && "+pkg_mgr+"-get -y -q install "+pkg
+        cmd = cmd+"-get update && "+cmd+"-get -y -q install "+pkg
       #2. yum
       elsif pkg_mgr == "yum"
         if host.user != "root"
@@ -344,19 +348,27 @@ class Deploy
         if host.user != "root"
           cmd = "sudo "+pkg_mgr
         end
-        cmd = cmd+" -Sy --noconfirm --noprogressbar "+pkg    ## NOT TESTED, DEVELOPMENT IN PROGRESS
+        cmd = cmd+" -Sy --noconfirm --noprogressbar "+pkg    ## NOT FULLY TESTED, DEVELOPMENT IN PROGRESS
       #5.1. solaris pkgadd
       elsif pkg_mgr == "pkgadd"
         if host.user != "root"
-          cmd = "sudo "+pkg_mgr
+          cmd = "sudo /usr/sbin/"+pkg_mgr
+        else
+          cmd = "/usr/sbin/"+pkg_mgr
         end
-        cmd = cmd+" -aadmin -d "+pkg    ## NOT TESTED, DEVELOPMENT IN PROGRESS
+        cmd = cmd+" -a /etc/admin -d "+pkg+" all"    ## NOT FULLY TESTED, DEVELOPMENT IN PROGRESS
       #5.2. solaris pkg
       elsif pkg_mgr == "pkg"
         if host.user != "root"
           cmd = "sudo "+pkg_mgr
         end
-        cmd = cmd+" install --accept "+pkg    ## NOT TESTED, DEVELOPMENT IN PROGRESS
+        cmd = cmd+" install --accept "+pkg    ## NOT FULLY TESTED, DEVELOPMENT IN PROGRESS
+      #5.3. solaris pkgutil
+    elsif pkg_mgr == "pkgutil"
+        if host.user != "root"
+          cmd = "sudo "+pkg_mgr
+        end
+        cmd = cmd+" -y -i "+pkg    ## NOT FULLY TESTED, DEVELOPMENT IN PROGRESS
       end
       result = host.exec_cmd(cmd)
       if result.include? "\nE: "
