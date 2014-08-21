@@ -36,6 +36,7 @@ class Host
       #start connection to remote host
       Net::SSH.start(ip, user, :port => self.ssh_port, :password => password, :timeout => 10) do |ssh|
         #check for package manager and add distro
+        #1. debian-based
         if !(ssh.exec!("which apt-get") =~ /\/bin\/apt-get$/).nil?
           self.pkg_mgr = "apt"
           if user != "root"
@@ -45,6 +46,8 @@ class Host
           end
           self.dist = ssh.exec!("lsb_release -s -i").strip
           self.dist_ver = ssh.exec!("lsb_release -s -r").strip.to_f
+          self.arch = ssh.exec!("uname -m").strip
+        #2. redhat-based
         elsif !(ssh.exec!("which yum") =~ /\/bin\/yum$/).nil?
           self.pkg_mgr = "yum"
           if user != "root"
@@ -54,6 +57,8 @@ class Host
           end
           self.dist = ssh.exec!("/usr/lib/dkms/lsb_release -s -i").strip
           self.dist_ver = ssh.exec!("/usr/lib/dkms/lsb_release -s -r").strip.to_f
+          self.arch = ssh.exec!("uname -m").strip
+        #3. arch-based
         elsif !(ssh.exec!("which pacman") =~ /\/bin\/pacman$/).nil?
           self.pkg_mgr = "pacman"
           if user != "root"
@@ -63,13 +68,36 @@ class Host
           end
           self.dist = ssh.exec!("lsb_release -s -i").strip
           self.dist_ver = 0
+          self.arch = ssh.exec!("uname -m").strip
+        #4. solaris
+      elsif !(ssh.exec!("export PATH=$PATH:/sbin:/usr/sbin/ && which pkgadd") =~ /\/sbin\/pkgadd$/).nil?
+          self.pkg_mgr = "pkgadd"
+          if !(ssh.exec!("which pkg") =~ /\/bin\/pkg$/).nil?
+            self.pkg_mgr = "pkg"
+          end
+          ret = ssh.exec!("cat /etc/release").lines.first.strip
+          if ret.include? "OpenIndiana"
+            self.dist = "OpenIndiana"
+            ret = ret.split(" ")
+            ret.each do |item|
+              if item =~ /oi_/
+                dv = item.gsub(/oi_/, '')
+                self.dist_ver = dv.to_f
+              end
+            end
+          else
+            self.dist = "Solaris"
+            ret = ret.split("Solaris ")
+            dv = ret[1].split(" ")
+            self.dist_ver = dv[0].to_f
+          end
+          self.arch = ssh.exec!("uname -p").strip
         else
           raise #OS not supported yet
         end
-        self.arch = ssh.exec!("uname -m").strip #OS architecture
         #upload the ssh key
         ssh.scp.upload!("data/ssh_key.pub", "/tmp/ssh_key.pub")
-        ssh.exec "mkdir -p ~/.ssh && touch ~/.ssh/authorized_keys && cat /tmp/ssh_key.pub >> ~/.ssh/authorized_keys && rm /tmp/ssh_key.pub"
+        ssh.exec "mkdir -p $HOME/.ssh && touch $HOME/.ssh/authorized_keys && cat /tmp/ssh_key.pub >> $HOME/.ssh/authorized_keys && rm /tmp/ssh_key.pub"
       end
       if !self.save
         raise #couldn't save the object
