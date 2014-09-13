@@ -80,9 +80,9 @@
         <div class="container">
           <ul class="mainnav">
             <li <% if request.path_info == "/" %>class="active"<%end%>><a href="/"><i class="icon-dashboard"></i><span>Dashboard</span></a></li>
-            <li <% if request.path_info.include?("/host") %>class="active"<%end%>><a href="/hosts/overiew"><i class="icon-hdd"></i><span>Servers</span></a></li>
-            <li <% if request.path_info.include?("/deploy") %>class="active"<%end%>><a href="/deploys/list"><i class="icon-code"></i><span>Deploys</span></a></li>
-            <li <% if request.path_info.include?("/task") %>class="active"<%end%>><a href="/task/list"><i class="icon-tasks"></i><span>Tasks</span></a></li>
+            <li <% if request.path_info.start_with?("/host") %>class="active"<%end%>><a href="/hosts/overiew"><i class="icon-hdd"></i><span>Servers</span></a></li>
+            <li <% if request.path_info.start_with?("/deploy") %>class="active"<%end%>><a href="/deploys/list"><i class="icon-code"></i><span>Deploys</span></a></li>
+            <li <% if request.path_info.start_with?("/task") %>class="active"<%end%>><a href="/task/list"><i class="icon-tasks"></i><span>Tasks</span></a></li>
           </ul>
         </div>
       </div>

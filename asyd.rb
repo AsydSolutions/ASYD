@@ -39,8 +39,9 @@ class ASYD < Sinatra::Application
     erb :oops
   end
 
-  #monitoring on the background
+  # monitoring on the background
   bgmonit = Spork.spork do
-    Monitoring.background
+   Monitoring.background
   end
+
 end
