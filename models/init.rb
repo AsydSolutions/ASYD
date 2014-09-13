@@ -12,8 +12,9 @@ require 'sqlite3'
 require 'redcarpet'
 require 'bcrypt'
 require 'monit'
-require_relative "spork"
-require_relative "errors"
+require_relative "lib/spork"
+require_relative "lib/flavored_markdown"
+require_relative "lib/errors"
 require_relative "misc"
 require_relative "setup"
 require_relative "deploy"

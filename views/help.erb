@@ -2,10 +2,27 @@
   <div class="span8 offset1">
     <h1> ASYD Documentation </h1>
     <br></br>
+  </div>
+</div>
+<div class="row">
+  <div class="span8 offset1">
     <div class="widget">
       <div class="widget-content">
-        <%= markdown(:help)%>
+        <%= flavored_markdown(@doc)%>
       </div>
     </div>
+  </div>
+  <div class="span2">
+    <ul class="nav nav-pills nav-stacked">
+      <li class="nav-header">Index</li>
+      <li><a href="/help/installing.md">Installing</a></li>
+      <li><a href="/help/basics.md">Basics</a></li>
+      <li><a href="/help/deploys.md">Deploys</a></li>
+      <li><a href="/help/configurations.md">Configurations</a></li>
+      <li><a href="/help/variables.md">Variables</a></li>
+      <li><a href="/help/conditionals.md">Conditionals</a></li>
+      <li><a href="/help/monitoring.md">Monitoring</a></li>
+      <li><a href="/help/solaris.md">Solaris specific</a></li>
+    </ul>
   </div>
 </div>

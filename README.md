@@ -8,6 +8,8 @@ Installation on Debian:
 	cd asyd
 	bundle install
 
+Or read the full [installation](https://github.com/AsydSolutions/asyd/blob/master/views/doc/en/installing.md) instructions.
+
 Run ASYD:
 
 	passenger start
@@ -15,6 +17,6 @@ Run ASYD:
 Then open [http://localhost:3000/](http://localhost:3000/)
 
 
-**Please read the [documentation](https://github.com/AsydSolutions/asyd/blob/master/views/help.md)**
+**Please read the [documentation](https://github.com/AsydSolutions/asyd/blob/master/views/doc/en/README.md)**
 
-Also, don't use it in production systems, is still on a very early development stage, might (and likely will) contain bugs
+Use it at your own risk, is still on a very early development stage, might (and likely will) contain bugs

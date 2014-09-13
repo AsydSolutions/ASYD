@@ -40,7 +40,8 @@ class ASYD < Sinatra::Application
   end
 
   #monitoring on the background
-  bgmonit = Spork.spork do
-    Monitoring.background
-  end
+  #bgmonit = Spork.spork do
+  #  Monitoring.background
+  #end
+
 end
