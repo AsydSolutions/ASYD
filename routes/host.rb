@@ -1,5 +1,5 @@
 class ASYD < Sinatra::Application
-  get '/hosts/overiew' do
+  get '/hosts/overview' do
     status 200
     @groups = Hostgroup.all
     @hosts = Host.all
@@ -7,7 +7,7 @@ class ASYD < Sinatra::Application
     @hosts.each do |host|
       @host_status[host.hostname] = host.is_ok?
     end
-    erb :hosts_overiew
+    erb :hosts_overview
   end
 
   get '/host/:host' do
@@ -24,7 +24,7 @@ class ASYD < Sinatra::Application
   post '/host/add' do
     status 200
     Host.new(params['hostname'], params['ip'], params['user'], params['ssh_port'].to_i, params['password'])
-    hostlist = '/hosts/overiew'
+    hostlist = '/hosts/overview'
     redirect to hostlist
   end
 
@@ -37,14 +37,14 @@ class ASYD < Sinatra::Application
     end
     host = Host.first(:hostname => params['hostname'])
     host.delete(revoke)
-    hostlist = '/hosts/overiew'
+    hostlist = '/hosts/overview'
     redirect to hostlist
   end
 
   post '/host/reboot' do
     host = Host.first(:hostname => params['hostname'])
     host.reboot
-    hostlist = '/hosts/overiew'
+    hostlist = '/hosts/overview'
     redirect to hostlist
   end
 
