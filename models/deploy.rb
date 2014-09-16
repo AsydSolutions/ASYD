@@ -388,20 +388,61 @@ class Deploy
   end
 
   # Uninstall package or packages on defined host
-  # TODO
   #
-  def self.uninstall(host, pkg)
+  def self.uninstall(host, pkg, pkg_mgr = nil)
     begin
       if pkg.include? "&" or pkg.include? "|" or pkg.include? ">" or pkg.include? "<" or pkg.include? "`" or pkg.include? "$"
         raise FormatException
       end
-      pkg_mgr = host.pkg_mgr
+      if host.dist == "Solaris" || host.dist == "OpenIndiana"
+        if pkg_mgr == "pkgadd"  #ok
+        elsif pkg_mgr == "pkgutil"  #ok
+        elsif pkg_mgr == "pkg"  #ok
+        else
+          pkg_mgr = host.pkg_mgr  #use standard
+        end
+      else
+        pkg_mgr = host.pkg_mgr
+      end
+      cmd = pkg_mgr
+      #1. apt
       if pkg_mgr == "apt"
-        cmd = pkg_mgr+"-get -y -q remove "+pkg
+        if host.user != "root"
+          cmd = "sudo "+pkg_mgr
+        end
+        cmd = cmd+"-get -y -q remove "+pkg
+      #2. yum
       elsif pkg_mgr == "yum"
-        cmd = pkg_mgr+" remove -y "+pkg
+        if host.user != "root"
+          cmd = "sudo "+pkg_mgr
+        end
+        cmd = cmd+" remove -y "+pkg
+      #3. pacman
       elsif pkg_mgr == "pacman"
-        cmd = pkg_mgr+" -R --noconfirm --noprogressbar "+pkg    ## NOT TESTED, DEVELOPMENT IN PROGRESS
+        if host.user != "root"
+          cmd = "sudo "+pkg_mgr
+        end
+        cmd = cmd+" -R --noconfirm --noprogressbar "+pkg    ## NOT FULLY TESTED, DEVELOPMENT IN PROGRESS
+      #5.1. solaris pkgadd
+      elsif pkg_mgr == "pkgadd"
+        if host.user != "root"
+          cmd = "sudo /usr/sbin/pkgrm"
+        else
+          cmd = "/usr/sbin/pkgrm"
+        end
+        cmd = cmd+" -a /etc/admin "+pkg    ## NOT FULLY TESTED, DEVELOPMENT IN PROGRESS
+      #5.2. solaris pkg
+      elsif pkg_mgr == "pkg"
+        if host.user != "root"
+          cmd = "sudo "+pkg_mgr
+        end
+        cmd = cmd+" uninstall "+pkg    ## NOT FULLY TESTED, DEVELOPMENT IN PROGRESS
+      #5.3. solaris pkgutil
+    elsif pkg_mgr == "pkgutil"
+        if host.user != "root"
+          cmd = "sudo "+pkg_mgr
+        end
+        cmd = cmd+" -y -r "+pkg    ## NOT FULLY TESTED, DEVELOPMENT IN PROGRESS
       end
       result = host.exec_cmd(cmd)
       if result.include? "\nE: "
