@@ -1,0 +1,200 @@
+<div class="row">
+	<div class="span6">
+		<div class="widget widget-table action-table">
+			<div class="widget-header">
+				<i class="icon-user"></i><h3>Users</h3>
+			</div>
+			<div class="widget-content">
+				<div style="position:absolute; margin:10px; z-index:90;">
+					<a data-toggle="modal" href="#addUser" class="btn">
+						Add user <i class="btn-icon-only icon-plus"></i>
+					</a>
+				</div>
+				<div class="visible-phone visible-tablet"><br></br></div>
+				<table id="htable" class="stripe row-border">
+					<thead style="text-align:left;">
+						<tr>
+							<th>
+								Username
+							</th>
+							<th>
+								Email
+							</th>
+							<th class="td-actions">
+								Actions
+							</th>
+						</tr>
+					</thead>
+					<tbody>
+						<% @users.each do |user| %>
+						<tr>
+							<td>
+								<%=user.username%>
+							</td>
+							<td>
+								<%=user.email%>
+							</td>
+							<td class="td-actions">
+								<a data-toggle="tooltip" data-original-title="Edit" href="#editUser" class="btn btn-info btn-mini btn-icon-only hint" onclick="passDataToModal('<%=user.username%>', '#editUser')"><i class="btn-icon-only icon-edit"></i></a>
+								<a data-toggle="tooltip" data-original-title="Remove" href="#delUser" class="btn btn-danger btn-mini btn-icon-only hint" onclick="passDataToModal('<%=user.username%>', '#delUser')"><i class="btn-icon-only icon-remove"></i></a>
+							</td>
+						</tr>
+						<% end %>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+	<div class="span6">
+		<div class="widget widget-table action-table">
+			<div class="widget-header">
+				<i class="icon-group"></i><h3>Teams</h3>
+			</div>
+			<div class="widget-content">
+				<div style="position:absolute; margin:10px; z-index:90;">
+					<a data-toggle="modal" href="#addTeam" class="btn">
+						Add team <i class="btn-icon-only icon-plus"></i>
+					</a>
+				</div>
+				<div class="visible-phone visible-tablet"><br></br></div>
+				<table id="hgtable" class="stripe row-border">
+					<thead style="text-align:left;">
+						<tr>
+							<th>
+								Name
+							</th>
+							<th>
+								Members
+							</th>
+							<th class="td-actions">
+								Actions
+							</th>
+						</tr>
+					</thead>
+					<tbody>
+						<% @teams.each do |team| %>
+						<tr>
+							<td>
+								<%=team.name%>
+							</td>
+							<td>
+								<div class="accordion-team accordion-invisible">
+									<div class="accordion-heading accordion-invisible">
+										<a data-toggle="collapse" href="#collapse<%=team.name%>" style="font-size: 8pt; color: #ffffff;" class="label label-info">&nbsp; <%=team.users.count%> &nbsp;</a>
+									</div>
+									<div id="collapse<%=team.name%>" class="accordion-body collapse accordion-invisible">
+										<div class="accordion-inner accordion-invisible">
+											<table class="table table-condensed">
+												<tbody>
+													<% team.users.each do |user| %>
+													<tr class="accordion-invisible"><td class="accordion-invisible">
+														<i class="icon-angle-right"></i>
+														<span class="label"><%= user.username %></span>
+													</td></tr>
+													<% end %>
+												</tbody>
+											</table>
+										</div>
+									</div>
+								</div>
+							</td>
+							<td class="td-actions">
+								<a data-toggle="tooltip" data-original-title="Edit" href="#editTeam" class="btn btn-info btn-mini btn-icon-only hint" onclick="editTeam('<%=team.name%>', '#teameditor')"><i class="btn-icon-only icon-edit"></i></a>
+								<a data-toggle="tooltip" data-original-title="Remove" href="#delTeam" class="btn btn-danger btn-mini btn-icon-only hint" onclick="passDataToModal('<%=team.name%>', '#delTeam')"><i class="btn-icon-only icon-remove"></i></a>
+							</td>
+						</tr>
+						<% end %>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div id="addUser" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="Add User" aria-hidden="true">
+	<div class="modal-header">
+		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+		<h3 id="addUserLabel">Add new user</h3>
+	</div>
+	<form id="addUserform" action="/user/add" method="post">
+		<div class="modal-body">
+			<div class="control-group"><input name='username' type="text" class="input" placeholder="Username" autofocus required><span class="help-inline">username</span></div>
+			<div class="control-group"><input name='email' type="email" class="input" placeholder="Email address" required><span class="help-inline">email address</span><p class="help-block"></p></div>
+			<div class="control-group"><input name='password' type="password" class="input" placeholder="password" required><span class="help-inline">password</span></div>
+		</div>
+		<div class="modal-footer">
+			<button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+			<button type="submit" class="btn btn-primary">Add</button>
+		</div>
+	</form>
+</div>
+
+<div id="addTeam" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="Add Team" aria-hidden="true">
+	<div class="modal-header">
+		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+		<h3 id="addTeamLabel">Add new team</h3>
+	</div>
+	<form id="addTeamform" action="/team/add" method="post">
+		<div class="modal-body">
+			<div class="control-group"><input name='name' type="text" class="input" placeholder="Team Name" autofocus required><span class="help-inline">name for the new team</span></div>
+		</div>
+		<div class="modal-footer">
+			<button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+			<button type="submit" class="btn btn-primary">Add</button>
+		</div>
+	</form>
+</div>
+
+<div id="delUser" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="Remove User" aria-hidden="true">
+	<div class="modal-header">
+		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+		<h3 id="delUserLabel">Attention!</h3>
+	</div>
+	<div class="modal-body">
+		<p>Are you sure you want to remove the user <b id="dataInput"></b>?</p>
+	</div>
+	<div class="modal-footer">
+		<form id="delUserform" action="/user/del" method="post">
+			<input type="hidden" name="username" id="dataInput" value="">
+			<button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+			<button type="submit" class="btn btn-primary">Delete</button>
+		</form>
+	</div>
+</div>
+
+<div id="delTeam" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="Remove Team" aria-hidden="true">
+	<div class="modal-header">
+		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+		<h3 id="delTeamLabel">Attention!</h3>
+	</div>
+	<div class="modal-body">
+		<p>Are you sure you want to delete the team <b id="dataInput"></b>?</p>
+	</div>
+	<div class="modal-footer">
+		<form id="delTeamform" action="/team/del" method="post">
+			<input type="hidden" name="name" id="dataInput" value="">
+			<button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+			<button type="submit" class="btn btn-primary">Delete</button>
+		</form>
+	</div>
+</div>
+
+<div id="editUser" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="Edit User" aria-hidden="true">
+	<div class="modal-header">
+		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+		<h3 id="editUserLabel">Edit user</h3>
+	</div>
+	<form id="editUserform" action="/user/edit" method="post">
+		<div class="modal-body">
+			<div class="control-group"><input name='username' type="text" id="dataInput" value="" readonly><span class="help-inline">username</span></div>
+			<div class="control-group"><input name='email' type="email" class="input" placeholder="email address"><span class="help-inline">change email address</span><p class="help-block"></p></div>
+			<div class="control-group"><input name='password' type="password" class="input" placeholder="new password"><span class="help-inline">change password</span></div>
+		</div>
+		<div class="modal-footer">
+			<button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+			<button type="submit" class="btn btn-primary">Edit</button>
+		</div>
+	</form>
+</div>
+
+<div id="teameditor"></div>

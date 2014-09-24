@@ -34,7 +34,7 @@ end
 class TeamMember
   include DataMapper::Resource
 
-  def self.default_repository_name #here we use the hosts_db for the HostgroupMember relation
+  def self.default_repository_name #here we use the hosts_db for the TeamMember relation
    :users_db
   end
 

@@ -11,7 +11,7 @@ $(function() {
             'left': '0',
             'right': '0',
             'position': 'fixed',
-            'z-index': '2048',
+            'z-index': '100',
             'top': '0'
         });
         // Changing the height of the scroller anchor to that of scroller so that there is no change in the overall height of the page.
@@ -196,8 +196,68 @@ $(function() {
 
 function passDataToModal(data, modal_id) {
   $(".modal-body #dataInput").text(data);
+  $(".modal-body #dataInput").val( data );
   $(".modal-footer #dataInput").val( data );
   $(modal_id).modal('show');
+}
+
+function editTeam(name, div_id) {
+  var xmlhttp;
+  if (window.XMLHttpRequest)
+  {// code for IE7+, Firefox, Chrome, Opera, Safari
+    xmlhttp=new XMLHttpRequest();
+  }
+  else
+  {// code for IE6, IE5
+    xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+  }
+  xmlhttp.open("GET","/team/edit/" + name,false);
+  xmlhttp.send();
+  document.getElementById('teameditor').innerHTML = xmlhttp.responseText;
+  $('#editTeam').modal('show');
+}
+
+function addTeamMember(team) {
+  var xmlhttp;
+  if (window.XMLHttpRequest)
+  {// code for IE7+, Firefox, Chrome, Opera, Safari
+    xmlhttp=new XMLHttpRequest();
+  }
+  else
+  {// code for IE6, IE5
+    xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+  }
+  var e = document.getElementById("selectAddUser");
+  var username = e.options[e.selectedIndex].value;
+  e.removeChild(e.options[e.selectedIndex]);
+  xmlhttp.open("POST","/team/add-member",true);
+  xmlhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+  xmlhttp.send("team=" + team + "&username=" + username);
+  var newuserhtml = '<div class="input-append" id="' + username + '"><span class="add-on" style="width: 78px;">' + username + '</span><button class="btn" type="button" onclick="delTeamMember(\'' + team + '\', \'' + username + '\')"><i class="icon-minus"></i></button></div>';
+  $('#teamMembers').append(newuserhtml);
+}
+
+function delTeamMember(team, username) {
+  var xmlhttp;
+  if (window.XMLHttpRequest)
+  {// code for IE7+, Firefox, Chrome, Opera, Safari
+    xmlhttp=new XMLHttpRequest();
+  }
+  else
+  {// code for IE6, IE5
+    xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+  }
+  xmlhttp.open("POST","/team/del-member",true);
+  xmlhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+  xmlhttp.send("team=" + team + "&username=" + username);
+  var div = document.getElementById(username);
+  div.parentNode.removeChild(div);
+  var sel = document.getElementById('selectAddUser');
+  var opt = document.createElement('option'); // create new option element
+  // create text node to add to option element (opt)
+  opt.appendChild( document.createTextNode(username) );
+  opt.value = username; // set value property of opt
+  sel.appendChild(opt); // add opt to end of select list (sel)
 }
 
 function dismissNotification(msg_id)
@@ -239,7 +299,7 @@ function acknowledgeMonitoringNotification(msg_id)
 {
   var element = document.getElementById(msg_id);
   element.parentNode.removeChild(element);
-  
+
   var xmlhttp;
   if (window.XMLHttpRequest)
   {// code for IE7+, Firefox, Chrome, Opera, Safari
