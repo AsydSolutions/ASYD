@@ -2,7 +2,7 @@
 
 ***
 
-**I. [Installando ASYD](installing.md)**
+**I. [Instalando ASYD](installing.md)**
 
 **1. [Básicos](basics.md)**
 
