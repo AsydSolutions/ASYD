@@ -57,16 +57,15 @@ class Deploy
         # /IGNORE
 
         # INSTALL BLOCK
-        # TODO: custom vars on conditionals
         elsif line.start_with?("install")
           doit = true
-          pkg_mgr = line.match(/^install (pkgutil|pkg|pkgadd)?(?: if .+)?:/)[1]
-          m = line.match(/^install (?:pkgutil |pkg |pkgadd )?if (.[^:]+)/)
+          pkg_mgr = line.match(/^install (pkgutil|pkg|pkgadd)?(?: if .+)?(?<!var):/i)[1]
+          m = line.match(/^install (?:pkgutil |pkg |pkgadd )?if (.+)(?<!var):/i)
           if !m.nil?
             doit = check_condition(m, host)
           end
           if doit
-            line = line.split(':', 2)
+            line = line.split(/(?<!var):/i, 2)
             pkgs = line[1].strip
             ret = Deploy.install(host, pkgs, pkg_mgr)
             if ret[0] == 1
@@ -83,15 +82,14 @@ class Deploy
         # /INSTALL BLOCK
 
         # UNINSTALL BLOCK
-        # TODO
         elsif line.start_with?("uninstall")
           doit = true
-          m = line.match(/^uninstall if (.+):/)
+          m = line.match(/^uninstall if (.+)(?<!var):/i)
           if !m.nil?
             doit = check_condition(m, host)
           end
           if doit
-            line = line.split(':', 2)
+            line = line.split(/(?<!var):/i, 2)
             pkgs = line[1].strip
             ret = Deploy.uninstall(host, pkgs)
             if ret[0] == 1
@@ -108,18 +106,18 @@ class Deploy
         # /UNINSTALL BLOCK
 
         # CONFIG FILE BLOCK
-        elsif line.match(/^(noparse )?config file/)
+        elsif line.match(/^(noparse )?config file/i)
           noparse = false
           if line.start_with?("noparse")
             noparse = true
           end
           doit = true
-          m = line.match(/config file if (.+):/)
+          m = line.match(/config file if (.+)(?<!var):/i)
           if !m.nil?
             doit = check_condition(m, host)
           end
           if doit
-            line = line.split(':', 2)
+            line = line.split(/(?<!var):/i, 2)
             cfg = line[1].split(',')
             cfg_src = cfg_root+cfg[0].strip
             parsed_cfg = parse_config(host, cfg_src) unless noparse
@@ -138,18 +136,18 @@ class Deploy
         # /CONFIG FILE BLOCK
 
         # CONFIG DIR BLOCK
-        elsif line.match(/^(noparse )?config dir/)
+        elsif line.match(/^(noparse )?config dir/i)
           noparse = false
           if line.start_with?("noparse")
             noparse = true
           end
           doit = true
-          m = line.match(/config dir if (.+):/)
+          m = line.match(/config dir if (.+)(?<!var):/i)
           if !m.nil?
             doit = check_condition(m, host)
           end
           if doit
-            line = line.split(':', 2)
+            line = line.split(/(?<!var):/i, 2)
             cfg = line[1].split(',')
             cfg_src = cfg_root+cfg[0].strip
             cfg_dst = cfg[1].strip
@@ -168,10 +166,10 @@ class Deploy
         # /CONFIG DIR BLOCK
 
         # EXEC BLOCK
-        # TODO: custom vars on conditionals
+        # TODO: improve this method
         elsif line.start_with?("exec")
           doit = true
-          m = line.match(/^exec (.[^:]+)/)
+          m = line.match(/^exec (.(var:|[^:])+)/i)
           if !m.nil? #there's some param
             m2 = m[1].split(/if\s?/)
             if !m2[1].nil? #there's conditionals
@@ -185,7 +183,7 @@ class Deploy
                 doit = check_condition(m2, other_host)
                 # if complies then execute the command on remote host
                 if doit
-                  line = line.split(':', 2)
+                  line = line.split(/(?<!var):/i, 2)
                   cmd = parse(host, line[1].strip) #parse for vars
                   ret = other_host.exec_cmd(cmd)
                   msg = "Executed '"+cmd+"' on "+other_host.hostname
@@ -197,7 +195,7 @@ class Deploy
               else
                 doit = check_condition(m2, host)
                 if doit
-                  line = line.split(':', 2)
+                  line = line.split(/(?<!var):/i, 2)
                   cmd = parse(host, line[1].strip) #parse for vars
                   ret = host.exec_cmd(cmd)
                   msg = "Executed '"+cmd+"' on "+host.hostname
@@ -214,7 +212,7 @@ class Deploy
                 raise FormatException, error
               end
               if doit
-                line = line.split(':', 2)
+                line = line.split(/(?<!var):/i, 2)
                 cmd = parse(host, line[1].strip) #parse for vars
                 ret = other_host.exec_cmd(cmd)
                 msg = "Executed '"+cmd+"' on "+other_host.hostname
@@ -226,7 +224,7 @@ class Deploy
             end
           else #just act normally, no params
             if doit
-              line = line.split(':', 2)
+              line = line.split(/(?<!var):/i, 2)
               cmd = parse(host, line[1].strip) #parse for vars
               ret = host.exec_cmd(cmd)
               msg = "Executed '"+cmd+"' on "+host.hostname
@@ -241,12 +239,12 @@ class Deploy
         # MONITOR BLOCK
         elsif line.start_with?("monitor")
           doit = true
-          m = line.match(/^monitor if (.+):/)
+          m = line.match(/^monitor if (.+)(?<!var):/i)
           if !m.nil?
             doit = check_condition(m, host)
           end
           if doit
-            line = line.split(':', 2)
+            line = line.split(/(?<!var):/i, 2)
             services = line[1].split(' ')
             services.each do |service|
               host.monitor_service(service)
@@ -260,12 +258,12 @@ class Deploy
         # DEPLOY BLOCK
         elsif line.start_with?("deploy")
             doit = true
-            m = line.match(/^deploy if (.+):/)
+            m = line.match(/^deploy if (.+)(?<!var):/i)
             if !m.nil?
               doit = check_condition(m, host)
             end
             if doit
-              line = line.split(':', 2)
+              line = line.split(/(?<!var):/i, 2)
               deploys = line[1].split(' ')
               deploys.each do |deploy|
                 ret = Deploy.launch(host, deploy, task)
@@ -390,20 +388,61 @@ class Deploy
   end
 
   # Uninstall package or packages on defined host
-  # TODO
   #
-  def self.uninstall(host, pkg)
+  def self.uninstall(host, pkg, pkg_mgr = nil)
     begin
       if pkg.include? "&" or pkg.include? "|" or pkg.include? ">" or pkg.include? "<" or pkg.include? "`" or pkg.include? "$"
         raise FormatException
       end
-      pkg_mgr = host.pkg_mgr
+      if host.dist == "Solaris" || host.dist == "OpenIndiana"
+        if pkg_mgr == "pkgadd"  #ok
+        elsif pkg_mgr == "pkgutil"  #ok
+        elsif pkg_mgr == "pkg"  #ok
+        else
+          pkg_mgr = host.pkg_mgr  #use standard
+        end
+      else
+        pkg_mgr = host.pkg_mgr
+      end
+      cmd = pkg_mgr
+      #1. apt
       if pkg_mgr == "apt"
-        cmd = pkg_mgr+"-get -y -q remove "+pkg
+        if host.user != "root"
+          cmd = "sudo "+pkg_mgr
+        end
+        cmd = cmd+"-get -y -q remove "+pkg
+      #2. yum
       elsif pkg_mgr == "yum"
-        cmd = pkg_mgr+" remove -y "+pkg
+        if host.user != "root"
+          cmd = "sudo "+pkg_mgr
+        end
+        cmd = cmd+" remove -y "+pkg
+      #3. pacman
       elsif pkg_mgr == "pacman"
-        cmd = pkg_mgr+" -R --noconfirm --noprogressbar "+pkg    ## NOT TESTED, DEVELOPMENT IN PROGRESS
+        if host.user != "root"
+          cmd = "sudo "+pkg_mgr
+        end
+        cmd = cmd+" -R --noconfirm --noprogressbar "+pkg    ## NOT FULLY TESTED, DEVELOPMENT IN PROGRESS
+      #5.1. solaris pkgadd
+      elsif pkg_mgr == "pkgadd"
+        if host.user != "root"
+          cmd = "sudo /usr/sbin/pkgrm"
+        else
+          cmd = "/usr/sbin/pkgrm"
+        end
+        cmd = cmd+" -a /etc/admin "+pkg    ## NOT FULLY TESTED, DEVELOPMENT IN PROGRESS
+      #5.2. solaris pkg
+      elsif pkg_mgr == "pkg"
+        if host.user != "root"
+          cmd = "sudo "+pkg_mgr
+        end
+        cmd = cmd+" uninstall "+pkg    ## NOT FULLY TESTED, DEVELOPMENT IN PROGRESS
+      #5.3. solaris pkgutil
+    elsif pkg_mgr == "pkgutil"
+        if host.user != "root"
+          cmd = "sudo "+pkg_mgr
+        end
+        cmd = cmd+" -y -r "+pkg    ## NOT FULLY TESTED, DEVELOPMENT IN PROGRESS
       end
       result = host.exec_cmd(cmd)
       if result.include? "\nE: "

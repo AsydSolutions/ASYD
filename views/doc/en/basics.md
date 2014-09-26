@@ -1,33 +1,13 @@
 Basics
 ======
 <br/>
+
 Almost everything in ASYD works using the web interface, it allows you to manage
 all the systems, hostgroups, users, teams, monitor your servers and manage and launch
 deploys.
 
 The monitoring is handled by [monit](http://mmonit.com/monit/) on the remote hosts,
 which communicates with the ASYD server.
-
-<br/>
-ASYD data structure:
--------------------
-<br/>
-
-  * `asyd.rb - config.ru`: base files for ASYD to work, `asyd.rb` contains the basic
-  initialization routines and `config.ru` allows Phusion Passenger to start and manage
-  the application.
-  * `installer/`: contains the predefined monitor files and the monitoring deploy
-  for launching monit to the added hosts. This folder gets deleted after the setup is complete.
-  * `models/`: contains all the ASYD core, all the functions for it to work.
-  * `routes/`: contains the routes and actions to be performed depending on the request.
-  * `views/`: contains all the views (web pages) to be displayed on the web interface.
-  * `static/lib/`: contains all the javascript, css and images for the views.
-  * `data/`: stores ASYD data
-    * `data/db/`: several SQLite DB files for storing hosts, hostgroups, users, teams,
-    tasks, notifications, monitoring notifications and system status.
-    * `data/deploys/`: where the deploys are stored (detailed information on the
-    [Deploys](deploys.md) section of the documentantion).
-    * `data/monitors/`: monit definition files for monitoring services.
 
 <br/>
 Adding Hosts and Hostgroups:
@@ -64,6 +44,7 @@ or custom variables to it. A single host can be included on several groups.
 Quick Install:
 --------------
 <br/>
+
 ASYD offers the possibility of installing single packages into a host or hostgroup. For
 doing this, go to the "Deploys" section and use the "Quick Install" dialog box. You can
 also install multiple packages separated by spaces (i.e. htop nano vim).
@@ -76,3 +57,24 @@ not use this feature on groups containing highly different systems.
 
 Please also read the [Solaris](solaris.md) section for more detailed information on how the quick install
 behaves on Solaris systems.
+
+<br/>
+ASYD data structure:
+-------------------
+<br/>
+
+  * `asyd.rb - config.ru`: base files for ASYD to work, `asyd.rb` contains the basic
+  initialization routines and `config.ru` allows Phusion Passenger to start and manage
+  the application.
+  * `installer/`: contains the predefined monitor files and the monitoring deploy
+  for launching monit to the added hosts. This folder gets deleted after the setup is complete.
+  * `models/`: contains all the ASYD core, all the functions for it to work.
+  * `routes/`: contains the routes and actions to be performed depending on the request.
+  * `views/`: contains all the views (web pages) to be displayed on the web interface.
+  * `static/lib/`: contains all the javascript, css and images for the views.
+  * `data/`: stores ASYD data
+    * `data/db/`: several SQLite DB files for storing hosts, hostgroups, users, teams,
+    tasks, notifications, monitoring notifications and system status.
+    * `data/deploys/`: where the deploys are stored (detailed information on the
+    [Deploys](deploys.md) section of the documentantion).
+    * `data/monitors/`: monit definition files for monitoring services.

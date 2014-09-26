@@ -4,7 +4,7 @@ Conditionals
 Conditionals are used for creating rules for when a command should be executed or a configuration
 should be used on a host or hostgroup.
 
-Valid conditions are `==` (equal), `!=` (different), `>=`(greater or equal) and `<=` (lower or equal).
+Valid conditions are `==` (equal), `!=` (different), `>=` (greater or equal) and `<=` (lower or equal).
 The `>=` and `<=` operators can only be used for numbers. The `==` and `!=` operators can be used both
 for strings (text comparison) and numbers.
 

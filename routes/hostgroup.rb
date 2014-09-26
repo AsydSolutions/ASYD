@@ -12,14 +12,14 @@ class ASYD < Sinatra::Application
   post '/hostgroup/add' do
     status 200
     Hostgroup.create(:name => params['hostgroup'])
-    redirect to '/hosts/overiew'
+    redirect to '/hosts/overview'
   end
 
   post '/hostgroup/del' do
     status 200
     hostgroup = Hostgroup.first(:name => params['hostgroup'])
     hostgroup.delete
-    redirect to '/hosts/overiew'
+    redirect to '/hosts/overview'
   end
 
   post '/hostgroup/add-member' do
