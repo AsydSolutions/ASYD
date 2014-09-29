@@ -3,24 +3,24 @@
 <head>
   <title>ASYD - Automated SYstem Deployment</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="/lib/css/bootstrap.min.css">
-  <link rel="stylesheet" href="/lib/css/bootstrap-responsive.min.css">
+  <link rel="stylesheet" href="/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/css/bootstrap-responsive.min.css">
   <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,600italic,400,600">
-  <link rel="stylesheet" href="/lib/css/font-awesome.min.css">
-  <link rel="stylesheet" href="/lib/css/style.css">
-  <link rel="stylesheet" href="/lib/css/pages/signin.css">
-  <script src="/lib/js/jquery-1.7.2.min.js" type="text/javascript"></script>
-  <script src="/lib/js/bootstrap.js"></script>
-  <script src="/lib/js/base.js"></script>
-  <script src="/lib/js/jqBootstrapValidation.min.js"></script>
-  <script src="/lib/js/funcs.js" type="text/javascript"></script>
+  <link rel="stylesheet" href="/css/font-awesome.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/pages/signin.css">
+  <script src="/js/jquery-1.7.2.min.js" type="text/javascript"></script>
+  <script src="/js/bootstrap.js"></script>
+  <script src="/js/base.js"></script>
+  <script src="/js/jqBootstrapValidation.min.js"></script>
+  <script src="/js/funcs.js" type="text/javascript"></script>
 </head>
 <body>
   <div class="navbar navbar-inverse navbar-fixed-top">
     <div class="navbar-inner">
       <div class="container">
         <a class="brand" href="/">
-          <img src="/lib/img/asyd-logo.png">
+          <img src="/img/asyd-logo.png">
         </a>
       </div>
     </div>
@@ -35,29 +35,25 @@
         <div class="account-container">
         	<div class="content clearfix">
         		<form action="/login" method="post">
-        			<h1>ASYD Login</h1>
+        			<h1><%=t('asyd.login')%></h1>
         			<div class="login-fields">
         				<div class="field">
-        					<label for="username">Username</label>
-        					<input type="text" id="username" name="username" value="" placeholder="Username" class="login username-field" />
+        					<label for="username"><%=t('username')%>:</label>
+        					<input type="text" id="username" name="username" value="" placeholder="<%=t('username')%>" class="login username-field" />
         				</div> <!-- /field -->
         				<div class="field">
-        					<label for="password">Password:</label>
-        					<input type="password" id="password" name="password" value="" placeholder="Password" class="login password-field"/>
+        					<label for="password"><%=t('password')%>:</label>
+        					<input type="password" id="password" name="password" value="" placeholder="<%=t('password')%>" class="login password-field"/>
         				</div> <!-- /password -->
         			</div> <!-- /login-fields -->
         			<div class="login-actions">
-        				<span class="login-checkbox">
-        					<input id="Field" name="Field" type="checkbox" class="field login-checkbox" value="First Choice" tabindex="4" />
-        					<label class="choice" for="Field">Keep me signed in</label>
-        				</span>
-        				<button class="button btn btn-success btn-large">Sign In</button>
+        				<button class="button btn btn-success btn-large"><%=t('action.signin')%></button>
         			</div> <!-- .actions -->
         		</form>
         	</div> <!-- /content -->
         </div> <!-- /account-container -->
         <div class="login-extra">
-        	<a href="#">Reset Password</a>
+        	<a href="#"><%=t('action.password_reset')%></a>
         </div> <!-- /login-extra -->
       </div>
     </div>

@@ -2,12 +2,12 @@
   <div class="span6">
     <div class="widget widget-table action-table">
       <div class="widget-header">
-        <i class="icon-sitemap"></i><h3>Group Members for <%=@hostgroup.name%></h3>
+        <i class="icon-sitemap"></i><h3><%=t('group.members.title', group: @hostgroup.name)%></h3>
       </div>
       <div class="widget-content">
         <div style="position:absolute; margin:10px; z-index:90;">
           <a data-toggle="modal" href="#addMember" class="btn">
-            Add member <i class="btn-icon-only icon-plus"></i>
+            <%=t('group.members.add')%> <i class="btn-icon-only icon-plus"></i>
           </a>
         </div>
         <div class="visible-phone visible-tablet"><br></br></div>
@@ -15,13 +15,13 @@
           <thead style="text-align:left;">
             <tr>
               <th>
-                Hostname
+                <%=t('host.hostname')%>
               </th>
               <th>
-                Status
+                <%=t('host.status')%>
               </th>
               <th class="td-actions">
-                Actions
+                <%=t('action.other')%>
               </th>
             </tr>
           </thead>
@@ -33,18 +33,18 @@
               </td>
               <td>
                 <% if @host_status[host.hostname] == 1 %>
-                  <span class="label label-success">all ok</span>
+                  <span class="label label-success"><%=t('status.ok')%></span>
                 <% elsif @host_status[host.hostname] == 2 %>
-                  <span class="label label-warning">warning</span>
+                  <span class="label label-warning"><%=t('status.warning')%></span>
                 <% elsif @host_status[host.hostname] == 3 %>
-                  <span class="label label-important">down</span>
+                  <span class="label label-important"><%=t('status.down')%></span>
                 <% elsif @host_status[host.hostname] == 4 %>
-                  <span class="label">not monitored</span>
+                  <span class="label"><%=t('status.not_monitored')%></span>
                 <% end %>
               </td>
               <td class="td-actions">
-                <a data-toggle="tooltip" data-original-title="Details" href="/host/<%=host.hostname%>" class="btn btn-info btn-mini btn-icon-only hint"><i class="btn-icon-only icon-folder-open"></i></a>
-                <a data-toggle="tooltip" data-original-title="Remove from group" href="#delMember" class="btn btn-danger btn-mini btn-icon-only hint" onclick="passDataToModal('<%=host.hostname%>', '#delMember')"><i class="btn-icon-only icon-remove"></i></a>
+                <a data-toggle="tooltip" data-original-title="<%=t('action.details')%>" href="/host/<%=host.hostname%>" class="btn btn-info btn-mini btn-icon-only hint"><i class="btn-icon-only icon-folder-open"></i></a>
+                <a data-toggle="tooltip" data-original-title="<%=t('group.members.del')%>" href="#delMember" class="btn btn-danger btn-mini btn-icon-only hint" onclick="passDataToModal('<%=host.hostname%>', '#delMember')"><i class="btn-icon-only icon-remove"></i></a>
               </td>
             </tr>
             <% end %>
@@ -56,7 +56,7 @@
   <div class="span6">
     <div class="widget">
       <div class="widget-header">
-        <i class="icon-terminal"></i><h3>Custom variables</h3>
+        <i class="icon-terminal"></i><h3><%=t('vars.title')%></h3>
       </div>
       <div class="widget-content">
         <div class="control-group" id="fields">
@@ -76,8 +76,8 @@
             <div class="controls">
             <div class="input-append">
               <input type="hidden" name="hostgroup" value="<%=@hostgroup.name%>">
-              <input autocomplete="off" class="input span2" id="var_name" name="var_name" type="text" placeholder="variable name" required/>
-              <input autocomplete="off" class="input span2" id="value" name="value" type="text" placeholder="value" required/>
+              <input autocomplete="off" class="input span2" id="var_name" name="var_name" type="text" placeholder="<%=t('vars.name')%>" required/>
+              <input autocomplete="off" class="input span2" id="value" name="value" type="text" placeholder="<%=t('vars.value')%>" required/>
               <button class="btn btn-append" type="submit"><i class="icon-plus"></i></button>
             </div>
           </div>
@@ -89,10 +89,10 @@
 </div>
 
 
-<div id="addMember" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="Add Member" aria-hidden="true">
+<div id="addMember" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="<%=t('group.members.add')%>" aria-hidden="true">
   <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h3 id="addMemeberLabel">Add Member</h3>
+    <h3 id="addMemeberLabel"><%=t('group.members.add')%></h3>
   </div>
   <form id="addMemeberform" action="/hostgroup/add-member" method="post">
     <div class="modal-body">
@@ -109,27 +109,27 @@
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
-      <button type="submit" class="btn btn-primary">Add</button>
+      <button class="btn" data-dismiss="modal" aria-hidden="true"><%=t('action.cancel')%></button>
+      <button type="submit" class="btn btn-primary"><%=t('action.add')%></button>
     </div>
   </form>
 </div>
 
 
-<div id="delMember" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="Del Memeber" aria-hidden="true">
+<div id="delMember" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="<%=t('group.members.del')%>" aria-hidden="true">
   <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h3 id="delDeployLabel">Attention!</h3>
+    <h3 id="delDeployLabel"><%=t('dialog.attention')%></h3>
   </div>
   <div class="modal-body">
-    <p>Are you sure you want to delete <b id="dataInput"></b> from the <b><%=@hostgroup.name%></b> hostgroup?</p>
+    <p><%= t('dialog.del_member.confirm', host: '<b id="dataInput"></b>', group: @hostgroup.name) %></p>
   </div>
   <div class="modal-footer">
     <form id="delMemberform" action="/hostgroup/del-member" method="post">
       <input type="hidden" name="hostgroup" value="<%=@hostgroup.name%>">
       <input type="hidden" name="hostname" id="dataInput" value="">
-      <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
-      <button type="submit" class="btn btn-primary">Delete</button>
+      <button class="btn" data-dismiss="modal" aria-hidden="true"><%=t('action.cancel')%></button>
+      <button type="submit" class="btn btn-primary"><%=t('action.del')%></button>
     </form>
   </div>
 </div>

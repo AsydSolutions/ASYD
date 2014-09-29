@@ -67,8 +67,8 @@ $(function() {
     if (Modernizr.csstransforms3d == false){
       $('.modal').removeClass('fade');
     };
-    var dttbl = $('script[src="/lib/js/datatables-bootstrap.js"]').length;
-    var slct = $('script[src="/lib/js/select2.min.js"]').length;
+    var dttbl = $('script[src="/js/datatables-bootstrap.js"]').length;
+    var slct = $('script[src="/js/select2.min.js"]').length;
     if (dttbl != 0) {
 				$('#hgtable').dataTable( {
             "ordering": false,

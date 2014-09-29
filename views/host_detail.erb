@@ -2,23 +2,23 @@
   <div class="span6">
     <div class="widget widget-table action-table">
       <div class="widget-header">
-        <i class="icon-stethoscope"></i><h3>System stats</h3>
+        <i class="icon-stethoscope"></i><h3><%=t('host.stats.title')%></h3>
       </div>
       <div class="widget-content">
         <table class="table table-striped table-bordered">
         <tbody>
           <tr>
-            <td><strong><%="load:"%></strong></td>
+            <td><strong><%=t('host.stats.load')%></strong></td>
             <td><%=@status.load_1.to_s+" "+@status.load_5.to_s+" "+@status.load_15.to_s unless @status.nil? %></td>
           </tr>
           <tr>
-            <td><strong><%="cpu:"%></strong></td>
+            <td><strong><%=t('host.stats.cpu')%></strong></td>
             <td><%=@status.cpu_us.to_s+"%us, "+@status.cpu_sy.to_s+"%sy, "+@status.cpu_wa.to_s+"%wa" unless @status.nil? %></td>
           </tr>
           <tr>
-            <td><strong><%="mem:"%></strong></td>
-            <td><%=@status.used_sysmem_mb.to_s+"MB used / "+@status.total_memory.to_s+"MB total" unless @status.nil? %><div style="margin-top: 9px; margin-bottom: 9px; text-align: center" class="progress progress-success">
-                      <div style="width: <%=@status.used_sysmem_percent.to_i.round.to_s unless @status.nil? %>%" class="bar"><%=@status.used_sysmem_percent.to_s unless @status.nil? %>% used</div>
+            <td><strong><%=t('host.stats.mem')%></strong></td>
+            <td><%=@status.used_sysmem_mb.to_s+"MB "+t('used')+" / "+@status.total_memory.to_s+"MB "+t('total')+"" unless @status.nil? %><div style="margin-top: 9px; margin-bottom: 9px; text-align: center" class="progress progress-success">
+                      <div style="width: <%=@status.used_sysmem_percent.to_i.round.to_s unless @status.nil? %>%" class="bar"><%=@status.used_sysmem_percent.to_s unless @status.nil? %>% <%=t('used')%></div>
             </div></td>
           </tr>
         </tbody>
@@ -29,13 +29,13 @@
   <div class="span4">
     <div class="widget widget-table action-table">
       <div class="widget-header">
-        <i class="icon-info"></i><h3>System info</h3>
+        <i class="icon-info"></i><h3><%=t('host.info.title')%></h3>
       </div>
       <div class="widget-content">
         <table class="table table-striped table-bordered">
         <tbody>
           <tr>
-            <td><strong><%="hostname:"%></strong></td>
+            <td><strong><%=t('host.hostname').downcase%></strong></td>
             <td><%=@host.hostname%></td>
           </tr>
           <tr>
@@ -43,11 +43,11 @@
             <td><%=@host.ip%></td>
           </tr>
           <tr>
-            <td><strong><%="os:"%></strong></td>
+            <td><strong><%=t('host.info.os')%></strong></td>
             <td><%=@host.dist+" "+@host.dist_ver.to_s%></td>
           </tr>
           <tr>
-            <td><strong><%="arch:"%></strong></td>
+            <td><strong><%=t('host.info.arch')%></strong></td>
             <td><%=@host.arch%></td>
           </tr>
         </tbody>
@@ -60,7 +60,7 @@
   <div class="span6">
     <div class="widget">
       <div class="widget-header">
-        <i class="icon-terminal"></i><h3>Custom variables</h3>
+        <i class="icon-terminal"></i><h3><%=t('vars.title')%></h3>
       </div>
       <div class="widget-content">
         <div class="control-group" id="fields">
@@ -80,8 +80,8 @@
             <div class="controls">
             <div class="input-append">
               <input type="hidden" name="hostname" value="<%=@host.hostname%>">
-              <input autocomplete="off" class="input span2" id="var_name" name="var_name" type="text" placeholder="variable name" required/>
-              <input autocomplete="off" class="input span2" id="value" name="value" type="text" placeholder="value" required/>
+              <input autocomplete="off" class="input span2" id="var_name" name="var_name" type="text" placeholder="<%=t('vars.name')%>" required/>
+              <input autocomplete="off" class="input span2" id="value" name="value" type="text" placeholder="<%=t('vars.value')%>" required/>
               <button class="btn btn-append" type="submit"><i class="icon-plus"></i></button>
             </div>
           </div>

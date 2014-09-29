@@ -59,7 +59,7 @@ class Deploy
         # INSTALL BLOCK
         elsif line.start_with?("install")
           doit = true
-          pkg_mgr = line.match(/^install (pkgutil|pkg|pkgadd)?(?: if .+)?(?<!var):/i)[1]
+          pkg_mgr = line.match(/^install (pkgutil|pkg|pkgadd)?(?: if .+)?(?<!var):/i) ? line.match(/^install (pkgutil|pkg|pkgadd)?(?: if .+)?(?<!var):/i) : nil
           m = line.match(/^install (?:pkgutil |pkg |pkgadd )?if (.+)(?<!var):/i)
           if !m.nil?
             doit = check_condition(m, host)

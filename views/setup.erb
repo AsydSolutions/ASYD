@@ -3,24 +3,24 @@
 <head>
   <title>ASYD - Automated SYstem Deployment</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="/lib/css/bootstrap.min.css">
-  <link rel="stylesheet" href="/lib/css/bootstrap-responsive.min.css">
+  <link rel="stylesheet" href="/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/css/bootstrap-responsive.min.css">
   <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,600italic,400,600">
-  <link rel="stylesheet" href="/lib/css/font-awesome.min.css">
-  <link rel="stylesheet" href="/lib/css/style.css">
-  <link rel="stylesheet" href="/lib/css/pages/signin.css">
-  <script src="/lib/js/jquery-1.7.2.min.js" type="text/javascript"></script>
-  <script src="/lib/js/bootstrap.js"></script>
-  <script src="/lib/js/base.js"></script>
-  <script src="/lib/js/jqBootstrapValidation.min.js"></script>
-  <script src="/lib/js/funcs.js" type="text/javascript"></script>
+  <link rel="stylesheet" href="/css/font-awesome.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/pages/signin.css">
+  <script src="/js/jquery-1.7.2.min.js" type="text/javascript"></script>
+  <script src="/js/bootstrap.js"></script>
+  <script src="/js/base.js"></script>
+  <script src="/js/jqBootstrapValidation.min.js"></script>
+  <script src="/js/funcs.js" type="text/javascript"></script>
 </head>
 <body>
   <div class="navbar navbar-inverse navbar-fixed-top">
     <div class="navbar-inner">
       <div class="container">
         <a class="brand" href="/">
-          <img src="/lib/img/asyd-logo.png">
+          <img src="/img/asyd-logo.png">
         </a>
       </div>
     </div>
@@ -32,47 +32,47 @@
         <div class="account-container">
           <div class="content clearfix">
             <form id="setup" action='/setup' method='post' enctype='multipart/form-data'>
-              <h1> Setup </h1>
+              <h1> <%=t('asyd.setup')%> </h1>
               <legend></legend>
               <div class="btn-group control-group" data-toggle-name="generate" data-toggle="buttons-radio" >
-                <button type="button" value="1" class="btn import_key active" data-toggle="button">Generate key pair</button>
-                <button type="button" value="0" class="btn import_key" data-toggle="button">Import key pair</button>
+                <button type="button" value="1" class="btn import_key active" data-toggle="button"><%=t('ssh.generate')%></button>
+                <button type="button" value="0" class="btn import_key" data-toggle="button"><%=t('ssh.import')%></button>
               </div>
               <input type="hidden" name="generate" value="1" />
               <div id="gen" class="control-group"><p class="help-block"></p></div>
               <div id="import" style="display:none">
                 <div class="control-group">
-                  <label class="control-label" for="priv_key">Private key</label>
+                  <label class="control-label" for="priv_key"><%=t('ssh.private_key')%></label>
                   <div class="controls">
                     <input class="input-file" name="priv_key" type="file">
                   </div>
                 </div>
                 <div class="control-group">
-                  <label class="control-label" for="pub_key">Public key</label>
+                  <label class="control-label" for="pub_key"><%=t('ssh.public_key')%></label>
                   <div class="controls">
                     <input class="input-file" name="pub_key" type="file">
                   </div>
                 </div>
               </div>
               <div class="control-group">
-                <label class="control-label" for="username">Username</label>
+                <label class="control-label" for="username"><%=t('username')%></label>
                 <div class="controls">
                   <input class="input" name="username" type="text" required>
                 </div>
               </div>
               <div class="control-group">
-                <label class="control-label" for="email">E-Mail</label>
+                <label class="control-label" for="email"><%=t('email')%></label>
                 <div class="controls">
                   <input class="input" name="email" type="email" required>
                 </div>
               </div>
               <div class="control-group">
-                <label class="control-label" for="password">Password</label>
+                <label class="control-label" for="password"><%=t('password')%></label>
                 <div class="controls">
                   <input class="input" name="password" type="password" required>
                 </div>
               </div>
-              <div class="control-group"><input class="btn" type='submit' value='Setup!'></div>
+              <div class="control-group"><input class="btn" type='submit' value="<%=t('action.setup')%>"></div>
             </form>
           </div>
         </div>

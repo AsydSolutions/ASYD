@@ -4,7 +4,7 @@ require_relative 'models/init'
 
 class ASYD < Sinatra::Application
   configure do
-    set :public_folder, Proc.new { File.join(root, "static") }
+    set :public_folder, Proc.new { File.join(root, "static/lib") }
     # set :environment, :production
     enable :sessions
   end
@@ -20,18 +20,26 @@ class ASYD < Sinatra::Application
     def timezone
       session[:timezone] ? session[:timezone] : "UTC"
     end
+    def t(*args)
+      I18n.t(*args)
+    end
+  end
+
+  before do
+    loc = request.env["HTTP_ACCEPT_LANGUAGE"] ? request.env["HTTP_ACCEPT_LANGUAGE"][0,2] : "en"
+    I18n.locale = I18n.available_locales.map(&:to_s).include?(loc) ? loc : "en"
   end
 
   # Check if ASYD was installed or user is logged in before doing anything
-  before /^(?!\/(setup))(?!\/(login))/ do
-    if !File.directory? 'data'
-      redirect '/setup'
-    else
-      if !session[:username] then
-        redirect '/login'
-      end
-    end
-  end
+  # before /^(?!\/(setup))(?!\/(login))/ do
+  #   if !File.directory? 'data'
+  #     redirect '/setup'
+  #   else
+  #     if !session[:username] then
+  #       redirect '/login'
+  #     end
+  #   end
+  # end
 
   # 404 Error!
   not_found do
