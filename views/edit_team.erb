@@ -1,13 +1,13 @@
-<div id="editTeam" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="Edit Team" aria-hidden="true">
+<div id="editTeam" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="<%=t('dialog.edit_team.title')%>" aria-hidden="true">
   <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h3 id="editTeamLabel">Edit team</h3>
+    <h3 id="editTeamLabel"><%=t('dialog.edit_team.title')%></h3>
   </div>
   <form id="editTeamform" action="/team/edit" method="post">
     <div class="modal-body">
-      <div class="control-group"><input name="name" type="text" id="name" value="<%=@team.name%>" readonly><span class="help-inline">team name</span></div>
+      <div class="control-group"><input name="name" type="text" id="name" value="<%=@team.name%>" readonly><span class="help-inline"><%=t('dialog.edit_team.name')%></span></div>
       <br/>
-      <h4>Capabilities:</h4>
+      <h4><%=t('dialog.edit_team.capabilities')%></h4>
       <div class="control-group">
         <%@team.capabilities.each do |cap|%>
           <input type="checkbox" value="<%=cap%>" checked="checked"> <%=cap%>
@@ -16,7 +16,7 @@
       <input type="submit" id="submit-form" class="hidden" />
     </form>
       <br/>
-      <h4>Team members:</h4>
+      <h4><%=t('dialog.edit_team.members')%></h4>
       <div class="control-group" style="margin-left: 4px; margin-top: 4px;" id="teamMembers">
       <% @team.users.each do |user| %>
         <div class="input-append" id="<%= user.username %>">
@@ -40,7 +40,7 @@
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
-      <label for="submit-form" class="btn btn-primary">Save</label>
+      <button class="btn" data-dismiss="modal" aria-hidden="true"><%=t('action.cancel')%></button>
+      <label for="submit-form" class="btn btn-primary"><%=t('action.save')%></label>
     </div>
 </div>

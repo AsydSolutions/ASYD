@@ -1,0 +1,164 @@
+en:
+  menu:
+    documentation: "Documentation"
+    manage_users: "Manage users"
+    logout: "Logout"
+    dashboard: "Dashboard"
+    servers: "Servers"
+    deploys: "Deploys"
+    tasks: "Tasks"
+
+  action:
+    one: "Action"
+    other: "Actions"
+    dismiss: "Dismiss"
+    acknowledge: "Acknowledge"
+    deploy: "Deploy!"
+    cancel: "Cancel"
+    add: "Add"
+    del: "Delete"
+    edit: "Edit"
+    remove: "Remove"
+    signin: "Sign In"
+    password_reset: "Reset Password"
+    setup: "Setup!"
+    details: "Details"
+    save: "Save"
+
+  asyd:
+    login: "ASYD Login"
+    setup: "ASYD Setup"
+    doc: "ASYD Documentation"
+
+  ssh:
+    generate: "Generate key pair"
+    import: "Import key pair"
+    private_key: "Private key"
+    public_key: "Public key"
+    port: "SSH port"
+
+  username: "Username"
+  password: "Password"
+  email: "E-Mail"
+  name: "Name"
+  ip: "IP address"
+  used: "used"
+  total: "total"
+  deploy: "Deploy"
+
+  member:
+    one: "Member"
+    other: "Members"
+
+  error:
+    not_found:
+      short: "Oops! we cannot find this place."
+      detail: "Why not try going back to the <a href='/'>dashboard</a> or using the top menu!"
+
+  group:
+    one: "Hostgroup"
+    other: "Host Groups"
+    add: "Add Hostgroup"
+    members:
+      title: "Group Members for %{group}"
+      add: "Add member"
+      del: "Remove from group"
+
+  host:
+    one: "Host"
+    other: "Hosts"
+    hostname: "Hostname"
+    status: "Status"
+    reboot: "Reboot"
+    add: "Add Host"
+    stats:
+      title: "System stats"
+      load: "load:"
+      cpu: "cpu:"
+      mem: "mem:"
+    info:
+      title: "System info"
+      os: "os:"
+      arch: "arch:"
+
+  vars:
+    title: "Custom variables"
+    name: "variable name"
+    value: "value"
+
+  status:
+    ok: "all ok"
+    warning: "warning"
+    down: "down"
+    not_monitored: "not monitored"
+
+  user:
+    one: "User"
+    other: "Users"
+    add: "Add user"
+
+  team:
+    one: "Team"
+    other: "Teams"
+    add: "Add team"
+
+  dialog:
+    unique: "(must be unique)"
+    attention: "Attention!"
+    add_host:
+      admin: "(must have admin privileges)"
+      password: "(won't be stored)"
+      ip:
+        valid: "Must be a valid IP address"
+    del_host:
+      title: "Remove Host"
+      confirm: "Are you sure you want to delete %{host} from your server list?"
+    del_group:
+      title: "Remove Hostgroup"
+      confirm: "Are you sure you want to delete %{group} hostgroup?"
+    reboot:
+      title: "Reboot Host"
+      confirm: "Are you sure you want to reboot %{host}?"
+    del_member:
+      confirm: "Are you sure you want to delete %{host} from the <b>%{group}</b> hostgroup?"
+    add_user:
+      title: "Add User"
+    add_team:
+      title: "Add Team"
+      name: "Team Name"
+      name_long: "name for the new team"
+    del_user:
+      title: "Remove User"
+      confirm: "Are you sure you want to remove the user %{user}?"
+    del_team:
+      title: "Remove Team"
+      confirm: "Are you sure you want to delete the team %{team}?"
+    edit_user:
+      title: "Edit User"
+      new_pass: "New Password"
+      change_pass: "Change password"
+      change_email: "Change email address"
+    edit_team:
+      title: "Edit Team"
+      name: "team name"
+      capabilities: "Capabilities:"
+      members: "Team members:"
+    deploy:
+      confirm: "Do you want to deploy %{deploy} on "
+    install:
+      title: "Quick Install"
+      packages: "Package(s) to install (separated by spaces)"
+    del_deploy:
+      title: "Delete Deploy"
+      confirm: "Are you sure you want to delete the deploy %{deploy}?"
+
+  docu:
+    index: "Index"
+    installing: "Installing"
+    basics: "Basics"
+    deploys: "Deploys"
+    configurations: "Configurations"
+    variables: "Variables"
+    conditionals: "Conditionals"
+    monitoring: "Monitoring"
+    solaris: "Solaris Specific"

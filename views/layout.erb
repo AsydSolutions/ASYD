@@ -3,32 +3,32 @@
 <head>
   <title>ASYD - Automated SYstem Deployment</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="/lib/css/bootstrap.min.css">
-  <link rel="stylesheet" href="/lib/css/bootstrap-responsive.min.css">
+  <link rel="stylesheet" href="/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/css/bootstrap-responsive.min.css">
   <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,600italic,400,600">
-  <link rel="stylesheet" href="/lib/css/font-awesome.min.css">
-  <link rel="stylesheet" href="/lib/css/style.css">
+  <link rel="stylesheet" href="/css/font-awesome.min.css">
+  <link rel="stylesheet" href="/css/style.css">
   <% if request.path_info.start_with?("/login") %>
-    <link rel="stylesheet" href="/lib/css/pages/signin.css">
+    <link rel="stylesheet" href="/css/pages/signin.css">
   <% end %>
-  <script src="/lib/js/jquery-1.7.2.min.js" type="text/javascript"></script>
-  <script src="/lib/js/bootstrap.js"></script>
-  <script src="/lib/js/base.js"></script>
-  <script src="/lib/js/jqBootstrapValidation.min.js"></script>
-  <script src="/lib/js/modernizr.min.js" type="text/javascript"></script>
-  <script src="/lib/js/funcs.js" type="text/javascript"></script>
+  <script src="/js/jquery-1.7.2.min.js" type="text/javascript"></script>
+  <script src="/js/bootstrap.js"></script>
+  <script src="/js/base.js"></script>
+  <script src="/js/jqBootstrapValidation.min.js"></script>
+  <script src="/js/modernizr.min.js" type="text/javascript"></script>
+  <script src="/js/funcs.js" type="text/javascript"></script>
   <!-- DataTables -->
   <% if request.path_info.start_with?("/host") || request.path_info.start_with?("/deploys/list") || request.path_info.start_with?("/task/list") || request.path_info.start_with?("/users") %>
     <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.1/css/jquery.dataTables.css">
-    <link rel="stylesheet" type="text/css" href="/lib/css/datatables-bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="/css/datatables-bootstrap.css">
     <script type="text/javascript" language="javascript" src="//cdn.datatables.net/1.10.1/js/jquery.dataTables.min.js"></script>
-    <script type="text/javascript" language="javascript" src="/lib/js/datatables-bootstrap.js"></script>
+    <script type="text/javascript" language="javascript" src="/js/datatables-bootstrap.js"></script>
   <% end %>
   <!-- DataTables -->
   <!-- Select2 -->
   <% if request.path_info.start_with?("/host") || request.path_info.start_with?("/deploys/list") %>
-    <link rel="stylesheet" type="text/css" href="/lib/css/select2.css">
-    <script type="text/javascript" language="javascript" src="/lib/js/select2.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="/css/select2.css">
+    <script type="text/javascript" language="javascript" src="/js/select2.min.js"></script>
   <% end %>
   <!-- Select2 -->
   <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
@@ -36,7 +36,7 @@
     <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
   <![endif]-->
   <!--[if IE 7]>
-    <link rel="stylesheet" href="/lib/css/font-awesome-ie7.min.css">
+    <link rel="stylesheet" href="/css/font-awesome-ie7.min.css">
   <![endif]-->
 </head>
 <body>
@@ -50,11 +50,11 @@
             <span class="icon-bar"></span>
           </a>
           <a class="brand" href="/">
-             <img src="/lib/img/asyd-logo.png">
+             <img src="/img/asyd-logo.png">
           </a>
           <div class="nav-collapse">
             <ul class="nav pull-right">
-              <li><a href="/help"><i class="icon-book"></i> Documentation</a></li>
+              <li><a href="/help"><i class="icon-book"></i> <%=t('menu.documentation')%></a></li>
               <%if !user.nil?%>
               <li class="dropdown">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown">
@@ -62,10 +62,10 @@
                 </a>
                 <ul class="dropdown-menu">
                   <%if user.is_admin?%>
-                    <li><a href="/users">Manage users</a></li>
+                    <li><a href="/users"><%=t('menu.manage_users')%></a></li>
                     <li class="divider"></li>
                   <%end%>
-                  <li><a href="/logout">Logout</a></li>
+                  <li><a href="/logout"><%=t('menu.logout')%></a></li>
                 </ul>
               </li>
               <%end%>
@@ -79,10 +79,10 @@
       <div class="subnavbar-inner">
         <div class="container">
           <ul class="mainnav">
-            <li <% if request.path_info == "/" %>class="active"<%end%>><a href="/"><i class="icon-dashboard"></i><span>Dashboard</span></a></li>
-            <li <% if request.path_info.start_with?("/host") %>class="active"<%end%>><a href="/hosts/overview"><i class="icon-hdd"></i><span>Servers</span></a></li>
-            <li <% if request.path_info.start_with?("/deploy") %>class="active"<%end%>><a href="/deploys/list"><i class="icon-code"></i><span>Deploys</span></a></li>
-            <li <% if request.path_info.start_with?("/task") %>class="active"<%end%>><a href="/task/list"><i class="icon-tasks"></i><span>Tasks</span></a></li>
+            <li <% if request.path_info == "/" %>class="active"<%end%>><a href="/"><i class="icon-dashboard"></i><span><%=t('menu.dashboard')%></span></a></li>
+            <li <% if request.path_info.start_with?("/host") %>class="active"<%end%>><a href="/hosts/overview"><i class="icon-hdd"></i><span><%=t('menu.servers')%></span></a></li>
+            <li <% if request.path_info.start_with?("/deploy") %>class="active"<%end%>><a href="/deploys/list"><i class="icon-code"></i><span><%=t('menu.deploys')%></span></a></li>
+            <li <% if request.path_info.start_with?("/task") %>class="active"<%end%>><a href="/task/list"><i class="icon-tasks"></i><span><%=t('menu.tasks')%></span></a></li>
           </ul>
         </div>
       </div>
@@ -132,8 +132,8 @@
                   &times;
                 </a>
                 <ul class="dropdown-menu" style="left: -100px">
-                  <li><a href="#" onclick="dismissMonitoringNotification('<%= notification.id %>')">Dismiss</a></li>
-                  <li><a href="#" onclick="acknowledgeMonitoringNotification('<%= notification.id %>')">Acknowledge</a></li>
+                  <li><a href="#" onclick="dismissMonitoringNotification('<%= notification.id %>')"><%=t('action.dismiss')%></a></li>
+                  <li><a href="#" onclick="acknowledgeMonitoringNotification('<%= notification.id %>')"><%=t('action.acknowledge')%></a></li>
                 </ul>
               </span>
               <%= notification.message %>

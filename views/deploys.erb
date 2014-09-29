@@ -2,17 +2,17 @@
   <div class="span6">
     <div class="widget widget-table action-table">
       <div class="widget-header">
-        <i class="icon-rocket"></i><h3>Deploy!</h3>
+        <i class="icon-rocket"></i><h3><%=t('action.deploy')%></h3>
       </div>
       <div class="widget-content">
         <div style="position:absolute; margin:10px; z-index:90;">
           <select name="target" class="input" id="selectHostDeploy" style="position:absolute; margin:10px; z-index:90;">
             <option></option>
-            <optgroup label="Hosts">
+            <optgroup label="<%=t('host.other')%>">
             <% @hosts.each do |host| %>
               <option value="host;<%=host.hostname%>"><%=host.hostname%></option>
             <% end %>
-            <optgroup label="Hostgroups">
+            <optgroup label="<%=t('group.other')%>">
             <% @hostgroups.each do |hostgroup| %>
               <option value="hostgroup;<%=hostgroup.name%>"><%=hostgroup.name%></option>
             <% end %>
@@ -23,11 +23,11 @@
           <thead style="text-align:left;">
             <tr>
               <th>
-                Deploy
+                <%=t('deploy')%>
               </th>
               </th>
               <th class="td-actions">
-                Actions
+                <%=t('action.other')%>
               </th>
             </tr>
           </thead>
@@ -38,9 +38,9 @@
                 <%=deploy%>
               </td>
               <td class="td-actions">
-                <a data-toggle="tooltip" data-original-title="Deploy!" href="<%=deploy%>" class="btn btn-success btn-mini btn-icon-only hint" deploy-confirm="Do you want to deploy <%=deploy%> on "><i class="btn-icon-only icon-rocket"></i></a>
-                <a data-toggle="tooltip" data-original-title="Details" href="/deploys/<%=deploy%>" class="btn btn-info btn-mini btn-icon-only hint"><i class="btn-icon-only icon-folder-open"></i></a>
-                <a data-toggle="tooltip" data-original-title="Delete" href="#delDeploy" class="btn btn-danger btn-mini btn-icon-only hint" onclick="passDataToModal('<%=deploy%>', '#delDeploy')"><i class="btn-icon-only icon-remove"></i></a>
+                <a data-toggle="tooltip" data-original-title="<%=t('action.deploy')%>" href="<%=deploy%>" class="btn btn-success btn-mini btn-icon-only hint" deploy-confirm="<%= t('dialog.deploy.confirm', deploy: deploy)%> on "><i class="btn-icon-only icon-rocket"></i></a>
+                <a data-toggle="tooltip" data-original-title="<%=t('action.details')%>" href="/deploys/<%=deploy%>" class="btn btn-info btn-mini btn-icon-only hint"><i class="btn-icon-only icon-folder-open"></i></a>
+                <a data-toggle="tooltip" data-original-title="<%=t('action.del')%>" href="#delDeploy" class="btn btn-danger btn-mini btn-icon-only hint" onclick="passDataToModal('<%=deploy%>', '#delDeploy')"><i class="btn-icon-only icon-remove"></i></a>
               </td>
             </tr>
             <% end %>
@@ -52,18 +52,18 @@
   <div class="span4-fluid">
     <div class="widget">
       <div class="widget-header">
-        <i class="icon-bolt"></i><h3>Quick install</h3>
+        <i class="icon-bolt"></i><h3><%= t('dialog.install.title')%></h3>
       </div>
       <div class="widget-content">
         <form id="install_pkg" action='/deploys/install-pkg' method='post' class="form-inline">
-          <div class="control-group"><input name='package' type="text" class="input-xlarge" placeholder="Package(s) to install (separated by spaces)" required></div>
+          <div class="control-group"><input name='package' type="text" class="input-xlarge" placeholder="<%= t('dialog.install.packages')%>" required></div>
           <div class="control-group" for"host"><select name="target" class="input-xlarge" id="selectHostInstall" required>
             <option></option>
-            <optgroup label="Hosts">
+            <optgroup label="<%=t('host.other')%>">
             <% @hosts.each do |host| %>
               <option value="host;<%=host.hostname%>"><%=host.hostname%></option>
             <% end %>
-            <optgroup label="Hostgroups">
+            <optgroup label="<%=t('group.other')%>">
             <% @hostgroups.each do |hostgroup| %>
               <option value="hostgroup;<%=hostgroup.name%>"><%=hostgroup.name%></option>
             <% end %>
@@ -76,19 +76,19 @@
 </div>
 
 
-<div id="delDeploy" class="modal hide fade no-csstransforms3d" tabindex="-1" role="dialog" aria-labelledby="Del Deploy" aria-hidden="true">
+<div id="delDeploy" class="modal hide fade no-csstransforms3d" tabindex="-1" role="dialog" aria-labelledby="<%=t('dialog.del_deploy.title')%>" aria-hidden="true">
   <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h3 id="delDeployLabel">Attention!</h3>
+    <h3 id="delDeployLabel"><%=t('dialog.attention')%></h3>
   </div>
   <div class="modal-body">
-    <p>Are you sure you want to delete the deploy <b id="dataInput"></b>?</p>
+    <p><%=t('dialog.del_deploy.confirm', deploy: '<b id="dataInput"></b>')%></p>
   </div>
   <div class="modal-footer">
     <form id="delDeployform" action="/deploys/del" method="post">
       <input type="hidden" name="deploy" id="dataInput" value="">
-      <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
-      <button type="submit" class="btn btn-primary">Delete</button>
+      <button class="btn" data-dismiss="modal" aria-hidden="true"><%=t('action.cancel')%></button>
+      <button type="submit" class="btn btn-primary"><%=t('action.del')%></button>
     </form>
   </div>
 </div>
