@@ -31,15 +31,15 @@ class ASYD < Sinatra::Application
   end
 
   # Check if ASYD was installed or user is logged in before doing anything
-  # before /^(?!\/(setup))(?!\/(login))/ do
-  #   if !File.directory? 'data'
-  #     redirect '/setup'
-  #   else
-  #     if !session[:username] then
-  #       redirect '/login'
-  #     end
-  #   end
-  # end
+  before /^(?!\/(setup))(?!\/(login))/ do
+    if !File.directory? 'data'
+      redirect '/setup'
+    else
+      if !session[:username] then
+        redirect '/login'
+      end
+    end
+  end
 
   # 404 Error!
   not_found do
