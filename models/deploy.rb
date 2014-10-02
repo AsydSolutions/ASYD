@@ -71,7 +71,7 @@ class Deploy
             if ret[0] == 1
               msg = "Installed "+pkgs+" on "+host.hostname+": "+ret[1]
               NOTEX.synchronize do
-                notification = Notification.create(:type => :info, :dismiss => true, :message => msg, :task => task)
+                notification = Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
               end
             elsif ret[0] == 4
               raise ExecutionError, ret[1]
@@ -95,7 +95,7 @@ class Deploy
             if ret[0] == 1
               msg = "Removed "+pkgs+" from "+host.hostname+": "+ret[1]
               NOTEX.synchronize do
-                notification = Notification.create(:type => :info, :dismiss => true, :message => msg, :task => task)
+                notification = Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
               end
             elsif ret[0] == 4
               raise ExecutionError, ret[1]
@@ -130,7 +130,7 @@ class Deploy
             parsed_cfg.unlink unless noparse
             msg = "Uploaded "+cfg_src+" to "+cfg_dst+" on "+host.hostname
             NOTEX.synchronize do
-              notification = Notification.create(:type => :info, :dismiss => true, :message => msg, :task => task)
+              notification = Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
             end
           end
         # /CONFIG FILE BLOCK
@@ -160,7 +160,7 @@ class Deploy
             FileUtils.rm_r parsed_cfg, :secure=>true unless noparse
             msg = "Uploaded "+cfg_src+" to "+cfg_dst+" on "+host.hostname
             NOTEX.synchronize do
-              notification = Notification.create(:type => :info, :dismiss => true, :message => msg, :task => task)
+              notification = Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
             end
           end
         # /CONFIG DIR BLOCK
@@ -189,7 +189,7 @@ class Deploy
                   msg = "Executed '"+cmd+"' on "+other_host.hostname
                   msg = msg+": "+ret unless ret.nil?
                   NOTEX.synchronize do
-                    notification = Notification.create(:type => :info, :dismiss => true, :message => msg, :task => task)
+                    notification = Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
                   end
                 end
               else
@@ -201,7 +201,7 @@ class Deploy
                   msg = "Executed '"+cmd+"' on "+host.hostname
                   msg = msg+": "+ret unless ret.nil?
                   NOTEX.synchronize do
-                    notification = Notification.create(:type => :info, :dismiss => true, :message => msg, :task => task)
+                    notification = Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
                   end
                 end
               end
@@ -218,7 +218,7 @@ class Deploy
                 msg = "Executed '"+cmd+"' on "+other_host.hostname
                 msg = msg+": "+ret unless ret.nil?
                 NOTEX.synchronize do
-                  notification = Notification.create(:type => :info, :dismiss => true, :message => msg, :task => task)
+                  notification = Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
                 end
               end
             end
@@ -230,7 +230,7 @@ class Deploy
               msg = "Executed '"+cmd+"' on "+host.hostname
               msg = msg+": "+ret unless ret.nil?
               NOTEX.synchronize do
-                notification = Notification.create(:type => :info, :dismiss => true, :message => msg, :task => task)
+                notification = Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
               end
             end
           end
@@ -250,7 +250,7 @@ class Deploy
               host.monitor_service(service)
               msg = "Monitoring service "+service+" on "+host.hostname
               NOTEX.synchronize do
-                notification = Notification.create(:type => :info, :dismiss => true, :message => msg, :task => task)
+                notification = Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
               end
             end
           end
@@ -270,7 +270,7 @@ class Deploy
                 if ret == 1
                   msg = "Deploy "+deploy+" successfully deployed on "+host.hostname
                   NOTEX.synchronize do
-                    notification = Notification.create(:type => :info, :dismiss => true, :message => msg, :task => task)
+                    notification = Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
                   end
                 elsif ret[0] == 5
                   raise FormatException, ret[1]
@@ -292,7 +292,7 @@ class Deploy
               host.reboot
               msg = "Reboot "+host.hostname
               NOTEX.synchronize do
-                notification = Notification.create(:type => :info, :dismiss => true, :message => msg, :task => task)
+                notification = Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
               end
             end
         # /REBOOT BLOCK

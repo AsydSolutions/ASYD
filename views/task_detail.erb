@@ -1,12 +1,23 @@
-Task #<%=@task.id.to_s%> - <%=@task.action.to_s%> "<%=@task.object%>" on <%=@task.target_type.to_s%>: <%=@task.target%>
-<br><br>
-Started on <%=@task.created_at.in_time_zone(timezone).strftime("%F %T %Z")%><br>
+<h3><%=t('task.one')%> #<%=@task.id.to_s%> - <%=t('task.actions.'+@task.action.to_s)%> "<%=@task.object%>" on <%=@task.target_type.to_s%>: <%=@task.target%></h3>
+<br>
+<%=t('task.started', date: @task.created_at.in_time_zone(timezone).strftime("%F %T %Z"))%><br>
 <% if @task.status != :in_progress %>
-Finished on <%=@task.updated_at.in_time_zone(timezone).strftime("%F %T %Z")%><br>
+<%=t('task.finished', date: @task.updated_at.in_time_zone(timezone).strftime("%F %T %Z"))%><br>
 <% end %>
-Status: <%=@task.status.to_s%>
-<br><br>
-Notifications:<br>
-<%@notifications.each do |notification|%>
-  <%=notification.created_at.in_time_zone(timezone).strftime("%F %T %Z")%> - <%=notification.message%><br>
+
+<% if @task.status == :in_progress %>
+  <strong class="text-info">
+<% elsif @task.status == :finished %>
+  <strong class="text-success">
+<% elsif @task.status == :failed %>
+  <strong class="text-error">
 <%end%>
+    <%=t('task.status.text')%> <%=t('task.status.'+@task.status.to_s)%>
+  </strong>
+<br><br>
+
+<h4><%=t('task.notifications')%></h4><br/>
+<div id="taskNotifications"></div>
+<script>
+getTaskNotifications(<%=@task.id.to_s%>);
+</script>

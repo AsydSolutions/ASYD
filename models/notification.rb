@@ -7,6 +7,7 @@ class Notification
 
   property :id, Serial
   property :type, Enum[ :error, :info, :success ], :lazy => false
+  property :host, String, :required => false
   property :message, Text, :lazy => false
   property :sticky, Boolean, :default => false, :lazy => false
   property :dismiss, Boolean, :default => false, :lazy => false

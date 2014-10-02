@@ -19,4 +19,16 @@ class ASYD < Sinatra::Application
       notification.update(:acknowledge => true)
     end
   end
+
+  get '/notifications/bytask/:taskid' do
+    task = Task.first(:id => params[:taskid])
+    @notifications = task.notifications.all(:order => [ :host.desc, :created_at.asc])
+    @hosts = Array.new
+    @notifications.each do |notif|
+      @hosts << notif.host unless notif.host.nil?
+    end
+    @hosts.uniq!
+
+    erb :notifications, :layout => false
+  end
 end

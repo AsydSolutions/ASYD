@@ -102,6 +102,22 @@ en:
     other: "Teams"
     add: "Add team"
 
+  task:
+    one: "Task"
+    other: "Tasks"
+    started: "Started on %{date}"
+    finished: "Finished on %{date}"
+    actions:
+      installing: "Installing"
+      deploying: "Deploying"
+    status:
+      text: "Status:"
+      in_progress: "In Progress"
+      finished: "Finished"
+      failed: "Failed"
+    notifications: "Notifications:"
+
+
   dialog:
     unique: "(must be unique)"
     attention: "Attention!"
