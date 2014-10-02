@@ -2,23 +2,23 @@
   <div class="span12">
     <div class="widget widget-table action-table">
       <div class="widget-header">
-        <i class="icon-gears"></i><h3>Active Tasks</h3>
+        <i class="icon-gears"></i><h3><%=t('task.active')%></h3>
       </div>
       <div class="widget-content">
         <table id="attable" class="stripe">
           <thead style="text-align:left;">
             <tr>
               <th>
-                Task ID
+                <%=t('task.id')%>
               </th>
               <th>
-                Description
+                <%=t('task.description')%>
               </th>
               <th class="td-actions">
-                Status
+                <%=t('host.status')%>
               </th>
               <th>
-                Started on
+                <%=t('task.started', date: '')%>
               </th>
             </tr>
           </thead>
@@ -27,7 +27,7 @@
               <tr>
                 <td><a href="/task/<%=task.id%>">#<%=task.id%></a></td>
                 <td>
-                  <%=task.action.to_s%> <% if task.action == :installing %>packages<% else %><%=task.object%><% end %> on <%=task.target_type%>: <%=task.target%>
+                  <%=t('task.actions.'+task.action.to_s)%> <% if task.action == :installing %><%=t('packages')%><% else %><%=task.object%><% end %> on <%=task.target_type%>: <%=task.target%>
                 </td>
                 <td class="td-actions"><i class="icon-gear icon-spin icon-large"></i></td>
                 <td><%=task.created_at.in_time_zone(timezone).strftime("%F %T %Z")%></td>
@@ -43,23 +43,23 @@
   <div class="span12">
     <div class="widget widget-table action-table">
       <div class="widget-header">
-        <i class="icon-archive"></i><h3>Completed Tasks</h3>
+        <i class="icon-archive"></i><h3><%=t('task.completed')%></h3>
       </div>
       <div class="widget-content">
         <table id="cttable" class="stripe">
           <thead style="text-align:left;">
             <tr>
               <th>
-                Task ID
+                <%=t('task.id')%>
               </th>
               <th>
-                Description
+                <%=t('task.description')%>
               </th>
               <th class="td-actions">
-                Status
+                <%=t('host.status')%>
               </th>
               <th>
-                Completed on
+                <%=t('task.finished', date: '')%>
               </th>
             </tr>
           </thead>
@@ -68,7 +68,7 @@
               <tr>
                 <td><a href="/task/<%=task.id%>">#<%=task.id%></a></td>
                 <td>
-                  <%=task.action.to_s%> <% if task.action == :installing %>packages<% else %><%=task.object%><% end %> on <%=task.target_type%>: <%=task.target%>
+                  <%=t('task.actions.'+task.action.to_s)%> <% if task.action == :installing %><%=t('packages')%><% else %><%=task.object%><% end %> on <%=task.target_type%>: <%=task.target%>
                 </td>
                 <td class="td-actions">
                   <% if task.status == :failed %>

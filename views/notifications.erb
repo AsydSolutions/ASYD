@@ -14,14 +14,14 @@
   <div class="accordion-group">
     <div class="accordion-heading">
       <a class="accordion-toggle" data-toggle="collapse" href="#collapse<%=host%>">
-      <%=host%>
+      <%if @errors.include?(host)%><strong class="text-error"><%=host%></strong><%else%><%=host%><%end%>
       </a>
     </div>
     <div id="collapse<%=host%>" class="accordion-body collapse out">
       <div class="accordion-inner">
         <%@notifications.each do |notification|%>
           <% if notification.host == host %>
-            <strong>[<%=notification.created_at.in_time_zone(timezone).strftime("%F %T %Z")%>]:</strong> <%=notification.message%><br>
+            <strong <% if notification.type == :error %>class="text-error"<% end %>>[<%=notification.created_at.in_time_zone(timezone).strftime("%F %T %Z")%>]:</strong> <%=notification.message%><br>
           <% end %>
         <%end%>
       </div>

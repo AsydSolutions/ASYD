@@ -24,10 +24,13 @@ class ASYD < Sinatra::Application
     task = Task.first(:id => params[:taskid])
     @notifications = task.notifications.all(:order => [ :host.desc, :created_at.asc])
     @hosts = Array.new
+    @errors = Array.new
     @notifications.each do |notif|
       @hosts << notif.host unless notif.host.nil?
+      @errors << notif.host unless notif.type != :error
     end
     @hosts.uniq!
+    @errors.uniq!
 
     erb :notifications, :layout => false
   end

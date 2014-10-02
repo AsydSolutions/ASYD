@@ -45,6 +45,7 @@ en:
   used: "used"
   total: "total"
   deploy: "Deploy"
+  packages: "Packages"
 
   member:
     one: "Member"
@@ -116,6 +117,10 @@ en:
       finished: "Finished"
       failed: "Failed"
     notifications: "Notifications:"
+    active: "Active Tasks"
+    completed: "Completed Tasks"
+    id: "Task ID"
+    description: "Description"
 
 
   dialog:
