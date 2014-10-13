@@ -347,6 +347,12 @@ class Deploy
           cmd = "sudo "+pkg_mgr
         end
         cmd = cmd+" -Sy --noconfirm --noprogressbar "+pkg    ## NOT FULLY TESTED, DEVELOPMENT IN PROGRESS
+      #4. zypper
+      elsif pkg_mgr == "zypper"
+        if host.user != "root"
+          cmd = "sudo "+pkg_mgr
+        end
+        cmd = cmd+" -q -n in "+pkg    ## NOT FULLY TESTED, DEVELOPMENT IN PROGRESS
       #5.1. solaris pkgadd
       elsif pkg_mgr == "pkgadd"
         if host.user != "root"
@@ -423,6 +429,12 @@ class Deploy
           cmd = "sudo "+pkg_mgr
         end
         cmd = cmd+" -R --noconfirm --noprogressbar "+pkg    ## NOT FULLY TESTED, DEVELOPMENT IN PROGRESS
+      #4. zypper
+      elsif pkg_mgr == "zypper"
+        if host.user != "root"
+          cmd = "sudo "+pkg_mgr
+        end
+        cmd = cmd+" -q -n rm "+pkg    ## NOT FULLY TESTED, DEVELOPMENT IN PROGRESS
       #5.1. solaris pkgadd
       elsif pkg_mgr == "pkgadd"
         if host.user != "root"

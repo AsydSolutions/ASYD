@@ -18,7 +18,7 @@ class ASYD < Sinatra::Application
       task = nil
       NOTEX.synchronize do
         task = Task.create(:action => :installing, :object => params['package'], :target => host.hostname, :target_type => :host)
-        notification = Notification.create(:type => :info, :message => task.action.to_s+" "+params['package']+" on "+host.hostname, :task => task)
+        notification = Notification.create(:type => :info, :message => t('task.actions.'+task.action.to_s)+" "+params['package']+" on "+host.hostname, :task => task)
       end
       inst = Spork.spork do
         sleep 0.2
@@ -40,7 +40,7 @@ class ASYD < Sinatra::Application
       task = nil
       NOTEX.synchronize do
         task = Task.create(:action => :installing, :object => params['package'], :target => hostgroup.name, :target_type => :hostgroup)
-        notification = Notification.create(:type => :info, :message => task.action.to_s+" "+params['package']+" on "+hostgroup.name, :task => task)
+        notification = Notification.create(:type => :info, :message => t('task.actions.'+task.action.to_s)+" "+params['package']+" on "+hostgroup.name, :task => task)
       end
       inst = Spork.spork do
         sleep 0.2
@@ -102,7 +102,7 @@ class ASYD < Sinatra::Application
       task = nil
       NOTEX.synchronize do
         task = Task.create(:action => :deploying, :object => params['deploy'], :target => host.hostname, :target_type => :host)
-        notification = Notification.create(:type => :info, :message => task.action.to_s+" "+params['deploy']+" on "+host.hostname, :task => task)
+        notification = Notification.create(:type => :info, :message => t('task.actions.'+task.action.to_s)+" "+params['deploy']+" on "+host.hostname, :task => task)
       end
       inst = Spork.spork do
         sleep 0.2
@@ -126,7 +126,7 @@ class ASYD < Sinatra::Application
       task = nil
       NOTEX.synchronize do
         task = Task.create(:action => :deploying, :object => params['deploy'], :target => hostgroup.name, :target_type => :hostgroup)
-        notification = Notification.create(:type => :info, :message => task.action.to_s+" "+params['deploy']+" on "+hostgroup.name, :task => task)
+        notification = Notification.create(:type => :info, :message => t('task.actions.'+task.action.to_s)+" "+params['deploy']+" on "+hostgroup.name, :task => task)
       end
       inst = Spork.spork do
         sleep 0.2
