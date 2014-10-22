@@ -38,6 +38,17 @@ comandos y parámetros.
 *Ten en cuenta que los dos puntos - : - después de los condicionales y antes
 de los argumentos, es imprescindible para el funcionamiento del deploy.*
 
+**0. comentarios**
+
+Cualquier línea que empiece con una almohadilla (#) es interpretada como un comentario y no será ejecutada
+Hay un tipo especial de comentario, la alerta, la cual despliega un mensaje de alerta antes de lanzar el deploy,
+esto es útil en el caso de que tu deploy requiera alguna variable personalizada o quieras avisar al usuario para que compruebe
+algo en concreto antes de ejecutar el deploy. Las alertas se crean empezando la línea con `# alert:`
+
+*Sintaxis:* `# Comentario normal`
+
+*Sintaxis:* `# Alert: Mensaje que se desplegará antes de confirmer la ejecución de un deploy`
+
 **1. install**
 El comando install puede ser usado para definir (separadas por espacios) listas de paquetes a ser instalados
 en el sistema seleccionado. Internamente, ASYD comprobará el tipo de sistema en el cual van a instalarse
