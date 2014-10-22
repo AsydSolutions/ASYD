@@ -1,7 +1,8 @@
 class ASYD < Sinatra::Application
   get '/deploys/list' do
     status 200
-    @deploys = Misc::get_dirs("data/deploys/")
+    @deploys = Deploy.all
+    @deploy_alerts = Deploy.get_alerts
     @hosts = Host.all
     @hostgroups = Hostgroup.all
     erb :deploys
