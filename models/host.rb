@@ -118,6 +118,8 @@ class Host
       return self #return the object itself
     rescue Net::SSH::AuthenticationFailed
       return false
+    rescue Errno::EHOSTUNREACH
+      return false
     rescue Timeout::Error
       return false
     end
