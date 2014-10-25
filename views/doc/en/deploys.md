@@ -43,7 +43,8 @@ the arguments, as it's required for the deploy to work.*
 Any line starting with a hash (#) is interpreted as a comment and won't be executed.
 There's an special kind of comment, the alert, which displays an alert message before launching the deploy, this
 is useful in case your deploy require some custom variables or you want to warn the user to check
-something before executing a deploy. The alerts are done by starting a line with `# alert:`
+something before executing a deploy. Please note the alerts only work on "def" files and not in "def.sudo".
+The alerts are done by starting a line with `# alert:`
 
 *Syntax:* `# Normal comment`
 

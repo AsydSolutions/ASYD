@@ -43,7 +43,8 @@ de los argumentos, es imprescindible para el funcionamiento del deploy.*
 Cualquier línea que empiece con una almohadilla (#) es interpretada como un comentario y no será ejecutada
 Hay un tipo especial de comentario, la alerta, la cual despliega un mensaje de alerta antes de lanzar el deploy,
 esto es útil en el caso de que tu deploy requiera alguna variable personalizada o quieras avisar al usuario para que compruebe
-algo en concreto antes de ejecutar el deploy. Las alertas se crean empezando la línea con `# alert:`
+algo en concreto antes de ejecutar el deploy. Tenga en cuenta que las alertas solo funcionan en los archivos "def", y no en los "def.sudo".
+Las alertas se crean empezando la línea con `# alert:`
 
 *Sintaxis:* `# Comentario normal`
 
