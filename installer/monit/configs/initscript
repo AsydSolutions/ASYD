@@ -1,4 +1,4 @@
-<%if <%PKG_MANAGER%> == apt%>
+<%if <%PKG_MANAGER%> == apt or <%PKG_MANAGER%> == zypper%>
 #!/bin/sh
 
 ### BEGIN INIT INFO
@@ -59,7 +59,7 @@ monit_checks () {
 
 case "$1" in
   start)
-    log_daemon_msg "Starting $DESC" "$NAME"
+    /bin/echo -n "Starting $DESC: $NAME"
     monit_checks $1
     if start-stop-daemon --start --quiet --oknodo \
                          --pidfile $PID --exec $DAEMON \
@@ -71,7 +71,7 @@ case "$1" in
     fi
     ;;
   stop)
-    log_daemon_msg "Stopping $DESC" "$NAME"
+    /bin/echo -n "Stopping $DESC: $NAME"
     if start-stop-daemon --retry TERM/5/KILL/5 --oknodo --stop --quiet \
                          --pidfile $PID --exec $DAEMON
     then
@@ -81,7 +81,7 @@ case "$1" in
     fi
     ;;
   reload)
-    log_daemon_msg "Reloading $DESC configuration" "$NAME"
+    /bin/echo -n "Reloading $DESC configuration: $NAME"
     if start-stop-daemon --stop --signal HUP --quiet \
                                 --oknodo --pidfile $PID \
                                 --exec $DAEMON -- $MONIT_OPTS
