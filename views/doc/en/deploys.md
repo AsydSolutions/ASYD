@@ -38,6 +38,18 @@ commands and parameters.
 *Please note the double dot - : - after the conditionals and before
 the arguments, as it's required for the deploy to work.*
 
+**0. comments**
+
+Any line starting with a hash (#) is interpreted as a comment and won't be executed.
+There's an special kind of comment, the alert, which displays an alert message before launching the deploy, this
+is useful in case your deploy require some custom variables or you want to warn the user to check
+something before executing a deploy. Please note the alerts only work on "def" files and not in "def.sudo".
+The alerts are done by starting a line with `# alert:`
+
+*Syntax:* `# Normal comment`
+
+*Syntax:* `# Alert: Message to display before confirming the execution of a deploy`
+
 **1. install**
 
 The install command can be used to define a (space separated) list of packages to be installed

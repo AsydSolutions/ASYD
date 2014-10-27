@@ -4,7 +4,7 @@
 
 ###
 # For Linux:
-if <%PKG_MANAGER%> == apt or <%PKG_MANAGER%> == yum or <%PKG_MANAGER%> == pacman
+if <%PKG_MANAGER%> == apt or <%PKG_MANAGER%> == yum or <%PKG_MANAGER%> == pacman or <%PKG_MANAGER%> == zypper
 
 # install monit:
 install: curl tar gzip
@@ -19,11 +19,12 @@ config file: monitrc, /tmp/monitrc
 exec: sudo mv /tmp/monitrc /etc/monit/monitrc
 exec: sudo chown -R root:root /etc/monit
 
-# if it's debian-based:
-config file if <%PKG_MANAGER%> == apt: initscript, /tmp/monit
-exec if <%PKG_MANAGER%> == apt: sudo mv /tmp/monit /etc/init.d/monit
-exec if <%PKG_MANAGER%> == apt: sudo chmod +x /etc/init.d/monit
+# if it's debian-based or opensuse:
+config file if <%PKG_MANAGER%> == apt or <%PKG_MANAGER%> == zypper: initscript, /tmp/monit
+exec if <%PKG_MANAGER%> == apt or <%PKG_MANAGER%> == zypper: sudo mv /tmp/monit /etc/init.d/monit
+exec if <%PKG_MANAGER%> == apt or <%PKG_MANAGER%> == zypper: sudo chmod +x /etc/init.d/monit
 exec if <%PKG_MANAGER%> == apt: sudo update-rc.d monit defaults
+exec if <%PKG_MANAGER%> == zypper: sudo insserv /etc/init.d/monit
 
 # if it's redhat or arch based:
 config file if <%PKG_MANAGER%> == yum or <%PKG_MANAGER%> == pacman: initscript, /tmp/monit.service

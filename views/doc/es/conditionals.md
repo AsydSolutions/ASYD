@@ -23,6 +23,9 @@ si una condición se cumple. Ambas, tanto la etiqueta de apertura `if <condition
 deben ser escritos en una sola línea sin carácteres extra, solo los parámetros aceptados. Entre ellos puedes
 escribir cualquier comando que será ejecutado solo si la condición es validada.
 
+*Nota: No puedes definir bloques condicionales dentro de otro bloque condicional, solo uno a la vez.
+Puedes, sin embargo, usar condicionales simples dentro de bloques condicionales, como se describe en el siguiente punto.*
+
 *Sintáxis:*
 
     if <%var%> == value [or|and condition2] [or|and ...]
@@ -55,6 +58,8 @@ Los condicionales pueden ser también usados dentro de los archivos de configura
 para definir partes del archivo de configuración que deberían ser solo cargadas en el servidor destino
 si la condición se cumple. El uso es el mismo que para bloques condicionales en los archivos "def" (lee arriba)
 pero definido por etiquetas `<%if condition%>` `<%endif%>`.
+
+*Nota: No puedes definir bloques condicionales dentro de otro bloque condicional, solo uno a la vez.*
 
 *Sintáxis:*
 

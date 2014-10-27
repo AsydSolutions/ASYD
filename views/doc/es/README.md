@@ -16,7 +16,9 @@
 
 **6. [Monitorización](monitoring.md)**
 
-*a. [Específico para Solaris](solaris.md)*
+*a. [Sistemas Soportados](systems.md)*
+
+*b. [Específico para Solaris](solaris.md)*
 
 <br/>
 Por favor lee toda la documentación antes de crear deploys, o Básicos y Monitorización

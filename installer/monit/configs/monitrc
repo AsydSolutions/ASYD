@@ -25,4 +25,4 @@ check system <%HOSTNAME%>
 
 include /etc/monit/conf.d/*
 
-<%MONITOR:sshd%>
+# <%MONITOR:sshd%>

@@ -1,10 +1,11 @@
 # Deploy file for installing monit
 # Will be executed on every new system added to ASYD
 # Modify accordingly to your systems (i.e. firewall rules, etc)
+# Alert: This deploy is automatically executed when a host is added, are you sure you want to manually execute it?
 
 ###
 # For Linux:
-if <%PKG_MANAGER%> == apt or <%PKG_MANAGER%> == yum or <%PKG_MANAGER%> == pacman
+if <%PKG_MANAGER%> == apt or <%PKG_MANAGER%> == yum or <%PKG_MANAGER%> == pacman or <%PKG_MANAGER%> == zypper
 
 # install monit:
 install: curl tar gzip
@@ -17,10 +18,11 @@ exec: rm -r /tmp/monit*
 
 config file: monitrc, /etc/monit/monitrc
 
-# if it's debian-based:
-config file if <%PKG_MANAGER%> == apt: initscript, /etc/init.d/monit
-exec if <%PKG_MANAGER%> == apt: chmod +x /etc/init.d/monit
+# if it's debian-based or opensuse:
+config file if <%PKG_MANAGER%> == apt or <%PKG_MANAGER%> == zypper: initscript, /etc/init.d/monit
+exec if <%PKG_MANAGER%> == apt or <%PKG_MANAGER%> == zypper: chmod +x /etc/init.d/monit
 exec if <%PKG_MANAGER%> == apt: update-rc.d monit defaults
+exec if <%PKG_MANAGER%> == zypper: insserv /etc/init.d/monit
 
 # if it's redhat or arch based:
 config file if <%PKG_MANAGER%> == yum or <%PKG_MANAGER%> == pacman: initscript, /usr/lib/systemd/system/monit.service

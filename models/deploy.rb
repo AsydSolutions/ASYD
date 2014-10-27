@@ -1,6 +1,33 @@
 class Deploy
   include Misc
 
+  def self.all
+    deploys = Misc::get_dirs("data/deploys/")
+    return deploys
+  end
+
+  def self.get_alerts
+    deploys = Deploy.all
+    alerts = {}
+    deploys.each do |deploy|
+      path = "data/deploys/"+deploy+"/def"
+      f = File.open(path, "r").read
+      f.gsub!(/\r\n?/, "\n")
+      f.each_line do |line|
+        if !line.match(/^# ?alert:/i).nil?
+          if alerts[deploy].nil?
+            alert = line.gsub!(/^# ?alert:/i, "").strip
+            alerts[deploy] = alert
+          else
+            alert = line.gsub!(/^# ?alert:/i, "").strip
+            alerts[deploy] = alerts[deploy]+"<br>"+alert
+          end
+        end
+      end
+    end
+    return alerts
+  end
+
   # Deploy a deploy on the defined host
   #
   def self.launch(host, dep, task)
@@ -36,14 +63,14 @@ class Deploy
 
         # Check for deploy global conditionals
         if !condition
-          m = line.match(/^if (.+)$/)
+          m = line.match(/^if (.+)$/i)
           if !m.nil?
             gdoit = check_condition(m, host)
             condition = true
             skip = true
           end
         else
-          if line.match(/^endif$/)
+          if line.match(/^endif$/i)
             condition = false
             gdoit = true
             skip = true
@@ -347,6 +374,12 @@ class Deploy
           cmd = "sudo "+pkg_mgr
         end
         cmd = cmd+" -Sy --noconfirm --noprogressbar "+pkg    ## NOT FULLY TESTED, DEVELOPMENT IN PROGRESS
+      #4. zypper
+      elsif pkg_mgr == "zypper"
+        if host.user != "root"
+          cmd = "sudo "+pkg_mgr
+        end
+        cmd = cmd+" -q -n in "+pkg    ## NOT FULLY TESTED, DEVELOPMENT IN PROGRESS
       #5.1. solaris pkgadd
       elsif pkg_mgr == "pkgadd"
         if host.user != "root"
@@ -423,6 +456,12 @@ class Deploy
           cmd = "sudo "+pkg_mgr
         end
         cmd = cmd+" -R --noconfirm --noprogressbar "+pkg    ## NOT FULLY TESTED, DEVELOPMENT IN PROGRESS
+      #4. zypper
+      elsif pkg_mgr == "zypper"
+        if host.user != "root"
+          cmd = "sudo "+pkg_mgr
+        end
+        cmd = cmd+" -q -n rm "+pkg    ## NOT FULLY TESTED, DEVELOPMENT IN PROGRESS
       #5.1. solaris pkgadd
       elsif pkg_mgr == "pkgadd"
         if host.user != "root"

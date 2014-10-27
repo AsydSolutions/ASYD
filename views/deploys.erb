@@ -36,6 +36,7 @@
             <tr>
               <td>
                 <%=deploy%>
+                <%= '<input type="hidden" id="alert_'+deploy+'" value="'+@deploy_alerts[deploy]+'">' unless @deploy_alerts[deploy].nil? %>
               </td>
               <td class="td-actions">
                 <a data-toggle="tooltip" data-original-title="<%=t('action.deploy')%>" href="<%=deploy%>" class="btn btn-success btn-mini btn-icon-only hint" deploy-confirm="<%= t('dialog.deploy.confirm', deploy: deploy)%> on "><i class="btn-icon-only icon-rocket"></i></a>

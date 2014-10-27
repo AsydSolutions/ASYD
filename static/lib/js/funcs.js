@@ -58,7 +58,12 @@ $(function() {
     if (Modernizr.csstransforms3d == false){
       $('#dataConfirmModal').removeClass('fade');
     };
-    $('#dataConfirmModal').find('.modal-body').text($(this).attr('deploy-confirm')+host[0]+" "+host[1]+"?");
+    var text = $(this).attr('deploy-confirm')+host[0]+" "+host[1]+"?";
+    if (typeof document.getElementById('alert_'+dep) != "undefined"){
+      text += "<br><strong><h3>Alert:</h3> "+document.getElementById('alert_'+dep).value+"</strong>";
+    };
+    $('#dataConfirmModal').find('.modal-body').text("");
+    $('#dataConfirmModal').find('.modal-body').append(text);
     $('#dataConfirmModal').modal({show:true});
     return false;
   });

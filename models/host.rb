@@ -62,15 +62,21 @@ class Host
         elsif !(ssh.exec!("which pacman") =~ /\/bin\/pacman$/).nil?
           self.pkg_mgr = "pacman"
           if user != "root"
-            ssh.exec!("sudo pacman -Sy lsb-release")
+            ssh.exec!("sudo pacman -Sy --noconfirm --noprogressbar lsb-release")
           else
             ssh.exec!("pacman -Sy --noconfirm --noprogressbar lsb-release")
           end
           self.dist = ssh.exec!("lsb_release -s -i").strip
           self.dist_ver = 0
           self.arch = ssh.exec!("uname -m").strip
-        #4. solaris
-      elsif !(ssh.exec!("export PATH=$PATH:/sbin:/usr/sbin/ && which pkgadd") =~ /\/sbin\/pkgadd$/).nil?
+        #4. opensuse
+        elsif !(ssh.exec!("which zypper") =~ /\/bin\/zypper$/).nil?
+          self.pkg_mgr = "zypper"
+          self.dist = ssh.exec!("cat /etc/issue |awk 'NR == 1 {print $3}'").strip
+          self.dist_ver = ssh.exec!("cat /etc/issue |awk 'NR == 1 {print $4}'").strip.to_f
+          self.arch = ssh.exec!("uname -m").strip
+        #5. solaris
+        elsif !(ssh.exec!("export PATH=$PATH:/sbin:/usr/sbin/ && which pkgadd") =~ /\/sbin\/pkgadd$/).nil?
           self.pkg_mgr = "pkgadd"
           if !(ssh.exec!("which pkg") =~ /\/bin\/pkg$/).nil?
             self.pkg_mgr = "pkg"
@@ -111,6 +117,8 @@ class Host
       end
       return self #return the object itself
     rescue Net::SSH::AuthenticationFailed
+      return false
+    rescue Errno::EHOSTUNREACH
       return false
     rescue Timeout::Error
       return false

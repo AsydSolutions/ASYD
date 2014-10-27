@@ -23,6 +23,9 @@ condition complies. Both the opening tag `if <condition>` and the ending tag `en
 written on a single line with no extra characters but the accepted parameters. Between them you
 can write any commands that will be executed only if the condition validates.
 
+*Note: You cannot define conditional blocks inside conditional blocks, but only one at a time.
+You can, however, use single line conditionals as described on the next point.*
+
 *Syntax:*
 
     if <%var%> == value [or|and condition2] [or|and ...]
@@ -55,6 +58,8 @@ Conditionals can also be used inside configuration files (see [Configurations](c
 for defining parts of the configuration file that should be only uploaded to the target server
 if the condition complies. The usage is the same as for Conditional blocks on "def" files (see above)
 but defined by the tags `<%if condition%>` `<%endif%>`.
+
+*Note: You cannot define conditional blocks inside conditional blocks, but only one at a time.*
 
 *Syntax:*
 
