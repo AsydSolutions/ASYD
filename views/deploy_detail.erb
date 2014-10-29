@@ -1,0 +1,31 @@
+<div class="row">
+  <div class="span4">
+    <div class="widget widget-table action-table">
+      <div class="widget-header">
+        <i class="icon-sitemap"></i><h3><%= @base %></h3>
+      </div>
+      <div class="widget-content">
+        <div class="accordion accordion-invisible"><%= Misc::render_path(@base) %></div>
+      </div>
+    </div>
+  </div>
+  <div class="span8">
+    <div class="widget">
+      <div class="widget-header">
+        <i class="icon-pencil"></i><h3 id="filePath"></h3>
+      </div>
+      <div class="widget-content">
+        <textarea id="editBox"></textarea>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="row">
+  <div class="span2 offset10">
+    <button class="btn btn-large input-block-level btn-primary" onclick="saveDeployFile()">Save</button><br/><br/><br/>
+  </div>
+</div>
+<script>
+editDeploy('<%= @base %>def');
+</script>
+<div id="saved">Saved</div>

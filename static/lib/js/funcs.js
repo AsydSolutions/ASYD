@@ -199,6 +199,50 @@ $(function() {
   });
 });
 
+function editDeploy(path)
+{
+  $('.CodeMirror').each(function(i, el){
+    el.parentNode.removeChild(el);
+  });
+  var xmlhttp;
+  if (window.XMLHttpRequest)
+  {// code for IE7+, Firefox, Chrome, Opera, Safari
+    xmlhttp=new XMLHttpRequest();
+  }
+  else
+  {// code for IE6, IE5
+    xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+  }
+  xmlhttp.open("GET","/deploys/get_file_contents/" + path, false);
+  xmlhttp.send();
+  $('#filePath').html(path);
+  $('#editBox').val(xmlhttp.responseText);
+  var editor = CodeMirror.fromTextArea(editBox, {
+    mode: "text/x-sh"
+  });
+  editor.on("change", function() {
+    editor.save();
+  });
+}
+
+function saveDeployFile(){
+  var path = $("#filePath").text();
+  var text = document.getElementById('editBox').value;
+  var xmlhttp;
+  if (window.XMLHttpRequest)
+  {// code for IE7+, Firefox, Chrome, Opera, Safari
+    xmlhttp=new XMLHttpRequest();
+  }
+  else
+  {// code for IE6, IE5
+    xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+  }
+  xmlhttp.open("POST","/deploys/edit",true);
+  xmlhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+  xmlhttp.send("path=" + path + "&text=" + text);
+  $("#saved").show().delay(2000).fadeOut();
+}
+
 function passDataToModal(data, modal_id) {
   $(".modal-body #dataInput").text(data);
   $(".modal-body #dataInput").val( data );

@@ -34,6 +34,26 @@ module Misc
     return files_array
   end
 
+  # Renders on html tree view the given path with all subdirectories
+  #
+  def self.render_path(path, level=0)
+    nbspd = '&nbsp;' * ((level-1)*4) if level > 0
+    data = '' if level == 0
+    data = '<div class="accordion-heading accordion-invisible"><a class="accordion-toggle" data-toggle="collapse" href="#collapse'+path.split("/").last+'">'+nbspd+'<i class="icon-folder-close-alt"></i> '+path.split("/").last+'</a></div><div id="collapse'+path.split("/").last+'" class="accordion-body collapse out accordion-invisible">' if level > 0
+    nbsp = '&nbsp;' * level*4
+    Dir.foreach(path) do |entry|
+      next if (entry == '..' || entry == '.')
+      full_path = File.join(path, entry)
+      if File.directory?(full_path)
+        level = level+1
+        data = data+render_path(full_path, level)+'</div>'
+      else
+        data = data+'<div class="accordion-inner accordion-invisible">'+nbsp+'<a href="#" onclick="editDeploy(\''+full_path+'\')"><i class="icon-file-text-alt"></i> '+entry+'</a></div>'
+      end
+    end
+    return data
+  end
+
   # Gets ASYD server IP address
   def get_asyd_ip
     ip = UDPSocket.open {|s| s.connect(self.ip, 1); s.addr.last}

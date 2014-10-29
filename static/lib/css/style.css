@@ -1133,7 +1133,7 @@ width: 11px;}
 	}
 
 	.action-table .td-actions .btn:last-child {
-		margin-rigth: 0;
+		margin-right: 0;
 	}
 
 
@@ -1141,6 +1141,27 @@ width: 11px;}
 /*------------------------------------------------------------------
 [9. Miscellaneous]
 */
+
+#saved {
+		position: fixed;
+		top: 40%;
+		left: 45%;
+		padding-top: 30px;
+		padding-bottom: -10px;
+		margin-right: 200px;
+		text-align: center;
+		width: 200px;
+		height: 50px;
+		background: #303030;
+		color: #fff;
+		display: none;
+		font-weight: 900;
+		font-size: 20px;
+		-webkit-border-radius: 6px;
+		-moz-border-radius: 6px;
+		border-radius: 6px;
+		z-index: 2001;
+}
 
 .accordion-invisible {
 	border-style: none !important;
