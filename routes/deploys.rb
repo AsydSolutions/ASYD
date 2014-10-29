@@ -9,7 +9,8 @@ class ASYD < Sinatra::Application
   end
 
   get '/deploys/:dep' do
-    erb "-WIP-"
+    @base = 'data/deploys/'+params[:dep]+'/'
+    erb :deploy_detail
   end
 
   post '/deploys/install-pkg' do
@@ -173,5 +174,22 @@ class ASYD < Sinatra::Application
     end
     deploys = '/deploys/list'
     redirect to deploys
+  end
+
+  get %r{/deploys/get_file_contents/(.+)} do
+    path = params[:captures].first
+    if path.start_with?("data/deploys/")
+      send_file path
+    end
+  end
+
+  post '/deploys/edit' do
+    path = params['path']
+    text = params['text']
+    if path.start_with?("data/deploys/")
+      open(path, 'w') { |file|
+        file.puts text
+      }
+    end
   end
 end
