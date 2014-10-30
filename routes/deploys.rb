@@ -176,6 +176,7 @@ class ASYD < Sinatra::Application
     redirect to deploys
   end
 
+  # accessed by ajax only
   get %r{/deploys/get_file_contents/(.+)} do
     path = params[:captures].first
     if path.start_with?("data/deploys/")
@@ -183,6 +184,7 @@ class ASYD < Sinatra::Application
     end
   end
 
+  # accessed by ajax only
   post '/deploys/edit' do
     path = params['path']
     text = params['text']
@@ -191,5 +193,29 @@ class ASYD < Sinatra::Application
         file.puts text
       }
     end
+  end
+
+  post '/deploys/new' do
+    name = params['deploy_name']
+    path = "data/deploys/"
+    unless name.include? "/" or name.include? "|" or name.include? "\\"
+      FileUtils.mkdir path+name
+      FileUtils.mkdir path+name+"/configs"
+      text = "# Alert: Empty deploy, modify before launching"
+      open(path+name+'/def', 'w') { |file|
+        file.puts text
+      }
+    end
+    deploys = '/deploys/list'
+    redirect to deploys
+  end
+
+  post '/deploys/del' do
+    deploy = params['deploy']
+    unless deploy == "monit"
+      Deploy.delete(deploy)
+    end
+    deploys = '/deploys/list'
+    redirect to deploys
   end
 end
