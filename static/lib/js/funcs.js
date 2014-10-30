@@ -45,7 +45,7 @@ $(function() {
   $('.hint').tooltip();
 
   $('a[deploy-confirm]').click(function(ev) {
-    var dep = $(this).attr('href');
+    var dep = $(this).attr('data-deploy');
     var e = document.getElementById('selectHostDeploy');
     var target = e.options[e.selectedIndex].value;
     if (!target) {
@@ -59,7 +59,8 @@ $(function() {
       $('#dataConfirmModal').removeClass('fade');
     };
     var text = $(this).attr('deploy-confirm')+host[0]+" "+host[1]+"?";
-    if (typeof document.getElementById('alert_'+dep) != "undefined"){
+    alert(dep);
+    if (document.getElementById('alert_'+dep)){
       text += "<br><strong><h3>Alert:</h3> "+document.getElementById('alert_'+dep).value+"</strong>";
     };
     $('#dataConfirmModal').find('.modal-body').text("");

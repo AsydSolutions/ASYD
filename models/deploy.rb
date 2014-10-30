@@ -1,11 +1,15 @@
 class Deploy
   include Misc
 
+  # Return a list of deploys
+  #
   def self.all
     deploys = Misc::get_dirs("data/deploys/")
     return deploys
   end
 
+  # Return the alerts for all the deploys
+  #
   def self.get_alerts
     deploys = Deploy.all
     alerts = {}
@@ -26,6 +30,13 @@ class Deploy
       end
     end
     return alerts
+  end
+
+  # Delete a deploy
+  #
+  def self.delete(dep)
+    path='data/deploys/'+dep
+    FileUtils.rm_r path, :secure=>true
   end
 
   # Deploy a deploy on the defined host
@@ -611,18 +622,6 @@ class Deploy
       parse_config_dir(host, cfg_dir+"/"+dir, tmpath+"/"+dir)
     end
     return tempdir
-  end
-
-  # Delete a deploy
-  #
-  def self.delete(dep)
-    path='data/deploys/'+dep
-    FileUtils.rm_r path, :secure=>true
-  end
-
-  def self.all
-    all = Misc::get_dirs("data/deploys/")
-    return all
   end
 
   private
