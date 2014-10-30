@@ -1,3 +1,7 @@
+**ASYD is the easiest server deployment automation system.
+Powerful, versatile, agentless and fully opensource, with integrated web interface and monitoring.**
+
+
 Installation on Debian:
 
 	apt-get update && apt-get install ruby1.9.1-full git libxslt-dev libxml2-dev libsqlite3-dev make
