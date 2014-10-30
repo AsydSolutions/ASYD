@@ -59,7 +59,6 @@ $(function() {
       $('#dataConfirmModal').removeClass('fade');
     };
     var text = $(this).attr('deploy-confirm')+host[0]+" "+host[1]+"?";
-    alert(dep);
     if (document.getElementById('alert_'+dep)){
       text += "<br><strong><h3>Alert:</h3> "+document.getElementById('alert_'+dep).value+"</strong>";
     };
