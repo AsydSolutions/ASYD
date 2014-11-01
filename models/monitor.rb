@@ -79,7 +79,7 @@ module Monitoring
           if service[1] != 'ok'
             status = 2
           end
-        end
+        end unless stat.services.nil?
       end
       MOTEX.synchronize do
         hoststatus = HostStatus.first(:host_hostname => self.hostname)
