@@ -163,8 +163,16 @@ module Misc
   end
 
   def reboot
-    Net::SSH.start(self.ip, self.user, :port => self.ssh_port, :keys => "data/ssh_key") do |ssh|
-      ssh.exec("reboot")
+    begin
+      Net::SSH.start(self.ip, self.user, :port => self.ssh_port, :keys => "data/ssh_key") do |ssh|
+        if self.user != "root"
+          ssh.exec("sudo reboot")
+        else
+          ssh.exec("reboot")
+        end
+      end
+    rescue
+      return true
     end
   end
 end
