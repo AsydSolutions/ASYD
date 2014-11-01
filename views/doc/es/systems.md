@@ -24,6 +24,7 @@ Actualmente puedes añadir sistemas basados en:
  * Arch Linux
  * OpenSUSE
  * Solaris/OpenIndiana
+ * OpenBSD
 
 *Nota: cualquier derivación o distribución basada en las anteriormente mencionadas debería
 funcionar también. Si encuentras algún problema con cualquiera de los sistemas soportados o
