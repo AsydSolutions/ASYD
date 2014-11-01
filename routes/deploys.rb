@@ -179,7 +179,7 @@ class ASYD < Sinatra::Application
   # accessed by ajax only
   get %r{/deploys/get_file_contents/(.+)} do
     path = params[:captures].first
-    if path.start_with?("data/deploys/") && !path.include? "../"
+    if path.start_with?("data/deploys/") and !path.include? "../"
       send_file path
     end
   end
@@ -188,7 +188,7 @@ class ASYD < Sinatra::Application
   post '/deploys/edit' do
     path = params['path']
     text = params['text']
-    if path.start_with?("data/deploys/") && !path.include? "../"
+    if path.start_with?("data/deploys/") and !path.include? "../"
       open(path, 'w') { |file|
         file.puts text
       }
