@@ -75,3 +75,30 @@ exec: sudo init q
 
 endif
 ###
+
+
+###
+# For OpenBSD:
+if <%DIST%> == OpenBSD
+
+# install monit
+exec: sudo mkdir -p /etc/monit/conf.d
+exec if <%ARCH%> == amd64: wget http://mmonit.com/monit/dist/binary/5.10/monit-5.10-openbsd-x64.tar.gz -O /tmp/monit.tar.gz
+exec if <%ARCH%> == i386: wget http://mmonit.com/monit/dist/binary/5.10/monit-5.10-openbsd-x86.tar.gz -O /tmp/monit.tar.gz
+exec: cd /tmp && gzip -dc /tmp/monit.tar.gz | tar xf -
+exec: sudo mv /tmp/monit-5.10/bin/monit /usr/bin/
+exec: rm -r /tmp/monit*
+
+config file: monitrc, /tmp/monitrc
+exec: sudo mv /tmp/monitrc /etc/monit/monitrc
+exec: sudo chown root /etc/monit/monitrc
+config file: initscript, /tmp/monit
+exec: sudo mv /tmp/monit /etc/rc.d/monit
+exec: sudo chmod +x /etc/rc.d/monit
+exec: sudo echo 'pkg_scripts="$pkg_scripts monit"' >> /etc/rc.conf.local
+
+exec: sudo /usr/bin/monit -c /etc/monit/monitrc quit
+exec: sudo /usr/bin/monit -c /etc/monit/monitrc
+
+endif
+###

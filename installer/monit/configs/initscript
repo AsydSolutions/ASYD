@@ -122,3 +122,15 @@ ExecReload=/usr/bin/monit reload
 [Install]
 WantedBy=multi-user.target
 <%endif%>
+<%if <%DIST%> == OpenBSD%>
+#!/bin/sh
+#
+# $OpenBSD: monit.rc,v 1.2 2012/11/25 13:34:04 ajacoutot Exp $
+
+daemon="/usr/bin/monit"
+daemon_flags="-c /etc/monit/monitrc"
+
+. /etc/rc.d/rc.subr
+
+rc_cmd $1
+<%endif%>

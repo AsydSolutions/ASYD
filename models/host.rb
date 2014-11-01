@@ -98,6 +98,12 @@ class Host
             self.dist_ver = dv[0].to_f
           end
           self.arch = ssh.exec!("uname -p").strip
+        #6. openbsd
+        elsif !(ssh.exec!("which pkg_add") =~ /\/sbin\/pkg_add$/).nil?
+          self.pkg_mgr = "pkg_add"
+          self.dist = ssh.exec!("uname -s").strip
+          self.dist_ver = ssh.exec!("uname -r").strip.to_f
+          self.arch = ssh.exec!("uname -p").strip
         else
           raise #OS not supported yet
         end

@@ -406,11 +406,18 @@ class Deploy
         end
         cmd = cmd+" install --accept "+pkg    ## NOT FULLY TESTED, DEVELOPMENT IN PROGRESS
       #5.3. solaris pkgutil
-    elsif pkg_mgr == "pkgutil"
+      elsif pkg_mgr == "pkgutil"
         if host.user != "root"
           cmd = "sudo "+pkg_mgr
         end
         cmd = cmd+" -y -i "+pkg    ## NOT FULLY TESTED, DEVELOPMENT IN PROGRESS
+      #6. openbsd pkg_add
+      elsif pkg_mgr == "pkg_add"
+        if host.user != "root"
+          cmd = "sudo "+pkg_mgr
+        end
+        pkg_path = 'export PKG_PATH="http://ftp.openbsd.org/pub/OpenBSD/'+host.dist_ver.to_s+'/packages/'+host.arch+'/"'
+        cmd = pkg_path+" && "+cmd+" -U -I -x "+pkg    ## NOT FULLY TESTED, DEVELOPMENT IN PROGRESS
       end
       result = host.exec_cmd(cmd)
       if result.include? "\nE: "
@@ -488,11 +495,18 @@ class Deploy
         end
         cmd = cmd+" uninstall "+pkg    ## NOT FULLY TESTED, DEVELOPMENT IN PROGRESS
       #5.3. solaris pkgutil
-    elsif pkg_mgr == "pkgutil"
+      elsif pkg_mgr == "pkgutil"
         if host.user != "root"
           cmd = "sudo "+pkg_mgr
         end
         cmd = cmd+" -y -r "+pkg    ## NOT FULLY TESTED, DEVELOPMENT IN PROGRESS
+      #6. openbsd pkg_add
+      elsif pkg_mgr == "pkg_add"
+        cmd = "pkg_delete"
+        if host.user != "root"
+          cmd = "sudo "+cmd
+        end
+        cmd = cmd+" -I -x "+pkg    ## NOT FULLY TESTED, DEVELOPMENT IN PROGRESS
       end
       result = host.exec_cmd(cmd)
       if result.include? "\nE: "
