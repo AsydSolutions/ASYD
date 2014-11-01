@@ -49,6 +49,7 @@ $(function() {
     var e = document.getElementById('selectHostDeploy');
     var target = e.options[e.selectedIndex].value;
     if (!target) {
+      alert("Select a host/hostgroup");
       return false;
     }
     var host = target.split(";");
