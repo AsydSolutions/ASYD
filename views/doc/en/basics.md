@@ -25,9 +25,11 @@ there you need to provide a unique hostname, the server IP, the user for that ho
 the ssh port if you configured a non-standard port, and the password for that user.
 ASYD then will add the ASYD ssh key on the ~/.ssh/authorized_keys file of the target host
 for all the future access, thus the provided password won't be stored at all.
+
 Please note that if you are using a non-root user (like in the case of ubuntu or similar),
 you need to be sure that the user has admin privileges, the command "sudo" is installed,
 and the user won't be prompted for a sudo password, as ASYD deploying system is non-interactive.
+This can be achieved by adding `%sudo   ALL=(ALL:ALL) NOPASSWD:ALL` on the `/etc/sudoers` file.
 
 After the new host it's added, it will start the monitoring deploy on the background, in this
 time the server will appear as "not monitored". When the monitoring setup has completed,
