@@ -9,11 +9,11 @@ make y algunas librerías estándar para que funcione.
 
 En sistemas basados ​​en Debian:
 
-    apt-get update && apt-get install -y ruby1.9.1-full git libxslt-dev libxml2-dev libsqlite3-dev make
+    apt-get update && apt-get install -y ruby1.9.1-full ruby1.9.1-dev git libxslt-dev libxml2-dev libsqlite3-dev make
 
 En sistemas basados ​​en RedHat:
 
-    yum install -y ruby1.9.1-full git libxslt-devel libxml2-devel libsqlite3-devel make
+    yum install -y ruby ruby-devel git libxslt-devel libxml2-devel libsqlite3-devel make
 
 **2. Instalar ASYD desde git**
 

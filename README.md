@@ -4,7 +4,7 @@ Powerful, versatile, agentless and fully opensource, with integrated web interfa
 
 Installation on Debian:
 
-	apt-get update && apt-get install ruby1.9.1-full git libxslt-dev libxml2-dev libsqlite3-dev make
+	apt-get update && apt-get install ruby1.9.1-full ruby1.9.1-dev git libxslt-dev libxml2-dev libsqlite3-dev make
 	gem install bundler
 
 	git clone https://github.com/AsydSolutions/asyd.git
