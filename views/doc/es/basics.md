@@ -24,10 +24,12 @@ donde debes introducir un hostname único, la IP del servidor, el usuario para e
 el puerto ssh si has configurado un puerto no estándar y la contraseña para ese usuario.
 ASYD añadirá la llave ssh de la aplicación en el archivo ~/.ssh/authorized_keys del host remoto
 para los futuros accesos, con lo que la contraseña provista no se guardará.
+
 Nota: si estás usando un usuario distinto a root (como en el caso de ubuntu o similar),
 necesitas asegurarte de que ese usuario tiene privilegios de administrador, el comando "sudo" está instalado,
 y el usuario no necesita proveer una contraseña para sudo, ya que el sistema de deploys de ASYD
-funciona en modo no-interactivo.
+funciona en modo no-interactivo. Esto se puede conseguir añadiendo la linea `%sudo   ALL=(ALL:ALL) NOPASSWD:ALL`
+al archivo `/etc/sudoers`.
 
 Después de que el nuevo host sea añadido, se iniciará el deploy de monitoring en segundo plano, en este
 momento el servidor aparecerá como "no monitorizado". Cuando la configuración de la monitorización se haya completado,
