@@ -108,6 +108,9 @@ module Misc
   # @param local [String] path to the local file
   # @param remote [String] remote path for uploading the file
   def upload_file(local, remote)
+    if remote.start_with? "~/" or remote.start_with? "$HOME/"
+      remote.gsub!(/^(~|\$HOME)\//, '')
+    end
     Net::SSH.start(self.ip, self.user, :port => self.ssh_port, :keys => "data/ssh_key") do |ssh|
       ssh.scp.upload!(local, remote)
     end
@@ -119,6 +122,9 @@ module Misc
   # @param remote [String] remote path of the file
   # @param local [String] local path to store the file
   def download_file(remote, local)
+    if remote.start_with? "~/" or remote.start_with? "$HOME/"
+      remote.gsub!(/^(~|\$HOME)\//, '')
+    end
     Net::SSH.start(self.ip, self.user, :port => self.ssh_port, :keys => "data/ssh_key") do |ssh|
       ssh.scp.download!(remote, local)
     end
@@ -130,6 +136,9 @@ module Misc
   # @param local [String] path to the local dir
   # @param remote [String] remote path for uploading the directory
   def upload_dir(local, remote)
+    if remote.start_with? "~/" or remote.start_with? "$HOME/"
+      remote.gsub!(/^(~|\$HOME)\//, '')
+    end
     Net::SSH.start(self.ip, self.user, :port => self.ssh_port, :keys => "data/ssh_key") do |ssh|
       match = ssh.exec!("ls "+remote)
       if !match.nil? && match.start_with?("ls:")
@@ -157,6 +166,9 @@ module Misc
   # @param remote [String] remote path of the directory
   # @param local [String] local path to store the directory
   def download_dir(remote, local)
+    if remote.start_with? "~/" or remote.start_with? "$HOME/"
+      remote.gsub!(/^(~|\$HOME)\//, '')
+    end
     Net::SSH.start(self.ip, self.user, :port => self.ssh_port, :keys => "data/ssh_key") do |ssh|
       ssh.scp.download!(remote, local, :recursive => true)
     end

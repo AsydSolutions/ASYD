@@ -3,6 +3,7 @@ require "dm-sqlite-adapter"
 require 'fileutils'
 require 'net/ssh'
 require 'net/scp'
+require 'open-uri'
 require 'pathname'
 require 'find'
 require 'tempfile'
