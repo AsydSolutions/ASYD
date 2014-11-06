@@ -51,12 +51,15 @@ class Host
         elsif !(ssh.exec!("which yum") =~ /\/bin\/yum$/).nil?
           self.pkg_mgr = "yum"
           if user != "root"
-            ssh.exec!("sudo yum install -y dkms")
+            ssh.exec!("sudo yum install -y openssh-clients")
           else
-            ssh.exec!("yum install -y dkms")
+            ssh.exec!("yum install -y openssh-clients")
           end
-          self.dist = ssh.exec!("/usr/lib/dkms/lsb_release -s -i").strip
-          self.dist_ver = ssh.exec!("/usr/lib/dkms/lsb_release -s -r").strip.to_f
+          self.dist = ssh.exec!("cat /etc/issue |awk 'NR == 1 {print $1}'").strip
+          if self.dist == "Red"
+            self.dist = "RedHat"
+          end
+          self.dist_ver = ssh.exec!("cat /etc/issue |awk -F\"release\" 'NR==1 {print $2}'|awk '{print $1}'").strip.to_f
           self.arch = ssh.exec!("uname -m").strip
         #3. arch-based
         elsif !(ssh.exec!("which pacman") =~ /\/bin\/pacman$/).nil?

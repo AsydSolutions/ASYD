@@ -7,30 +7,32 @@
 # For Linux:
 if <%PKG_MANAGER%> == apt or <%PKG_MANAGER%> == yum or <%PKG_MANAGER%> == pacman or <%PKG_MANAGER%> == zypper
 
-# install monit:
-install: curl tar gzip
-exec: mkdir -p /etc/monit/conf.d
-exec if <%ARCH%> == x86_64: curl -o /tmp/monit.tar.gz http://mmonit.com/monit/dist/binary/5.10/monit-5.10-linux-x64.tar.gz
-exec if <%ARCH%> == i686: curl -o /tmp/monit.tar.gz http://mmonit.com/monit/dist/binary/5.10/monit-5.10-linux-x86.tar.gz
-exec: cd /tmp && tar xzf /tmp/monit.tar.gz
-exec: mv /tmp/monit-5.10/bin/monit /usr/bin/
-exec: rm -r /tmp/monit*
+  # install monit:
+  install: curl tar gzip
+  exec: mkdir -p /etc/monit/conf.d
+  exec if <%ARCH%> == x86_64: curl -o /tmp/monit.tar.gz http://mmonit.com/monit/dist/binary/5.10/monit-5.10-linux-x64.tar.gz
+  exec if <%ARCH%> == i686: curl -o /tmp/monit.tar.gz http://mmonit.com/monit/dist/binary/5.10/monit-5.10-linux-x86.tar.gz
+  exec: cd /tmp && tar xzf /tmp/monit.tar.gz
+  exec: mv /tmp/monit-5.10/bin/monit /usr/bin/
+  exec: rm -r /tmp/monit*
 
-config file: monitrc, /etc/monit/monitrc
+  config file: monitrc, /etc/monit/monitrc
 
-# if it's debian-based or opensuse:
-config file if <%PKG_MANAGER%> == apt or <%PKG_MANAGER%> == zypper: initscript, /etc/init.d/monit
-exec if <%PKG_MANAGER%> == apt or <%PKG_MANAGER%> == zypper: chmod +x /etc/init.d/monit
-exec if <%PKG_MANAGER%> == apt: update-rc.d monit defaults
-exec if <%PKG_MANAGER%> == zypper: insserv /etc/init.d/monit
+  # if it's debian-based, opensuse or redhat-old:
+  config file if <%PKG_MANAGER%> == apt or <%PKG_MANAGER%> == zypper or <%DIST%> == CentOS and <%DIST_VER%> <= 6.6 or <%DIST%> == RedHat and <%DIST_VER%> <= 6.6 or <%DIST%> == Fedora and <%DIST_VER%> <= 17: initscript, /etc/init.d/monit
+  exec if <%PKG_MANAGER%> == apt or <%PKG_MANAGER%> == zypper or <%DIST%> == CentOS and <%DIST_VER%> <= 6.6 or <%DIST%> == RedHat and <%DIST_VER%> <= 6.6 or <%DIST%> == Fedora and <%DIST_VER%> <= 17: chmod +x /etc/init.d/monit
+  exec if <%PKG_MANAGER%> == apt: update-rc.d monit defaults
+  exec if <%PKG_MANAGER%> == zypper: insserv /etc/init.d/monit
+  exec if <%DIST%> == CentOS and <%DIST_VER%> <= 6.6 or <%DIST%> == RedHat and <%DIST_VER%> <= 6.6 or <%DIST%> == Fedora and <%DIST_VER%> <= 17: chkconfig --level 2345 monit on
 
-# if it's redhat or arch based:
-config file if <%PKG_MANAGER%> == yum or <%PKG_MANAGER%> == pacman: initscript, /usr/lib/systemd/system/monit.service
-exec if <%PKG_MANAGER%> == yum or <%PKG_MANAGER%> == pacman: chmod +x /usr/lib/systemd/system/monit.service
-exec if <%PKG_MANAGER%> == yum or <%PKG_MANAGER%> == pacman: systemctl enable monit
+  # if it's redhat-new or arch based:
+  config file if <%PKG_MANAGER%> == pacman or <%DIST%> == CentOS and <%DIST_VER%> >= 7 or <%DIST%> == RedHat and <%DIST_VER%> >= 7 or <%DIST%> == Fedora and <%DIST_VER%> >= 18: initscript, /usr/lib/systemd/system/monit.service
+  exec if <%PKG_MANAGER%> == yum or <%PKG_MANAGER%> == pacman or <%DIST%> == CentOS and <%DIST_VER%> >= 7 or <%DIST%> == RedHat and <%DIST_VER%> >= 7 or <%DIST%> == Fedora and <%DIST_VER%> >= 18: chmod +x /usr/lib/systemd/system/monit.service
+  exec if <%PKG_MANAGER%> == yum or <%PKG_MANAGER%> == pacman or <%DIST%> == CentOS and <%DIST_VER%> >= 7 or <%DIST%> == RedHat and <%DIST_VER%> >= 7 or <%DIST%> == Fedora and <%DIST_VER%> >= 18: systemctl enable monit
 
-exec: /usr/bin/monit -c /etc/monit/monitrc quit
-exec: /usr/bin/monit -c /etc/monit/monitrc
+  exec: /usr/bin/monit -c /etc/monit/monitrc quit
+  exec: sleep 1
+  exec: /usr/bin/monit -c /etc/monit/monitrc
 
 endif
 ###
@@ -40,30 +42,30 @@ endif
 # For Solaris:
 if <%DIST%> == Solaris or <%DIST%> == OpenIndiana
 
-# first upload the admin file for non-interactive pkgadd
-config file: solaris-admin, /etc/admin
-exec: chmod 666 /etc/admin
+  # first upload the admin file for non-interactive pkgadd
+  config file: solaris-admin, /etc/admin
+  exec: chmod 666 /etc/admin
 
-# install OpenCSW
-install pkgadd if <%DIST_VER%> >= 10: http://get.opencsw.org/now
-exec if <%DIST_VER%> <= 9: wget http://mirror.opencsw.org/opencsw/pkgutil.pkg
-install pkgadd if <%DIST_VER%> <= 9: pkgutil.pkg all
+  # install OpenCSW
+  install pkgadd if <%DIST_VER%> >= 10: http://get.opencsw.org/now
+  exec if <%DIST_VER%> <= 9: wget http://mirror.opencsw.org/opencsw/pkgutil.pkg
+  install pkgadd if <%DIST_VER%> <= 9: pkgutil.pkg all
 
-# install wget and gzip in case they are not there using pkgutil
-install pkgutil: wget gzip
+  # install wget and gzip in case they are not there using pkgutil
+  install pkgutil: wget gzip
 
-# install monit
-exec: mkdir -p /etc/monit/conf.d
-exec if <%ARCH%> == sparc: wget http://mmonit.com/monit/dist/binary/5.10/monit-5.10-solaris-sparc.tar.gz -O /tmp/monit.tar.gz
-exec if <%ARCH%> != sparc: wget http://mmonit.com/monit/dist/binary/5.10/monit-5.10-solaris-x64.tar.gz -O /tmp/monit.tar.gz
-exec: cd /tmp && gzip -dc /tmp/monit.tar.gz | tar xf -
-exec: mv /tmp/monit-5.10/bin/monit /usr/bin/
-exec: rm -r /tmp/monit*
+  # install monit
+  exec: mkdir -p /etc/monit/conf.d
+  exec if <%ARCH%> == sparc: wget http://mmonit.com/monit/dist/binary/5.10/monit-5.10-solaris-sparc.tar.gz -O /tmp/monit.tar.gz
+  exec if <%ARCH%> != sparc: wget http://mmonit.com/monit/dist/binary/5.10/monit-5.10-solaris-x64.tar.gz -O /tmp/monit.tar.gz
+  exec: cd /tmp && gzip -dc /tmp/monit.tar.gz | tar xf -
+  exec: mv /tmp/monit-5.10/bin/monit /usr/bin/
+  exec: rm -r /tmp/monit*
 
-config file: monitrc, /etc/monit/monitrc
+  config file: monitrc, /etc/monit/monitrc
 
-exec: echo "mo:2345:respawn:/usr/bin/monit -Ic /etc/monit/monitrc" >> /etc/inittab
-exec: init q
+  exec: echo "mo:2345:respawn:/usr/bin/monit -Ic /etc/monit/monitrc" >> /etc/inittab
+  exec: init q
 
 endif
 ###
@@ -73,24 +75,25 @@ endif
 # For OpenBSD:
 if <%DIST%> == OpenBSD
 
-# make sure wget is installed
-install: wget
+  # make sure wget is installed
+  install: wget
 
-# install monit
-exec: mkdir -p /etc/monit/conf.d
-exec if <%ARCH%> == amd64: wget http://mmonit.com/monit/dist/binary/5.10/monit-5.10-openbsd-x64.tar.gz -O /tmp/monit.tar.gz
-exec if <%ARCH%> == i386: wget http://mmonit.com/monit/dist/binary/5.10/monit-5.10-openbsd-x86.tar.gz -O /tmp/monit.tar.gz
-exec: cd /tmp && gzip -dc /tmp/monit.tar.gz | tar xf -
-exec: mv /tmp/monit-5.10/bin/monit /usr/bin/
-exec: rm -r /tmp/monit*
+  # install monit
+  exec: mkdir -p /etc/monit/conf.d
+  exec if <%ARCH%> == amd64: wget http://mmonit.com/monit/dist/binary/5.10/monit-5.10-openbsd-x64.tar.gz -O /tmp/monit.tar.gz
+  exec if <%ARCH%> == i386: wget http://mmonit.com/monit/dist/binary/5.10/monit-5.10-openbsd-x86.tar.gz -O /tmp/monit.tar.gz
+  exec: cd /tmp && gzip -dc /tmp/monit.tar.gz | tar xf -
+  exec: mv /tmp/monit-5.10/bin/monit /usr/bin/
+  exec: rm -r /tmp/monit*
 
-config file: monitrc, /etc/monit/monitrc
-config file: initscript, /etc/rc.d/monit
-exec: chmod +x /etc/rc.d/monit
-exec: echo 'pkg_scripts="$pkg_scripts monit"' >> /etc/rc.conf.local
+  config file: monitrc, /etc/monit/monitrc
+  config file: initscript, /etc/rc.d/monit
+  exec: chmod +x /etc/rc.d/monit
+  exec: echo 'pkg_scripts="$pkg_scripts monit"' >> /etc/rc.conf.local
 
-exec: /usr/bin/monit -c /etc/monit/monitrc quit
-exec: /usr/bin/monit -c /etc/monit/monitrc
+  exec: /usr/bin/monit -c /etc/monit/monitrc quit
+  exec: sleep 1
+  exec: /usr/bin/monit -c /etc/monit/monitrc
 
 endif
 ###
