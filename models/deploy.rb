@@ -756,7 +756,7 @@ class Deploy
             comply_prev = comply_curr
           else
             comply = false
-            comply_prev = comply_curr
+            comply_prev = false
           end
           vand = false
         elsif vor
