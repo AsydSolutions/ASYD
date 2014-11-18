@@ -1,4 +1,11 @@
 class ASYD < Sinatra::Application
+
+  before /^(\/user|team)/ do
+    unless user.is_admin?
+      redirect "/"
+    end
+  end
+
   get '/users' do
     @users = User.all
     @teams = Team.all
