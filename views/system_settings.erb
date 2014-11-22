@@ -1,0 +1,40 @@
+<h3> E-Mail Settings </h3>
+<legend></legend>
+<div class="btn-group control-group" data-toggle-name="sendMethod" data-toggle="buttons-radio" >
+  <a href="#sendmail" data-toggle="tab" class="btn <%= "active" if @method == :sendmail %>">Sendmail</a>
+  <a href="#smtp" data-toggle="tab" class="btn <%= "active" if @method == :smtp %>">SMTP</a>
+</div>
+
+<div class="tab-content">
+  <div class="tab-pane <%= "active" if @method == :sendmail %>" id="sendmail">
+    <form method="POST" action="/settings/email">
+      <fieldset>
+        <input type="hidden" name="method" value="sendmail" />
+        <label>Path to sendmail</label>
+        <input class="input" name="path" type="text" value="<%= @path %>" required>
+        <label></label>
+        <button type="submit" class="btn btn-primary">Save</button>
+      </fieldset>
+    </form>
+  </div>
+  <div class="tab-pane <%= "active" if @method == :smtp %>" id="smtp">
+    <form method="POST" action="/settings/email">
+      <fieldset>
+        <input type="hidden" name="method" value="smtp" />
+        <label>Host</label>
+        <input class="input" name="host" type="text" value="<%= @host %>" required>
+        <label>Port</label>
+        <input class="input" name="port" type="text" value="<%= @port %>" required>
+        <label class="checkbox">
+          <input type="checkbox" name="tls" value="1" <%= "checked" if @tls == true %>> SSL/TLS
+        </label>
+        <label>User</label>
+        <input class="input" name="user" type="text" value="<%= @user %>">
+        <label>Password</label>
+        <input class="input" name="password" type="text" value="<%= @password %>">
+        <label></label>
+        <button type="submit" class="btn btn-primary">Save</button>
+      </fieldset>
+    </form>
+  </div>
+</div>

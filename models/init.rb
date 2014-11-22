@@ -13,9 +13,11 @@ require 'sqlite3'
 require 'redcarpet'
 require 'bcrypt'
 require 'monit'
+require 'mail'
 require_relative "lib/spork"
 require_relative "lib/flavored_markdown"
 require_relative "lib/errors"
+require_relative "lib/URI-monkey-patch"
 require_relative "misc"
 require_relative "setup"
 require_relative "deploy"
@@ -33,6 +35,8 @@ require_relative "user"
 require_relative "team"
 DataMapper.setup(:status_db, "sqlite3:data/db/status.db") #load the status database
 require_relative "status"
+DataMapper.setup(:config_db, "sqlite3:data/db/config.db") #load the status database
+require_relative "email"
 DataMapper.finalize
 if File.directory? 'data'
   DataMapper.auto_upgrade!
