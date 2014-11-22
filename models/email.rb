@@ -14,7 +14,7 @@ class Email
   property :user, String
   property :password, String
 
-  if Email.all.first.nil?
+  if Email.all.first.nil? and File.directory? 'data'
     Email.create
   end
 
