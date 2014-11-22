@@ -17,6 +17,7 @@ require 'mail'
 require_relative "lib/spork"
 require_relative "lib/flavored_markdown"
 require_relative "lib/errors"
+require_relative "lib/URI-monkey-patch"
 require_relative "misc"
 require_relative "setup"
 require_relative "deploy"
