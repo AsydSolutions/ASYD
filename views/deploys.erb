@@ -8,13 +8,13 @@
         <div style="position:absolute; margin:10px; z-index:90;">
           <select name="target" class="input" id="selectHostDeploy" style="position:absolute; margin:10px; z-index:90;">
             <option></option>
-            <optgroup label="<%=t('host.other')%>">
-            <% @hosts.each do |host| %>
-              <option value="host;<%=host.hostname%>"><%=host.hostname%></option>
-            <% end %>
             <optgroup label="<%=t('group.other')%>">
             <% @hostgroups.each do |hostgroup| %>
               <option value="hostgroup;<%=hostgroup.name%>"><%=hostgroup.name%></option>
+            <% end %>
+            <optgroup label="<%=t('host.other')%>">
+            <% @hosts.each do |host| %>
+              <option value="host;<%=host.hostname%>"><%=host.hostname%></option>
             <% end %>
           </select>
         </div>
@@ -72,13 +72,13 @@
           <div class="control-group"><input name='package' type="text" class="input-xlarge" placeholder="<%= t('dialog.install.packages')%>" required></div>
           <div class="control-group" for"host"><select name="target" class="input-xlarge" id="selectHostInstall" required>
             <option></option>
-            <optgroup label="<%=t('host.other')%>">
-            <% @hosts.each do |host| %>
-              <option value="host;<%=host.hostname%>"><%=host.hostname%></option>
-            <% end %>
             <optgroup label="<%=t('group.other')%>">
             <% @hostgroups.each do |hostgroup| %>
               <option value="hostgroup;<%=hostgroup.name%>"><%=hostgroup.name%></option>
+            <% end %>
+            <optgroup label="<%=t('host.other')%>">
+            <% @hosts.each do |host| %>
+              <option value="host;<%=host.hostname%>"><%=host.hostname%></option>
             <% end %>
           </select></div>
           <div class="control-group"><input class="btn primary" type='submit' value='Install!'></div>
