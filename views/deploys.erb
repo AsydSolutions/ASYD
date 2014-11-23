@@ -19,34 +19,34 @@
           </select>
         </div>
         <div class="visible-phone visible-tablet"><br></br></div>
-        <table id="dptable" class="stripe row-border">
-          <thead style="text-align:left;">
-            <tr>
-              <th>
-                <%=t('deploy')%>
-              </th>
-              </th>
-              <th class="td-actions">
-                <%=t('action.other')%>
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <% @deploys.each do |deploy| %>
-            <tr>
-              <td>
-                <%=deploy%>
-                <%= '<input type="hidden" id="alert_'+deploy+'" value="'+@deploy_alerts[deploy]+'">' unless @deploy_alerts[deploy].nil? %>
-              </td>
-              <td class="td-actions">
-                <a data-toggle="tooltip" data-original-title="<%=t('action.deploy')%>" data-deploy="<%=deploy%>" class="btn btn-success btn-mini btn-icon-only hint" deploy-confirm="<%= t('dialog.deploy.confirm', deploy: deploy)%> on "><i class="btn-icon-only icon-rocket"></i></a>
-                <a data-toggle="tooltip" data-original-title="<%=t('action.details')%>" href="/deploys/<%=deploy%>" class="btn btn-info btn-mini btn-icon-only hint"><i class="btn-icon-only icon-folder-open"></i></a>
-                <a data-toggle="tooltip" data-original-title="<%=t('action.del')%>" href="#delDeploy" class="btn btn-danger btn-mini btn-icon-only hint" onclick="passDataToModal('<%=deploy%>', '#delDeploy')"><i class="btn-icon-only icon-remove"></i></a>
-              </td>
-            </tr>
-            <% end %>
-            <tr>
-              <form id="createDeploy" action="/deploys/new" method="post">
+        <form id="createDeploy" action="/deploys/new" method="post">
+          <table id="dptable" class="stripe row-border">
+            <thead style="text-align:left;">
+              <tr>
+                <th>
+                  <%=t('deploy')%>
+                </th>
+                </th>
+                <th class="td-actions">
+                  <%=t('action.other')%>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <% @deploys.each do |deploy| %>
+              <tr>
+                <td>
+                  <%=deploy%>
+                  <%= '<input type="hidden" id="alert_'+deploy+'" value="'+@deploy_alerts[deploy]+'">' unless @deploy_alerts[deploy].nil? %>
+                </td>
+                <td class="td-actions">
+                  <a data-toggle="tooltip" data-original-title="<%=t('action.deploy')%>" data-deploy="<%=deploy%>" class="btn btn-success btn-mini btn-icon-only hint" deploy-confirm="<%= t('dialog.deploy.confirm', deploy: deploy)%> on "><i class="btn-icon-only icon-rocket"></i></a>
+                  <a data-toggle="tooltip" data-original-title="<%=t('action.details')%>" href="/deploys/<%=deploy%>" class="btn btn-info btn-mini btn-icon-only hint"><i class="btn-icon-only icon-folder-open"></i></a>
+                  <a data-toggle="tooltip" data-original-title="<%=t('action.del')%>" href="#delDeploy" class="btn btn-danger btn-mini btn-icon-only hint" onclick="passDataToModal('<%=deploy%>', '#delDeploy')"><i class="btn-icon-only icon-remove"></i></a>
+                </td>
+              </tr>
+              <% end %>
+              <tr>
                 <td>
                   <input type="text" name="deploy_name" class="input" placeholder="Deploy Name" required>
                 </td>
@@ -55,10 +55,10 @@
                     <i class="btn-icon-only icon-plus"></i>
                   </button>
                 </td>
-              </form>
-            </tr>
-          </tbody>
-        </table>
+              </tr>
+            </tbody>
+          </table>
+        </form>
       </div>
     </div>
   </div>
