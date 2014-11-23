@@ -21,10 +21,10 @@ class Deploy
         if !line.match(/^# ?alert:/i).nil?
           if alerts[deploy].nil?
             alert = line.gsub!(/^# ?alert:/i, "").strip
-            alerts[deploy] = alert
+            alerts[deploy] = HTMLEntities.new.encode(HTMLEntities.new.encode(alert))
           else
             alert = line.gsub!(/^# ?alert:/i, "").strip
-            alerts[deploy] = alerts[deploy]+"<br>"+alert
+            alerts[deploy] = alerts[deploy]+"<br />"+HTMLEntities.new.encode(HTMLEntities.new.encode(alert))
           end
         end
       end
