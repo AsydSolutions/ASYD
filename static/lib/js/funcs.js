@@ -60,9 +60,9 @@ $(function() {
       $('#dataConfirmModal').removeClass('fade');
     };
     var text = $(this).attr('deploy-confirm')+host[0]+" "+host[1]+"?";
-    if (document.getElementById('alert_'+dep)){
-      text += "<br><strong><h3>Alert:</h3> "+document.getElementById('alert_'+dep).value+"</strong>";
-    };
+    if ($(this).attr('deploy-alert')) {
+      text += '<br /><strong><h3>Alert:</h3> ' + $(this).attr('deploy-alert') + '</strong>';
+    }
     $('#dataConfirmModal').find('.modal-body').text("");
     $('#dataConfirmModal').find('.modal-body').append(text);
     $('#dataConfirmModal').modal({show:true});
