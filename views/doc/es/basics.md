@@ -23,7 +23,9 @@ Para añadir un nuevo servidor, click en el botón "Add host" y aparecerá un di
 donde debes introducir un hostname único, la IP del servidor, el usuario para este host,
 el puerto ssh si has configurado un puerto no estándar y la contraseña para ese usuario.
 ASYD añadirá la llave ssh de la aplicación en el archivo ~/.ssh/authorized_keys del host remoto
-para los futuros accesos, con lo que la contraseña provista no se guardará.
+para los futuros accesos, con lo que la contraseña provista no se guardará. Alertnativamente,
+puedes dejar el campo de la contraseña vacío, en cuyo caso ASYD intentará autentificar el nuevo
+host usando la clave SSH creada o provista durante el setup.
 
 Nota: si estás usando un usuario distinto a root (como en el caso de ubuntu o similar),
 necesitas asegurarte de que ese usuario tiene privilegios de administrador, el comando "sudo" está instalado,
