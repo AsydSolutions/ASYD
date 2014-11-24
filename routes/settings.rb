@@ -2,6 +2,9 @@ class ASYD < Sinatra::Application
   get '/settings' do
     if user.is_admin?
       cfg = Email.all.first
+      if cfg.nil?
+        cfg = Email.create
+      end
       @method = cfg.method
       @path = cfg.path
       @host = cfg.host

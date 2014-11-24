@@ -41,6 +41,9 @@ require_relative "email"
 DataMapper.finalize
 if File.directory? 'data'
   DataMapper.auto_upgrade!
+  if Email.all.first.nil?
+    Email.create
+  end
 end
 
 MOTEX = ProcessShared::Mutex.new #mutex for monitoring handling

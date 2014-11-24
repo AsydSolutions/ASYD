@@ -14,10 +14,6 @@ class Email
   property :user, String
   property :password, String
 
-  if File.directory? 'data' and Email.all.first.nil? 
-    Email.create
-  end
-
   def initialize(_to, _subject, _body)
     begin
       cfg = Email.all.first
