@@ -14,7 +14,7 @@ class Email
   property :user, String
   property :password, String
 
-  def initialize(_to, _subject, _body)
+  def self.mail(_to, _subject, _body)
     begin
       cfg = Email.all.first
       mail = Mail.new do
