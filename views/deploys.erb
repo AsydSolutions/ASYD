@@ -90,7 +90,7 @@
 
 <div id="delDeploy" class="modal hide fade no-csstransforms3d" tabindex="-1" role="dialog" aria-labelledby="<%=t('dialog.del_deploy.title')%>" aria-hidden="true">
   <div class="modal-header">
-    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <a type="button" class="close" data-dismiss="modal" aria-hidden="true">×</a>
     <h3 id="delDeployLabel"><%=t('dialog.attention')%></h3>
   </div>
   <div class="modal-body">
@@ -99,7 +99,7 @@
   <div class="modal-footer">
     <form id="delDeployform" action="/deploys/del" method="post">
       <input type="hidden" name="deploy" id="dataInput" value="">
-      <button class="btn" data-dismiss="modal" aria-hidden="true"><%=t('action.cancel')%></button>
+      <a class="btn" data-dismiss="modal" aria-hidden="true"><%=t('action.cancel')%></a>
       <button type="submit" class="btn btn-primary"><%=t('action.del')%></button>
     </form>
   </div>

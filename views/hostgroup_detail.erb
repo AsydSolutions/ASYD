@@ -91,7 +91,7 @@
 
 <div id="addMember" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="<%=t('group.members.add')%>" aria-hidden="true">
   <div class="modal-header">
-    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <a type="button" class="close" data-dismiss="modal" aria-hidden="true">×</a>
     <h3 id="addMemeberLabel"><%=t('group.members.add')%></h3>
   </div>
   <form id="addMemeberform" action="/hostgroup/add-member" method="post">
@@ -109,7 +109,7 @@
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn" data-dismiss="modal" aria-hidden="true"><%=t('action.cancel')%></button>
+      <a class="btn" data-dismiss="modal" aria-hidden="true"><%=t('action.cancel')%></a>
       <button type="submit" class="btn btn-primary"><%=t('action.add')%></button>
     </div>
   </form>
@@ -118,7 +118,7 @@
 
 <div id="delMember" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="<%=t('group.members.del')%>" aria-hidden="true">
   <div class="modal-header">
-    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <a type="button" class="close" data-dismiss="modal" aria-hidden="true">×</a>
     <h3 id="delDeployLabel"><%=t('dialog.attention')%></h3>
   </div>
   <div class="modal-body">
@@ -128,7 +128,7 @@
     <form id="delMemberform" action="/hostgroup/del-member" method="post">
       <input type="hidden" name="hostgroup" value="<%=@hostgroup.name%>">
       <input type="hidden" name="hostname" id="dataInput" value="">
-      <button class="btn" data-dismiss="modal" aria-hidden="true"><%=t('action.cancel')%></button>
+      <a class="btn" data-dismiss="modal" aria-hidden="true"><%=t('action.cancel')%></a>
       <button type="submit" class="btn btn-primary"><%=t('action.del')%></button>
     </form>
   </div>
