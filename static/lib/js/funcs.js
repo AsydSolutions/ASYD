@@ -75,109 +75,109 @@ $(function () {
     var dttbl = $('script[src="/js/datatables-bootstrap.js"]').length;
     var slct = $('script[src="/js/select2.min.js"]').length;
     if (dttbl !== 0) {
-        $('#hgtable').dataTable({
-            'ordering': false,
-            'pageLength': 10,
-            'info': false,
-            'sDom': '<\'row-fluid\'<\'span12\'f>r>t<\'row-fluid\'<\'span6\'l><\'span6\'p>>',
-            'renderer': 'bootstrap',
-            'language': {
-              'search': '<i class="icon-search"></i>',
-              'emptyTable': 'You haven\'t added any hostgroup yet',
-              'paginate': {
-                'next': '<i class="icon-arrow-right"></i>',
-                'previous': '<i class="icon-arrow-left"></i>'
-              }
-            }
-        });
-        $('#htable').dataTable({
-            'ordering': false,
-            'pageLength': 10,
-            'info': false,
-            'sDom': '<\'row-fluid\'<\'span12\'f>r>t<\'row-fluid\'<\'span6\'l><\'span6\'p>>',
-            'renderer': 'bootstrap',
-            'language': {
-              'search': '<i class="icon-search"></i>',
-              'emptyTable': 'You haven\'t added any host yet',
-              'paginate': {
-                'next': '<i class="icon-arrow-right"></i>',
-                'previous': '<i class="icon-arrow-left"></i>'
-              }
-            }
-        });
-        $('#hgmtable').dataTable({
-            'ordering': false,
-            'pageLength': 10,
-            'info': false,
-            'sDom': '<\'row-fluid\'<\'span12\'f>r>t<\'row-fluid\'<\'span6\'l><\'span6\'p>>',
-            'renderer': 'bootstrap',
-            'language': {
-              'search': '<i class="icon-search"></i>',
-              'emptyTable': 'You haven\'t added any members to this group yet',
-              'paginate': {
-                'next': '<i class="icon-arrow-right"></i>',
-                'previous': '<i class="icon-arrow-left"></i>'
-              }
-            }
-        });
-        $('#dptable').dataTable({
-            'ordering': false,
-            'lengthChange': false,
-            'pageLength': 10,
-            'info': false,
-            'renderer': 'bootstrap',
-            'language': {
-              'search': '<i class="icon-search"></i>',
-              'emptyTable': 'You haven\'t added any deploys yet',
-              'paginate': {
-                'next': '<i class="icon-arrow-right"></i>',
-                'previous': '<i class="icon-arrow-left"></i>'
-              }
-            }
-        });
-        $('#attable').dataTable({
-            'ordering': false,
-            'lengthChange': false,
-            'pageLength': 10,
-            'info': false,
-            'searching': false,
-            'renderer': 'bootstrap',
-            'language': {
-              'emptyTable': 'No active tasks',
-              'paginate': {
-                'next': '<i class="icon-arrow-right"></i>',
-                'previous': '<i class="icon-arrow-left"></i>'
-              }
-            }
-        });
-        $('#cttable').dataTable({
-            'ordering': false,
-            'pageLength': 5,
-            'info': false,
-            'searching': false,
-            'lengthMenu': [ 5, 10, 25, 50, 75, 100 ],
-            'sDom': '<\'row-fluid\'<\'span12\'f>r>t<\'row-fluid\'<\'span6\'l><\'span6\'p>>',
-            'renderer': 'bootstrap',
-            'language': {
-              'emptyTable': 'No completed tasks',
-              'paginate': {
-                'next': '<i class="icon-arrow-right"></i>',
-                'previous': '<i class="icon-arrow-left"></i>'
-              }
-            }
-        });
-      }
-      if (slct !== 0) {
-        $('#selectMember').select2( {
-          'placeholder': 'Select host',
-        });
-        $('#selectHostDeploy').select2( {
-          'placeholder': 'Select host or hostgroup',
-        });
-        $('#selectHostInstall').select2( {
-          'placeholder': 'Select host or hostgroup',
-        });
-      }
+      $('#hgtable').dataTable({
+        'ordering': false,
+        'pageLength': 10,
+        'info': false,
+        'sDom': '<\'row-fluid\'<\'span12\'f>r>t<\'row-fluid\'<\'span6\'l><\'span6\'p>>',
+        'renderer': 'bootstrap',
+        'language': {
+          'search': '<i class="icon-search"></i>',
+          'emptyTable': 'You haven\'t added any hostgroup yet',
+          'paginate': {
+            'next': '<i class="icon-arrow-right"></i>',
+            'previous': '<i class="icon-arrow-left"></i>'
+          }
+        }
+      });
+      $('#htable').dataTable({
+        'ordering': false,
+        'pageLength': 10,
+        'info': false,
+        'sDom': '<\'row-fluid\'<\'span12\'f>r>t<\'row-fluid\'<\'span6\'l><\'span6\'p>>',
+        'renderer': 'bootstrap',
+        'language': {
+          'search': '<i class="icon-search"></i>',
+          'emptyTable': 'You haven\'t added any host yet',
+          'paginate': {
+            'next': '<i class="icon-arrow-right"></i>',
+            'previous': '<i class="icon-arrow-left"></i>'
+          }
+        }
+      });
+      $('#hgmtable').dataTable({
+        'ordering': false,
+        'pageLength': 10,
+        'info': false,
+        'sDom': '<\'row-fluid\'<\'span12\'f>r>t<\'row-fluid\'<\'span6\'l><\'span6\'p>>',
+        'renderer': 'bootstrap',
+        'language': {
+          'search': '<i class="icon-search"></i>',
+          'emptyTable': 'You haven\'t added any members to this group yet',
+          'paginate': {
+            'next': '<i class="icon-arrow-right"></i>',
+            'previous': '<i class="icon-arrow-left"></i>'
+          }
+        }
+      });
+      $('#dptable').dataTable({
+        'ordering': false,
+        'lengthChange': false,
+        'pageLength': 10,
+        'info': false,
+        'renderer': 'bootstrap',
+        'language': {
+          'search': '<i class="icon-search"></i>',
+          'emptyTable': 'You haven\'t added any deploys yet',
+          'paginate': {
+            'next': '<i class="icon-arrow-right"></i>',
+            'previous': '<i class="icon-arrow-left"></i>'
+          }
+        }
+      });
+      $('#attable').dataTable({
+        'ordering': false,
+        'lengthChange': false,
+        'pageLength': 10,
+        'info': false,
+        'searching': false,
+        'renderer': 'bootstrap',
+        'language': {
+          'emptyTable': 'No active tasks',
+          'paginate': {
+            'next': '<i class="icon-arrow-right"></i>',
+            'previous': '<i class="icon-arrow-left"></i>'
+          }
+        }
+      });
+      $('#cttable').dataTable({
+        'ordering': false,
+        'pageLength': 5,
+        'info': false,
+        'searching': false,
+        'lengthMenu': [ 5, 10, 25, 50, 75, 100 ],
+        'sDom': '<\'row-fluid\'<\'span12\'f>r>t<\'row-fluid\'<\'span6\'l><\'span6\'p>>',
+        'renderer': 'bootstrap',
+        'language': {
+          'emptyTable': 'No completed tasks',
+          'paginate': {
+            'next': '<i class="icon-arrow-right"></i>',
+            'previous': '<i class="icon-arrow-left"></i>'
+          }
+        }
+      });
+    }
+    if (slct !== 0) {
+      $('#selectMember').select2( {
+        'placeholder': 'Select host',
+      });
+      $('#selectHostDeploy').select2( {
+        'placeholder': 'Select host or hostgroup',
+      });
+      $('#selectHostInstall').select2( {
+        'placeholder': 'Select host or hostgroup',
+      });
+    }
   });
 
   $('input,select,textarea').not('[type=submit]').jqBootstrapValidation();
