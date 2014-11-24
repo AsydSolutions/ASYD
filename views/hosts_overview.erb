@@ -147,7 +147,7 @@
 			<div class="control-group"><input autocomplete="off" name='ip' type="text" class="input" placeholder="<%=t('ip')%>" data-validation-regex-regex="(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)" data-validation-regex-message="<%=t('dialog.add_host.ip.valid')%>" required><span class="help-inline"><%=t('ip')%> <%=t('dialog.unique')%></span><p class="help-block"></p></div>
 			<div class="control-group"><input autocomplete="off" name='user' type="text" class="input" placeholder="<%=t('username')%>" value="root" required><span class="help-inline"><%=t('username')%> <%=t('dialog.add_host.admin')%></span></div>
 			<div class="control-group"><input autocomplete="off" name='ssh_port' type="number" class="input" value="22" required><span class="help-inline"><%=t('ssh.port')%></span></div>
-			<div class="control-group"><input name='password' type="password" class="input" placeholder="<%=t('password')%>" required><span class="help-inline"><%=t('password')%> <%=t('dialog.add_host.password')%></span></div>
+			<div class="control-group"><input name='password' type="password" class="input" placeholder="<%=t('password')%>"><span class="help-inline"><%=t('password')%> <%=t('dialog.add_host.password')%></span></div>
 		</div>
 		<div class="modal-footer">
 			<button class="btn" data-dismiss="modal" aria-hidden="true"><%=t('action.cancel')%></button>

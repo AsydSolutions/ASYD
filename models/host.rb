@@ -34,7 +34,7 @@ class Host
       self.monit_pw = (0...8).map { o[rand(o.length)] }.join
       self.opt_vars = {} #initialize opt_vars as an empty hash
       #start connection to remote host
-      Net::SSH.start(ip, user, :port => self.ssh_port, :password => password, :timeout => 10) do |ssh|
+      Net::SSH.start(ip, user, :port => self.ssh_port, :keys => "data/ssh_key", :password => password, :timeout => 10) do |ssh|
         #check for package manager and add distro
         #1. debian-based
         if !(ssh.exec!("which apt-get") =~ /\/bin\/apt-get$/).nil?
@@ -126,10 +126,19 @@ class Host
       end
       return self #return the object itself
     rescue Net::SSH::AuthenticationFailed
+      NOTEX.synchronize do
+        notification = Notification.create(:type => :error, :sticky => false, :message => I18n.t('error.host.auth'))
+      end
       return false
     rescue Errno::EHOSTUNREACH
+      NOTEX.synchronize do
+        notification = Notification.create(:type => :error, :sticky => false, :message => I18n.t('error.host.unreach'))
+      end
       return false
-    rescue Timeout::Error
+    rescue
+      NOTEX.synchronize do
+        notification = Notification.create(:type => :error, :sticky => false, :message => I18n.t('error.host.misc'))
+      end
       return false
     end
   end
