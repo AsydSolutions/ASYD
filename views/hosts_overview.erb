@@ -138,7 +138,7 @@
 
 <div id="addServer" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="<%=t('host.add')%>" aria-hidden="true">
 	<div class="modal-header">
-		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+		<a type="button" class="close" data-dismiss="modal" aria-hidden="true">×</a>
 		<h3 id="addServerLabel"><%=t('host.add')%></h3>
 	</div>
 	<form id="addServerform" action="/host/add" method="post">
@@ -147,10 +147,10 @@
 			<div class="control-group"><input autocomplete="off" name='ip' type="text" class="input" placeholder="<%=t('ip')%>" data-validation-regex-regex="(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)" data-validation-regex-message="<%=t('dialog.add_host.ip.valid')%>" required><span class="help-inline"><%=t('ip')%> <%=t('dialog.unique')%></span><p class="help-block"></p></div>
 			<div class="control-group"><input autocomplete="off" name='user' type="text" class="input" placeholder="<%=t('username')%>" value="root" required><span class="help-inline"><%=t('username')%> <%=t('dialog.add_host.admin')%></span></div>
 			<div class="control-group"><input autocomplete="off" name='ssh_port' type="number" class="input" value="22" required><span class="help-inline"><%=t('ssh.port')%></span></div>
-			<div class="control-group"><input name='password' type="password" class="input" placeholder="<%=t('password')%>" required><span class="help-inline"><%=t('password')%> <%=t('dialog.add_host.password')%></span></div>
+			<div class="control-group"><input name='password' type="password" class="input" placeholder="<%=t('password')%>"><span class="help-inline"><%=t('password')%> <%=t('dialog.add_host.password')%></span></div>
 		</div>
 		<div class="modal-footer">
-			<button class="btn" data-dismiss="modal" aria-hidden="true"><%=t('action.cancel')%></button>
+			<a class="btn" data-dismiss="modal" aria-hidden="true"><%=t('action.cancel')%></a>
 			<button type="submit" class="btn btn-primary"><%=t('action.deploy')%></button>
 		</div>
 	</form>
@@ -159,7 +159,7 @@
 
 <div id="addGroup" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="<%=t('group.add')%>" aria-hidden="true">
 	<div class="modal-header">
-		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+		<a type="button" class="close" data-dismiss="modal" aria-hidden="true">×</a>
 		<h3 id="addServerLabel"><%=t('group.add')%></h3>
 	</div>
 	<form id="addGroupform" action="/hostgroup/add" method="post">
@@ -167,7 +167,7 @@
 			<div class="control-group"><input autocomplete="off" name='hostgroup' type="text" class="input-xlarge" placeholder="<%=t('name')%>" autofocus required></div>
 		</div>
 		<div class="modal-footer">
-			<button class="btn" data-dismiss="modal" aria-hidden="true"><%=t('action.cancel')%></button>
+			<a class="btn" data-dismiss="modal" aria-hidden="true"><%=t('action.cancel')%></a>
 			<button type="submit" class="btn btn-primary"><%=t('action.add')%></button>
 		</div>
 	</form>
@@ -176,7 +176,7 @@
 
 <div id="rebootServer" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="<%=t('dialog.reboot.title')%>" aria-hidden="true">
 	<div class="modal-header">
-		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+		<a type="button" class="close" data-dismiss="modal" aria-hidden="true">×</a>
 		<h3 id="rebootServerLabel"><%=t('dialog.attention')%></h3>
 	</div>
 	<div class="modal-body">
@@ -185,7 +185,7 @@
 	<div class="modal-footer">
 		<form id="rebootServerform" action="/host/reboot" method="post">
 			<input type="hidden" name="hostname" id="dataInput" value="">
-			<button class="btn" data-dismiss="modal" aria-hidden="true"><%=t('action.cancel')%></button>
+			<a class="btn" data-dismiss="modal" aria-hidden="true"><%=t('action.cancel')%></a>
 			<button type="submit" class="btn btn-primary"><%=t('host.reboot')%></button>
 		</form>
 	</div>
@@ -194,7 +194,7 @@
 
 <div id="delServer" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="<%=t('dialog.del_host.title')%>" aria-hidden="true">
 	<div class="modal-header">
-		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+		<a type="button" class="close" data-dismiss="modal" aria-hidden="true">×</a>
 		<h3 id="delServerLabel"><%=t('dialog.attention')%></h3>
 	</div>
 	<div class="modal-body">
@@ -204,7 +204,7 @@
 		<form id="delServerform" action="/host/del" method="post">
 			<input type="hidden" name="hostname" id="dataInput" value="">
 			<div style="float:left" class="control-group"><input type="checkbox" name="revoke" value="true"> Revoke SSH key</div>
-			<button class="btn" data-dismiss="modal" aria-hidden="true"><%=t('action.cancel')%></button>
+			<a class="btn" data-dismiss="modal" aria-hidden="true"><%=t('action.cancel')%></a>
 			<button type="submit" class="btn btn-primary"><%=t('action.del')%></button>
 		</form>
 	</div>
@@ -213,7 +213,7 @@
 
 <div id="delGroup" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="<%=t('dialog.del_group.title')%>" aria-hidden="true">
 	<div class="modal-header">
-		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+		<a type="button" class="close" data-dismiss="modal" aria-hidden="true">×</a>
 		<h3 id="delGroupLabel"><%=t('dialog.attention')%></h3>
 	</div>
 	<div class="modal-body">
@@ -222,7 +222,7 @@
 	<div class="modal-footer">
 		<form id="delGroupform" action="/hostgroup/del" method="post">
 			<input type="hidden" name="hostgroup" id="dataInput" value="">
-			<button class="btn" data-dismiss="modal" aria-hidden="true"><%=t('action.cancel')%></button>
+			<a class="btn" data-dismiss="modal" aria-hidden="true"><%=t('action.cancel')%></a>
 			<button type="submit" class="btn btn-primary"><%=t('action.del')%></button>
 		</form>
 	</div>

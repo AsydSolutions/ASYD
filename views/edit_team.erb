@@ -1,6 +1,6 @@
 <div id="editTeam" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="<%=t('dialog.edit_team.title')%>" aria-hidden="true">
   <div class="modal-header">
-    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <a type="button" class="close" data-dismiss="modal" aria-hidden="true">×</a>
     <h3 id="editTeamLabel"><%=t('dialog.edit_team.title')%></h3>
   </div>
   <form id="editTeamform" action="/team/edit" method="post">
@@ -40,7 +40,7 @@
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn" data-dismiss="modal" aria-hidden="true"><%=t('action.cancel')%></button>
+      <a class="btn" data-dismiss="modal" aria-hidden="true"><%=t('action.cancel')%></a>
       <label for="submit-form" class="btn btn-primary"><%=t('action.save')%></label>
     </div>
 </div>

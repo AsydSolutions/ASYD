@@ -113,7 +113,7 @@
 
 <div id="addUser" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="<%=t('dialog.add_user.title')%>" aria-hidden="true">
 	<div class="modal-header">
-		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+		<a type="button" class="close" data-dismiss="modal" aria-hidden="true">×</a>
 		<h3 id="addUserLabel"><%=t('dialog.add_user.title')%></h3>
 	</div>
 	<form id="addUserform" action="/user/add" method="post">
@@ -123,7 +123,7 @@
 			<div class="control-group"><input name='password' type="password" class="input" placeholder="<%=t('password')%>" required><span class="help-inline"><%=t('password')%></span></div>
 		</div>
 		<div class="modal-footer">
-			<button class="btn" data-dismiss="modal" aria-hidden="true"><%=t('action.cancel')%></button>
+			<a class="btn" data-dismiss="modal" aria-hidden="true"><%=t('action.cancel')%></a>
 			<button type="submit" class="btn btn-primary"><%=t('action.add')%></button>
 		</div>
 	</form>
@@ -131,7 +131,7 @@
 
 <div id="addTeam" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="<%=t('dialog.add_team.title')%>" aria-hidden="true">
 	<div class="modal-header">
-		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+		<a type="button" class="close" data-dismiss="modal" aria-hidden="true">×</a>
 		<h3 id="addTeamLabel"><%=t('dialog.add_team.title')%></h3>
 	</div>
 	<form id="addTeamform" action="/team/add" method="post">
@@ -139,7 +139,7 @@
 			<div class="control-group"><input name='name' type="text" class="input" placeholder="<%=t('dialog.add_team.name')%>" autofocus required><span class="help-inline"><%=t('dialog.add_team.name_long')%></span></div>
 		</div>
 		<div class="modal-footer">
-			<button class="btn" data-dismiss="modal" aria-hidden="true"><%=t('action.cancel')%></button>
+			<a class="btn" data-dismiss="modal" aria-hidden="true"><%=t('action.cancel')%></a>
 			<button type="submit" class="btn btn-primary"><%=t('action.add')%></button>
 		</div>
 	</form>
@@ -147,7 +147,7 @@
 
 <div id="delUser" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="<%=t('dialog.del_user.title')%>" aria-hidden="true">
 	<div class="modal-header">
-		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+		<a type="button" class="close" data-dismiss="modal" aria-hidden="true">×</a>
 		<h3 id="delUserLabel"><%=t('dialog.attention')%></h3>
 	</div>
 	<div class="modal-body">
@@ -156,7 +156,7 @@
 	<div class="modal-footer">
 		<form id="delUserform" action="/user/del" method="post">
 			<input type="hidden" name="username" id="dataInput" value="">
-			<button class="btn" data-dismiss="modal" aria-hidden="true"><%=t('action.cancel')%></button>
+			<a class="btn" data-dismiss="modal" aria-hidden="true"><%=t('action.cancel')%></a>
 			<button type="submit" class="btn btn-primary"><%=t('action.del')%></button>
 		</form>
 	</div>
@@ -164,7 +164,7 @@
 
 <div id="delTeam" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="<%=t('dialog.del_team.title')%>" aria-hidden="true">
 	<div class="modal-header">
-		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+		<a type="button" class="close" data-dismiss="modal" aria-hidden="true">×</a>
 		<h3 id="delTeamLabel"><%=t('dialog.attention')%></h3>
 	</div>
 	<div class="modal-body">
@@ -173,7 +173,7 @@
 	<div class="modal-footer">
 		<form id="delTeamform" action="/team/del" method="post">
 			<input type="hidden" name="name" id="dataInput" value="">
-			<button class="btn" data-dismiss="modal" aria-hidden="true"><%=t('action.cancel')%></button>
+			<a class="btn" data-dismiss="modal" aria-hidden="true"><%=t('action.cancel')%></a>
 			<button type="submit" class="btn btn-primary"><%=t('action.del')%></button>
 		</form>
 	</div>
@@ -181,7 +181,7 @@
 
 <div id="editUser" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="<%=t('dialog.edit_user.title')%>" aria-hidden="true">
 	<div class="modal-header">
-		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+		<a type="button" class="close" data-dismiss="modal" aria-hidden="true">×</a>
 		<h3 id="editUserLabel"><%=t('dialog.edit_user.title')%></h3>
 	</div>
 	<form id="editUserform" action="/user/edit" method="post">
@@ -191,7 +191,7 @@
 			<div class="control-group"><input name='password' type="password" class="input" placeholder="<%=t('dialog.edit_user.new_pass')%>"><span class="help-inline"><%=t('dialog.edit_user.change_pass')%></span></div>
 		</div>
 		<div class="modal-footer">
-			<button class="btn" data-dismiss="modal" aria-hidden="true"><%=t('action.cancel')%></button>
+			<a class="btn" data-dismiss="modal" aria-hidden="true"><%=t('action.cancel')%></a>
 			<button type="submit" class="btn btn-primary"><%=t('action.edit')%></button>
 		</div>
 	</form>

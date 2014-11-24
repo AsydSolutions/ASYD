@@ -24,7 +24,9 @@ For adding a new server, click on the "Add host" button and a prompt will appear
 there you need to provide a unique hostname, the server IP, the user for that host,
 the ssh port if you configured a non-standard port, and the password for that user.
 ASYD then will add the ASYD ssh key on the ~/.ssh/authorized_keys file of the target host
-for all the future access, thus the provided password won't be stored at all.
+for all the future access, thus the provided password won't be stored at all. Alternatively,
+you can leave the password field empty, then ASYD will try to auth against the host using the
+SSH key created or provided at the setup.
 
 Please note that if you are using a non-root user (like in the case of ubuntu or similar),
 you need to be sure that the user has admin privileges, the command "sudo" is installed,

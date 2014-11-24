@@ -128,7 +128,7 @@ en:
     attention: "Attention!"
     add_host:
       admin: "(must have admin privileges)"
-      password: "(won't be stored)"
+      password: "- Or leave empty to use ASYD's SSH key"
       ip:
         valid: "Must be a valid IP address"
     del_host:
@@ -183,3 +183,9 @@ en:
     conditionals: "Conditionals"
     monitoring: "Monitoring"
     solaris: "Solaris Specific"
+
+  error:
+    host:
+      auth: "Authentication error, please check the provided password"
+      unreach: "Host unreachable, please check the network"
+      misc: "Error adding the host"

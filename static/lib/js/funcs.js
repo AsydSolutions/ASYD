@@ -54,7 +54,7 @@ $(function () {
     }
     var host = target.split(';');
     if (!$('#dataConfirmModal').length) {
-      $('body').append('<div id="dataConfirmModal" class="modal fade" role="dialog" aria-labelledby="dataConfirmLabel" aria-hidden="true"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button><h3 id="dataConfirmLabel">Please Confirm</h3></div><div class="modal-body"></div><div class="modal-footer"><form id="deployForm" action="/deploys/deploy" method="post"><input type="hidden" name="deploy" value="'+dep+'"><input type="hidden" name="target" value="'+target+'"><button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button><button type="submit" class="btn btn-primary">Deploy!</a></div></div>');
+      $('body').append('<div id="dataConfirmModal" class="modal fade" role="dialog" aria-labelledby="dataConfirmLabel" aria-hidden="true"><div class="modal-header"><a type="button" class="close" data-dismiss="modal" aria-hidden="true">×</a><h3 id="dataConfirmLabel">Please Confirm</h3></div><div class="modal-body"></div><div class="modal-footer"><form id="deployForm" action="/deploys/deploy" method="post"><input type="hidden" name="deploy" value="'+dep+'"><input type="hidden" name="target" value="'+target+'"><a class="btn" data-dismiss="modal" aria-hidden="true">Cancel</a><button type="submit" class="btn btn-primary">Deploy!</button></div></div>');
     }
     if (Modernizr.csstransforms3d === false){
       $('#dataConfirmModal').removeClass('fade');
@@ -272,7 +272,7 @@ var dismissNotification = function (msg_id) {
   $.post('/notification/dismiss', {
     msg_id: msg_id
   }, function () {
-    
+
   });
 };
 
