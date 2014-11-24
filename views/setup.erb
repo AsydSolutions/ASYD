@@ -67,9 +67,15 @@
                 </div>
               </div>
               <div class="control-group">
-                <label class="control-label" for="password"><%=t('password')%></label>
+                <label class="control-label" for="password"><%=t('password.one')%></label>
                 <div class="controls">
-                  <input class="input" name="password" type="password" required>
+                  <input class="input" id="password" name="password" type="password" required>
+                </div>
+              </div>
+              <div class="control-group">
+                <label class="control-label" for="passwordRepeat"><%=t('password.repeat')%></label>
+                <div class="controls">
+                  <input class="input" name="passwordRepeat" type="password" data-validation-matches-match="password" data-validation-matches-message="<%=t('password.match')%>" >
                 </div>
               </div>
               <div class="control-group"><input class="btn" type='submit' value="<%=t('action.setup')%>"></div>
