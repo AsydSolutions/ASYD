@@ -38,7 +38,10 @@ en:
     port: "SSH port"
 
   username: "Username"
-  password: "Password"
+  password:
+    one: "Password"
+    repeat: "Repeat password"
+    match: "Password must match"
   email: "E-Mail"
   name: "Name"
   ip: "IP address"
@@ -55,6 +58,10 @@ en:
     not_found:
       short: "Oops! we cannot find this place."
       detail: "Why not try going back to the <a href='/'>dashboard</a> or using the top menu!"
+    host:
+      auth: "Authentication error, please check the provided password"
+      unreach: "Host unreachable, please check the network"
+      misc: "Error adding the host"
 
   group:
     one: "Hostgroup"
@@ -183,9 +190,3 @@ en:
     conditionals: "Conditionals"
     monitoring: "Monitoring"
     solaris: "Solaris Specific"
-
-  error:
-    host:
-      auth: "Authentication error, please check the provided password"
-      unreach: "Host unreachable, please check the network"
-      misc: "Error adding the host"
