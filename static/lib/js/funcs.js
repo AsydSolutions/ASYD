@@ -1,5 +1,5 @@
-$(function() {
-  $(window).scroll(function() {
+$(function () {
+  $(window).scroll(function () {
     // Get the position of the location where the scroller starts.
     var scroller_anchor = $('.scroller_anchor').offset().top;
 
@@ -29,22 +29,22 @@ $(function() {
     }
   });
 
-  $('#add').click(function() {
+  $('#add').click(function () {
     $('#add_form').toggle();
     $('#add').remove();
   });
 
-  $('.import_key').click(function() {
+  $('.import_key').click(function () {
     $('#import').toggle();
   });
 
-  $('.import_key').click(function() {
+  $('.import_key').click(function () {
     $('#gen').toggle();
   });
 
   $('.hint').tooltip();
 
-  $('a[deploy-confirm]').click(function() {
+  $('a[deploy-confirm]').click(function () {
     var dep = $(this).attr('data-deploy');
     var e = document.getElementById('selectHostDeploy');
     var target = e.options[e.selectedIndex].value;
@@ -68,7 +68,7 @@ $(function() {
     return false;
   });
 
-  $(document).ready(function() {
+  $(document).ready(function () {
     if (Modernizr.csstransforms3d === false){
       $('.modal').removeClass('fade');
     }
@@ -182,14 +182,14 @@ $(function() {
 
   $('input,select,textarea').not('[type=submit]').jqBootstrapValidation();
 
-  $('div.btn-group[data-toggle-name=*]').each(function() {
+  $('div.btn-group[data-toggle-name=*]').each(function () {
     var group   = $(this);
     var form    = group.parents('form').eq(0);
     var name    = group.attr('data-toggle-name');
     var hidden  = $('input[name="' + name + '"]', form);
-    $('button', group).each(function() {
+    $('button', group).each(function () {
       var button = $(this);
-      button.live('click', function() {
+      button.live('click', function () {
           hidden.val($(this).val());
       });
       if(button.val() == hidden.val()) {
@@ -211,7 +211,7 @@ var editDeploy = function (path)
   var editor = CodeMirror.fromTextArea(editBox, {
     mode: "text/x-sh"
   });
-  editor.on("change", function() {
+  editor.on("change", function () {
     editor.save();
   });
 };
