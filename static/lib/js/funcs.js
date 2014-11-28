@@ -1,4 +1,3 @@
-var $, Modernizr, CodeMirror, editBox;
 $(function () {
   $(window).scroll(function () {
     // Get the position of the location where the scroller starts.
