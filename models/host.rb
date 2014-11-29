@@ -135,9 +135,10 @@ class Host
         notification = Notification.create(:type => :error, :sticky => false, :message => I18n.t('error.host.unreach'))
       end
       return false
-    rescue
+    rescue => e
+      error = I18n.t('error.host.misc')+": "+e.message
       NOTEX.synchronize do
-        notification = Notification.create(:type => :error, :sticky => false, :message => I18n.t('error.host.misc'))
+        notification = Notification.create(:type => :error, :sticky => false, :message => error)
       end
       return false
     end

@@ -432,8 +432,8 @@ class Deploy
     rescue ExecutionError => e
       error = e.message.split("\n")
       return [4, error.last]
-    rescue
-      error = "Something really bad happened when installing "+pkg+" on "+host.hostname
+    rescue => e
+      error = "Something really bad happened when installing "+pkg+" on "+host.hostname+": "+e.message
       return [4, error]
     end
   end
@@ -521,8 +521,8 @@ class Deploy
     rescue ExecutionError => e
       error = e.message.split("\n")
       return [4, error.last]
-    rescue
-      error = "Something really bad happened when uninstalling "+pkg+" on "+host.hostname
+    rescue => e
+      error = "Something really bad happened when uninstalling "+pkg+" on "+host.hostname+": "+e.message
       return [4, error]
     end
   end
