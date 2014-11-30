@@ -11,13 +11,14 @@
     </div>
   </div>
 <%@hosts.each do |host|%>
+  <%randid = SecureRandom.hex(4)%>
   <div class="accordion-group">
     <div class="accordion-heading">
       <a class="accordion-toggle" data-toggle="collapse" href="#collapse<%=host%>">
-      <%if @errors.include?(host)%><strong class="text-error"><%=host%></strong><%else%><%=host%><%end%>
+      <%if @errors.include?(host)%><strong class="text-error"><%=host%></strong><%else%><%=randid%><%end%>
       </a>
     </div>
-    <div id="collapse<%=host%>" class="accordion-body collapse out">
+    <div id="collapse<%=randid%>" class="accordion-body collapse out">
       <div class="accordion-inner">
         <%@notifications.each do |notification|%>
           <% if notification.host == host %>
