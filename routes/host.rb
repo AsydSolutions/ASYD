@@ -70,6 +70,10 @@ class ASYD < Sinatra::Application
 
   post '/host/edit' do
     host = Host.first(:hostname => params['old_hostname'])
+    groups = Array.new
+    host.hostgroups.each do |group|
+      groups << group
+    end
     host.hostname = params['hostname']
     host.save
     host.ip = params['ip']
