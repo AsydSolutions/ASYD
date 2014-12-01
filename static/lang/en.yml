@@ -79,6 +79,7 @@ en:
     status: "Status"
     reboot: "Reboot"
     add: "Add Host"
+    edit: "Edit Host"
     stats:
       title: "System stats"
       load: "load:"

@@ -63,4 +63,14 @@ class ASYD < Sinatra::Application
     redir = '/host/'+params['hostname']
     redirect to redir
   end
+
+  post '/host/edit' do
+    host = Host.first(:hostname => params['old_hostname'])
+    host.hostname = params['hostname']
+    host.save
+    host.ip = params['ip']
+    host.save
+    redir = '/host/'+params['hostname']
+    redirect to redir
+  end
 end
