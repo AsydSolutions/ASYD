@@ -39,10 +39,12 @@ class Host
         #1. debian-based
         if !(ssh.exec!("which apt-get") =~ /\/bin\/apt-get$/).nil?
           self.pkg_mgr = "apt"
-          if user != "root"
-            ssh.exec!("sudo apt-get update && sudo apt-get -y -q install lsb-release")
-          else
-            ssh.exec!("apt-get update && apt-get -y -q install lsb-release")
+          if (ssh.exec!("which lsb_release") =~ /\/bin\/lsb_release$/).nil?
+            if user != "root"
+              ssh.exec!("sudo apt-get -y -q install lsb-release")
+            else
+              ssh.exec!("apt-get -y -q install lsb-release")
+            end
           end
           self.dist = ssh.exec!("lsb_release -s -i").strip
           self.dist_ver = ssh.exec!("lsb_release -s -r").strip.to_f
@@ -50,10 +52,12 @@ class Host
         #2. redhat-based
         elsif !(ssh.exec!("which yum") =~ /\/bin\/yum$/).nil?
           self.pkg_mgr = "yum"
-          if user != "root"
-            ssh.exec!("sudo yum install -y openssh-clients")
-          else
-            ssh.exec!("yum install -y openssh-clients")
+          if (ssh.exec!("which scp") =~ /\/bin\/scp$/).nil?
+            if user != "root"
+              ssh.exec!("sudo yum install -y openssh-clients")
+            else
+              ssh.exec!("yum install -y openssh-clients")
+            end
           end
           self.dist = ssh.exec!("cat /etc/issue |awk 'NR == 1 {print $1}'").strip
           if self.dist == "Red"
@@ -64,10 +68,12 @@ class Host
         #3. arch-based
         elsif !(ssh.exec!("which pacman") =~ /\/bin\/pacman$/).nil?
           self.pkg_mgr = "pacman"
-          if user != "root"
-            ssh.exec!("sudo pacman -Sy --noconfirm --noprogressbar lsb-release")
-          else
-            ssh.exec!("pacman -Sy --noconfirm --noprogressbar lsb-release")
+          if (ssh.exec!("which lsb_release") =~ /\/bin\/lsb_release$/).nil?
+            if user != "root"
+              ssh.exec!("sudo pacman -S --noconfirm --noprogressbar lsb-release")
+            else
+              ssh.exec!("pacman -S --noconfirm --noprogressbar lsb-release")
+            end
           end
           self.dist = ssh.exec!("lsb_release -s -i").strip
           self.dist_ver = 0
