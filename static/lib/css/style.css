@@ -42,6 +42,12 @@ input {
 	padding-left: 3px;
 }
 
+.btn-icon-header {
+	padding-right: 12px !important;
+	padding-left: 0px !important;
+	margin-right: 5px;
+}
+
 .table td {
 	vertical-align: middle;
 }

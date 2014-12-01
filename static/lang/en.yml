@@ -16,6 +16,7 @@ en:
     deploy: "Deploy!"
     cancel: "Cancel"
     add: "Add"
+    more: "More"
     del: "Delete"
     edit: "Edit"
     remove: "Remove"
@@ -67,6 +68,7 @@ en:
     one: "Hostgroup"
     other: "Host Groups"
     add: "Add Hostgroup"
+    edit: "Edit Hostgroup"
     members:
       title: "Group Members for %{group}"
       add: "Add member"
@@ -79,6 +81,7 @@ en:
     status: "Status"
     reboot: "Reboot"
     add: "Add Host"
+    edit: "Edit Host"
     stats:
       title: "System stats"
       load: "load:"

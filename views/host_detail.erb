@@ -1,5 +1,5 @@
-<div class="row">
-  <div class="span6">
+<div class="span6">
+  <div class="row">
     <div class="widget widget-table action-table">
       <div class="widget-header">
         <i class="icon-stethoscope"></i><h3><%=t('host.stats.title')%></h3>
@@ -26,38 +26,7 @@
       </div>
     </div>
   </div>
-  <div class="span4">
-    <div class="widget widget-table action-table">
-      <div class="widget-header">
-        <i class="icon-info"></i><h3><%=t('host.info.title')%></h3>
-      </div>
-      <div class="widget-content">
-        <table class="table table-striped table-bordered">
-        <tbody>
-          <tr>
-            <td><strong><%=t('host.hostname').downcase%></strong></td>
-            <td><%=@host.hostname%></td>
-          </tr>
-          <tr>
-            <td><strong><%="ip:"%></strong></td>
-            <td><%=@host.ip%></td>
-          </tr>
-          <tr>
-            <td><strong><%=t('host.info.os')%></strong></td>
-            <td><%=@host.dist+" "+@host.dist_ver.to_s%></td>
-          </tr>
-          <tr>
-            <td><strong><%=t('host.info.arch')%></strong></td>
-            <td><%=@host.arch%></td>
-          </tr>
-        </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-</div>
-<div class="row">
-  <div class="span6">
+  <div class="row">
     <div class="widget">
       <div class="widget-header">
         <i class="icon-terminal"></i><h3><%=t('vars.title')%></h3>
@@ -90,4 +59,57 @@
       </div>
     </div>
   </div>
+</div>
+<div class="span4">
+  <div class="widget widget-table action-table">
+    <div class="widget-header">
+      <i class="icon-info"></i><h3><%=t('host.info.title')%></h3>
+      <div class="pull-right"><a class="btn btn-icon-header btn-mini" href="#editHost" role="button" data-toggle="modal"><i class="icon-edit"></i></a></div>
+    </div>
+    <div class="widget-content">
+      <table class="table table-striped table-bordered">
+      <tbody>
+        <tr>
+          <td><strong><%=t('host.hostname').downcase%></strong></td>
+          <td><%=@host.hostname%></td>
+        </tr>
+        <tr>
+          <td><strong><%="ip:"%></strong></td>
+          <td><%=@host.ip%></td>
+        </tr>
+        <tr>
+          <td><strong><%=t('host.info.os')%></strong></td>
+          <td><%=@host.dist+" "+@host.dist_ver.to_s%></td>
+        </tr>
+        <tr>
+          <td><strong><%=t('host.info.arch')%></strong></td>
+          <td><%=@host.arch%></td>
+        </tr>
+      </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div id="editHost" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="<%=t('host.edit')%>" aria-hidden="true">
+  <div class="modal-header">
+    <a type="button" class="close" data-dismiss="modal" aria-hidden="true">×</a>
+    <h3 id="EditHostLabel"><%=t('host.edit')%></h3>
+  </div>
+  <form id="editServerform" action="/host/edit" method="post">
+    <div class="modal-body">
+      <div class="control-group">
+        <input autocomplete="off" name='hostname' type="text" class="input" value="<%=@host.hostname%>" autofocus required><span class="help-inline"><%=t('host.hostname')%></span>
+      </div>
+      <div class="control-group">
+        <input autocomplete="off" name='ip' type="text" class="input" value="<%=@host.ip%>" data-validation-regex-regex="(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)" data-validation-regex-message="<%=t('dialog.add_host.ip.valid')%>" required><span class="help-inline"><%=t('ip')%></span>
+        <p class="help-block"></p>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <input type="hidden" name="old_hostname" value="<%=@host.hostname%>">
+      <a class="btn" data-dismiss="modal" aria-hidden="true"><%=t('action.cancel')%></a>
+      <button type="submit" class="btn btn-primary"><%=t('action.save')%></button>
+    </div>
+  </form>
 </div>

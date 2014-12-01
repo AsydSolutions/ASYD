@@ -72,6 +72,11 @@ $(function () {
     if (Modernizr.csstransforms3d === false){
       $('.modal').removeClass('fade');
     }
+    var hash = window.location.hash;
+    if (hash.substring(1) == 'addServer') {
+      $('#addServer').modal('show');
+      window.location.hash = '';
+    }
     var dttbl = $('script[src="/js/datatables-bootstrap.js"]').length;
     var slct = $('script[src="/js/select2.min.js"]').length;
     if (dttbl !== 0) {

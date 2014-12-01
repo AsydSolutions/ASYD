@@ -24,7 +24,11 @@ class ASYD < Sinatra::Application
   post '/host/add' do
     status 200
     Host.new(params['hostname'], params['ip'], params['user'], params['ssh_port'].to_i, params['password'])
-    hostlist = '/hosts/overview'
+    if params['more'].nil?
+      hostlist = '/hosts/overview'
+    else
+      hostlist = '/hosts/overview#addServer'
+    end
     redirect to hostlist
   end
 
@@ -60,6 +64,16 @@ class ASYD < Sinatra::Application
     status 200
     host = Host.first(:hostname => params['hostname'])
     host.del_var(params['var_name'])
+    redir = '/host/'+params['hostname']
+    redirect to redir
+  end
+
+  post '/host/edit' do
+    host = Host.first(:hostname => params['old_hostname'])
+    host.hostname = params['hostname']
+    host.save
+    host.ip = params['ip']
+    host.save
     redir = '/host/'+params['hostname']
     redirect to redir
   end
