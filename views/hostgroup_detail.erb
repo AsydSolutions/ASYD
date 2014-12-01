@@ -99,7 +99,7 @@
     <div class="modal-body">
       <input name='hostgroup' type="hidden" value="<%=@hostgroup.name%>">
       <div class="control-group">
-        <select name='hostname' class="input-xlarge" id="selectMember">
+        <select name='hostname[]' class="input-xlarge" id="selectMember" multiple>
           <option></option>
           <% Host.all.each do |host| %>
             <% if !@hostgroup.hosts.include?(host) %>

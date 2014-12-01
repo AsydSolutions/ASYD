@@ -25,8 +25,10 @@ class ASYD < Sinatra::Application
   post '/hostgroup/add-member' do
     status 200
     hostgroup = Hostgroup.first(:name => params['hostgroup'])
-    host = Host.first(:hostname => params['hostname'])
-    hostgroup.add_member(host)
+    params['hostname'].each do |hostname|
+      host = Host.first(:hostname => hostname)
+      hostgroup.add_member(host)
+    end
     redir = '/hostgroup/'+params['hostgroup']
     redirect to redir
   end
