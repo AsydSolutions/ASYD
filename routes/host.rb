@@ -24,7 +24,11 @@ class ASYD < Sinatra::Application
   post '/host/add' do
     status 200
     Host.new(params['hostname'], params['ip'], params['user'], params['ssh_port'].to_i, params['password'])
-    hostlist = '/hosts/overview'
+    if params['more'].nil?
+      hostlist = '/hosts/overview'
+    else
+      hostlist = '/hosts/overview#addServer'
+    end
     redirect to hostlist
   end
 

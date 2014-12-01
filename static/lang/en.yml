@@ -16,6 +16,7 @@ en:
     deploy: "Deploy!"
     cancel: "Cancel"
     add: "Add"
+    more: "More"
     del: "Delete"
     edit: "Edit"
     remove: "Remove"
