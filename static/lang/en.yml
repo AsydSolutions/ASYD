@@ -67,6 +67,7 @@ en:
     one: "Hostgroup"
     other: "Host Groups"
     add: "Add Hostgroup"
+    edit: "Edit Hostgroup"
     members:
       title: "Group Members for %{group}"
       add: "Add member"

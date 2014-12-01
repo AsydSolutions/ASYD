@@ -55,4 +55,16 @@ class ASYD < Sinatra::Application
     redir = '/hostgroup/'+params['hostgroup']
     redirect to redir
   end
+
+  post '/hostgroup/edit' do
+    hostgroup = Hostgroup.first(:name => params['old_name'])
+    members = Array.new
+    hostgroup.hosts.each do |host|
+      members << host
+    end
+    hostgroup.name = params['name']
+    hostgroup.save
+    redir = '/hostgroup/'+params['name']
+    redirect to redir
+  end
 end
