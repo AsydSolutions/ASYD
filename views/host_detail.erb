@@ -105,6 +105,9 @@
         <input autocomplete="off" name='ip' type="text" class="input" value="<%=@host.ip%>" data-validation-regex-regex="(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)" data-validation-regex-message="<%=t('dialog.add_host.ip.valid')%>" required><span class="help-inline"><%=t('ip')%></span>
         <p class="help-block"></p>
       </div>
+      <div class="control-group">
+        <input autocomplete="off" name='ssh_port' type="text" class="input" value="<%=@host.ssh_port%>" autofocus required><span class="help-inline"><%=t('ssh.port')%></span>
+      </div>
     </div>
     <div class="modal-footer">
       <input type="hidden" name="old_hostname" value="<%=@host.hostname%>">

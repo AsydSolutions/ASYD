@@ -159,7 +159,7 @@
             <div class="span2 offset6">
               <% file = open('http://www.asyd.eu/asyd.version') %>
               <% last_ver = file.read.strip %>
-              <% curr_ver = "0.038" %>
+              <% curr_ver = "0.039" %>
               <%= '<div class="text-error">' unless last_ver == curr_ver %> v <%= curr_ver %> <%= "Update available</div>" unless last_ver == curr_ver %>
             </div>
           </div>
