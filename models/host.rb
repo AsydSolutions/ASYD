@@ -22,23 +22,23 @@ class Host
   has n, :hostgroup_members
   has n, :hostgroups, :through => :hostgroup_members
 
-  def initialize(hostname, ip, user, ssh_port, password)
+  def self.init(hostname, ip, user, ssh_port, password)
     begin
+      host = Host.new(:hostname => hostname)
       #set the parameters as object properties
-      self.hostname = hostname
-      self.ip = ip
-      self.user = user
-      self.ssh_port = ssh_port
+      host.ip = ip
+      host.user = user
+      host.ssh_port = ssh_port
       #generate random monit password
       o = [('a'..'z'), ('A'..'Z')].map { |i| i.to_a }.flatten
-      self.monit_pw = (0...8).map { o[rand(o.length)] }.join
-      self.opt_vars = {} #initialize opt_vars as an empty hash
+      host.monit_pw = (0...8).map { o[rand(o.length)] }.join
+      host.opt_vars = {} #initialize opt_vars as an empty hash
       #start connection to remote host
-      Net::SSH.start(ip, user, :port => self.ssh_port, :keys => "data/ssh_key", :password => password, :timeout => 10) do |ssh|
+      Net::SSH.start(host.ip, host.user, :port => host.ssh_port, :keys => "data/ssh_key", :password => password, :timeout => 10) do |ssh|
         #check for package manager and add distro
         #1. debian-based
         if !(ssh.exec!("which apt-get") =~ /\/bin\/apt-get$/).nil?
-          self.pkg_mgr = "apt"
+          host.pkg_mgr = "apt"
           if (ssh.exec!("which lsb_release") =~ /\/bin\/lsb_release$/).nil?
             if user != "root"
               ssh.exec!("sudo apt-get -y -q install lsb-release")
@@ -46,12 +46,12 @@ class Host
               ssh.exec!("apt-get -y -q install lsb-release")
             end
           end
-          self.dist = ssh.exec!("lsb_release -s -i").strip
-          self.dist_ver = ssh.exec!("lsb_release -s -r").strip.to_f
-          self.arch = ssh.exec!("uname -m").strip
+          host.dist = ssh.exec!("lsb_release -s -i").strip
+          host.dist_ver = ssh.exec!("lsb_release -s -r").strip.to_f
+          host.arch = ssh.exec!("uname -m").strip
         #2. redhat-based
         elsif !(ssh.exec!("which yum") =~ /\/bin\/yum$/).nil?
-          self.pkg_mgr = "yum"
+          host.pkg_mgr = "yum"
           if (ssh.exec!("which scp") =~ /\/bin\/scp$/).nil?
             if user != "root"
               ssh.exec!("sudo yum install -y openssh-clients")
@@ -59,15 +59,15 @@ class Host
               ssh.exec!("yum install -y openssh-clients")
             end
           end
-          self.dist = ssh.exec!("cat /etc/issue |awk 'NR == 1 {print $1}'").strip
-          if self.dist == "Red"
-            self.dist = "RedHat"
+          host.dist = ssh.exec!("cat /etc/issue |awk 'NR == 1 {print $1}'").strip
+          if host.dist == "Red"
+            host.dist = "RedHat"
           end
-          self.dist_ver = ssh.exec!("cat /etc/issue |awk -F\"release\" 'NR==1 {print $2}'|awk '{print $1}'").strip.to_f
-          self.arch = ssh.exec!("uname -m").strip
+          host.dist_ver = ssh.exec!("cat /etc/issue |awk -F\"release\" 'NR==1 {print $2}'|awk '{print $1}'").strip.to_f
+          host.arch = ssh.exec!("uname -m").strip
         #3. arch-based
         elsif !(ssh.exec!("which pacman") =~ /\/bin\/pacman$/).nil?
-          self.pkg_mgr = "pacman"
+          host.pkg_mgr = "pacman"
           if (ssh.exec!("which lsb_release") =~ /\/bin\/lsb_release$/).nil?
             if user != "root"
               ssh.exec!("sudo pacman -S --noconfirm --noprogressbar lsb-release")
@@ -75,44 +75,44 @@ class Host
               ssh.exec!("pacman -S --noconfirm --noprogressbar lsb-release")
             end
           end
-          self.dist = ssh.exec!("lsb_release -s -i").strip
-          self.dist_ver = 0
-          self.arch = ssh.exec!("uname -m").strip
+          host.dist = ssh.exec!("lsb_release -s -i").strip
+          host.dist_ver = 0
+          host.arch = ssh.exec!("uname -m").strip
         #4. opensuse
         elsif !(ssh.exec!("which zypper") =~ /\/bin\/zypper$/).nil?
-          self.pkg_mgr = "zypper"
-          self.dist = ssh.exec!("cat /etc/issue |awk 'NR == 1 {print $3}'").strip
-          self.dist_ver = ssh.exec!("cat /etc/issue |awk 'NR == 1 {print $4}'").strip.to_f
-          self.arch = ssh.exec!("uname -m").strip
+          host.pkg_mgr = "zypper"
+          host.dist = ssh.exec!("cat /etc/issue |awk 'NR == 1 {print $3}'").strip
+          host.dist_ver = ssh.exec!("cat /etc/issue |awk 'NR == 1 {print $4}'").strip.to_f
+          host.arch = ssh.exec!("uname -m").strip
         #5. solaris
         elsif !(ssh.exec!("export PATH=$PATH:/sbin:/usr/sbin/ && which pkgadd") =~ /\/sbin\/pkgadd$/).nil?
-          self.pkg_mgr = "pkgadd"
+          host.pkg_mgr = "pkgadd"
           if !(ssh.exec!("which pkg") =~ /\/bin\/pkg$/).nil?
-            self.pkg_mgr = "pkg"
+            host.pkg_mgr = "pkg"
           end
           ret = ssh.exec!("cat /etc/release").lines.first.strip
           if ret.include? "OpenIndiana"
-            self.dist = "OpenIndiana"
+            host.dist = "OpenIndiana"
             ret = ret.split(" ")
             ret.each do |item|
               if item =~ /oi_/
                 dv = item.gsub(/oi_/, '')
-                self.dist_ver = dv.to_f
+                host.dist_ver = dv.to_f
               end
             end
           else
-            self.dist = "Solaris"
+            host.dist = "Solaris"
             ret = ret.split("Solaris ")
             dv = ret[1].split(" ")
-            self.dist_ver = dv[0].to_f
+            host.dist_ver = dv[0].to_f
           end
-          self.arch = ssh.exec!("uname -p").strip
+          host.arch = ssh.exec!("uname -p").strip
         #6. openbsd
         elsif !(ssh.exec!("which pkg_add") =~ /\/sbin\/pkg_add$/).nil?
-          self.pkg_mgr = "pkg_add"
-          self.dist = ssh.exec!("uname -s").strip
-          self.dist_ver = ssh.exec!("uname -r").strip.to_f
-          self.arch = ssh.exec!("uname -p").strip
+          host.pkg_mgr = "pkg_add"
+          host.dist = ssh.exec!("uname -s").strip
+          host.dist_ver = ssh.exec!("uname -r").strip.to_f
+          host.arch = ssh.exec!("uname -p").strip
         else
           raise #OS not supported yet
         end
@@ -120,17 +120,17 @@ class Host
         ssh.scp.upload!("data/ssh_key.pub", "/tmp/ssh_key.pub")
         ssh.exec "mkdir -p $HOME/.ssh && touch $HOME/.ssh/authorized_keys && cat /tmp/ssh_key.pub >> $HOME/.ssh/authorized_keys && rm /tmp/ssh_key.pub"
       end
-      if !self.save
+      if !host.save
         raise #couldn't save the object
       end
       mon = Spork.spork do #we fork the monitoring setup for saving time
-        self.monitor()
+        host.monitor()
       end
       NOTEX.synchronize do
-        msg = "Monitoring setup for "+self.hostname+" in progress"
+        msg = "Monitoring setup for "+host.hostname+" in progress"
         Notification.create(:type => :info, :message => msg)
       end
-      return self #return the object itself
+      return host #return the object itself
     rescue Net::SSH::AuthenticationFailed
       NOTEX.synchronize do
         notification = Notification.create(:type => :error, :sticky => false, :message => I18n.t('error.host.auth'))
