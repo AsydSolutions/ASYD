@@ -72,7 +72,7 @@ class ASYD < Sinatra::Application
     oldhost = Host.first(:hostname => params['old_hostname'])
     newhost = Host.create!(:hostname => params['hostname'],
                           :ip => params['ip'],
-                          :ssh_port => oldhost.ssh_port,
+                          :ssh_port => params['ssh_port'],
                           :user => oldhost.user,
                           :dist => oldhost.dist,
                           :dist_ver => oldhost.dist_ver,
