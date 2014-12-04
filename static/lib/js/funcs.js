@@ -239,6 +239,12 @@ var getTaskNotifications = function (task_id) {
   });
 };
 
+var delTask = function (id) {
+  $.get('/task/del/' + id, function (data) {
+    $('#task' + id).remove();
+  });
+};
+
 // TODO: Make the backend return a json element so we can replace everything on the fly instead of simply readding elements
 var addTeamMember = function (team) {
   var username = $('#selectAddUser').val();

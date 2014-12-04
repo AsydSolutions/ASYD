@@ -1129,7 +1129,7 @@ width: 11px;}
 }
 
 .action-table .td-actions {
-	width: 110px;
+	max-width: 110px;
 
 	text-align: center;
 }
