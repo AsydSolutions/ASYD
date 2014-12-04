@@ -19,6 +19,10 @@ be displayed on the ASYD web interface on the "Deploys" sections.
 packages to install, commands to execute, configurations to upload, conditions, etc.
 * Optionally, a "def.sudo" file (i.e. `data/deploys/LAMP/def.sudo`) in case we want to
 execute it instead of the standard "def" when using a non-root user.
+* Optionally, an "undeploy" file (i.e. `data/deploys/LAMP/undeploy`) with the steps required to
+revert (undeploy) a Deploy.
+* Optionally, an "undeploy.sudo" file (i.e. `data/deploys/LAMP/undeploy.sudo`) being the "undeploy"
+equivalent of "def.sudo".
 * A "configs" directory with the configuration files and folders to be uploaded
 (i.e. `data/deploys/LAMP/configs/apache/apache.conf`).
 
@@ -26,14 +30,14 @@ execute it instead of the standard "def" when using a non-root user.
 the user executing on the remote machine is not "root" and this file is present. This is specially useful on
 Ubuntu machines which doesn't use the root user. For the machines which user is "root", the standard
 "def" file will be executed regardless the existence of "def.sudo". If this file is not present,
-the standard "def" file will be executed also for non-root users.
+the standard "def" file will be executed also for non-root users. Same applies to "undeploy.sudo".
 
 <br/>
 The "def" file:
 ------------------
 <br/>
 Both the "def" and "def.sudo" files, used for defining a deploy, accept the following
-commands and parameters.
+commands and parameters. The same rules applies as well for the "undeploy" and "undeploy.sudo" files.
 
 *Please note the double dot - : - after the conditionals and before
 the arguments, as it's required for the deploy to work.*
