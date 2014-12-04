@@ -32,6 +32,32 @@ class Deploy
     return alerts
   end
 
+  # Return the alerts for all the undeploys
+  #
+  def self.get_undeploy_alerts
+    deploys = Deploy.all
+    alerts = {}
+    deploys.each do |deploy|
+      if can_undeploy?(deploy)
+        path = "data/deploys/"+deploy+"/undeploy"
+        f = File.open(path, "r").read
+        f.gsub!(/\r\n?/, "\n")
+        f.each_line do |line|
+          if !line.match(/^# ?alert:/i).nil?
+            if alerts[deploy].nil?
+              alert = line.gsub!(/^# ?alert:/i, "").strip
+              alerts[deploy] = HTMLEntities.new.encode(HTMLEntities.new.encode(alert))
+            else
+              alert = line.gsub!(/^# ?alert:/i, "").strip
+              alerts[deploy] = alerts[deploy]+"<br />"+HTMLEntities.new.encode(HTMLEntities.new.encode(alert))
+            end
+          end
+        end
+      end
+    end
+    return alerts
+  end
+
   # Return if it can be undeployed
   #
   def self.can_undeploy?(dep)

@@ -3,6 +3,7 @@ class ASYD < Sinatra::Application
     status 200
     @deploys = Deploy.all
     @deploy_alerts = Deploy.get_alerts
+    @undeploy_alerts = Deploy.get_undeploy_alerts
     @hosts = Host.all
     @hostgroups = Hostgroup.all
     erb :deploys
