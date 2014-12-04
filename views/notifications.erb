@@ -4,7 +4,7 @@
       <div class="accordion-inner">
         <%@notifications.each do |notification|%>
           <% if notification.host.nil? %>
-            <strong>[<%=notification.created_at.in_time_zone(timezone).strftime("%F %T %Z")%>]:</strong> <%=notification.message%><br>
+            <strong <% if notification.type == :error %>class="text-error"<% end %><% if notification.type == :success %>class="text-success"<% end %>>[<%=notification.created_at.in_time_zone(timezone).strftime("%F %T %Z")%>]:</strong> <%=notification.message%><br>
           <% end %>
         <%end%>
       </div>
