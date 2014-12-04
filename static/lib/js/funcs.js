@@ -68,6 +68,32 @@ $(function () {
     return false;
   });
 
+  $('a[undeploy-confirm]').click(function () {
+    if (!$(this).hasClass('disabled')) {
+      var dep = $(this).attr('data-deploy');
+      var e = document.getElementById('selectHostDeploy');
+      var target = e.options[e.selectedIndex].value;
+      if (!target) {
+        alert('Select a host/hostgroup');
+        return false;
+      }
+      var host = target.split(';');
+      if (!$('#dataConfirmModal').length) {
+        $('body').append('<div id="dataConfirmModal" class="modal fade" role="dialog" aria-labelledby="dataConfirmLabel" aria-hidden="true"><div class="modal-header"><a type="button" class="close" data-dismiss="modal" aria-hidden="true">×</a><h3 id="dataConfirmLabel">Please Confirm</h3></div><div class="modal-body"></div><div class="modal-footer"><form id="deployForm" action="/deploys/undeploy" method="post"><input type="hidden" name="deploy" value="'+dep+'"><input type="hidden" name="target" value="'+target+'"><a class="btn" data-dismiss="modal" aria-hidden="true">Cancel</a><button type="submit" class="btn btn-primary">Undeploy</button></div></div>');
+      }
+      if (Modernizr.csstransforms3d === false){
+        $('#dataConfirmModal').removeClass('fade');
+      }
+      var text = $(this).attr('undeploy-confirm') + host[0] + ' ' + host[1] + '?';
+      if ($(this).attr('deploy-alert')) {
+        text += '<br /><strong><h3>Alert:</h3> ' + $(this).attr('deploy-alert') + '</strong>';
+      }
+      $('#dataConfirmModal').find('.modal-body').html(text);
+      $('#dataConfirmModal').modal({show:true});
+      return false;
+    }
+  });
+
   $(document).ready(function () {
     if (Modernizr.csstransforms3d === false){
       $('.modal').removeClass('fade');
@@ -210,6 +236,12 @@ var editTeam = function (name) {
 var getTaskNotifications = function (task_id) {
   $.get('/notifications/bytask/' + task_id, function (data) {
     $('#taskNotifications').html(data);
+  });
+};
+
+var delTask = function (id) {
+  $.get('/task/del/' + id, function (data) {
+    $('#task' + id).remove();
   });
 };
 

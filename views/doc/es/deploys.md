@@ -19,6 +19,10 @@ se mostrará en la interfaz web de ASYD en las sección "Deploys".
 paquetes a instalar, comandos para ejecutar, configuraciones a cargar, condiciones, etc.
 * Opcionalmente un archivo "def.sudo" (i.e. `data/deploys/LAMP/def.sudo`) en caso de que queramos
 ejecutarlo en lugar del archivo estándar "def" cuando usamos un usuario no root.
+* Opcionalmente un archivo "undeploy" (i.e. `data/deploys/LAMP/undeploy`) con los pasos necesarios para
+revertir los cambios hechos por un Deploy.
+* Opcionalmente un archivo "undeploy.sudo" (i.e. `data/deploys/LAMP/undeploy.sudo`) siendo el equivalente
+de "def.sudo" para "undeploy".
 * Un directorio de "configs" con todos los archivos y carpetas de configuración que quieres cargar
 (i.e. `data/deploys/LAMP/configs/apache/apache.conf`).
 
@@ -26,14 +30,14 @@ ejecutarlo en lugar del archivo estándar "def" cuando usamos un usuario no root
 de que el usuario que esté ejecutando en el equipo remoto no sea "root" y este archivo esté presente.
 Es especialmente útil en máquinas Ubuntu las cuales no tienen usuario root.
 Para las máquinas en las que el usuario es "root",  el archivo estándar "def" será el ejecutado a pesar de la existencia de "def.sudo".
-Si este archivo no está presente, el archivo estándar "def" será ejecutado también para usuarios no root.
+Si este archivo no está presente, el archivo estándar "def" será ejecutado también para usuarios no root. Lo mismo se aplica a "undeploy.sudo".
 
 <br/>
 El archivo "def":
 ------------------
 <br/>
 Tanto el archivo "def" como el archivo "def.sudo", usados para definir un deploy, aceptan los siguientes
-comandos y parámetros.
+comandos y parámetros. Las mismas reglas también se aplican a los archivos "undeploy" y "undeploy.sudo".
 
 *Ten en cuenta que los dos puntos - : - después de los condicionales y antes
 de los argumentos, es imprescindible para el funcionamiento del deploy.*

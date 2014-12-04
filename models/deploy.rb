@@ -32,6 +32,42 @@ class Deploy
     return alerts
   end
 
+  # Return the alerts for all the undeploys
+  #
+  def self.get_undeploy_alerts
+    deploys = Deploy.all
+    alerts = {}
+    deploys.each do |deploy|
+      if can_undeploy?(deploy)
+        path = "data/deploys/"+deploy+"/undeploy"
+        f = File.open(path, "r").read
+        f.gsub!(/\r\n?/, "\n")
+        f.each_line do |line|
+          if !line.match(/^# ?alert:/i).nil?
+            if alerts[deploy].nil?
+              alert = line.gsub!(/^# ?alert:/i, "").strip
+              alerts[deploy] = HTMLEntities.new.encode(HTMLEntities.new.encode(alert))
+            else
+              alert = line.gsub!(/^# ?alert:/i, "").strip
+              alerts[deploy] = alerts[deploy]+"<br />"+HTMLEntities.new.encode(HTMLEntities.new.encode(alert))
+            end
+          end
+        end
+      end
+    end
+    return alerts
+  end
+
+  # Return if it can be undeployed
+  #
+  def self.can_undeploy?(dep)
+    if File.exists?("data/deploys/"+dep+"/undeploy")
+      return true
+    else
+      return false
+    end
+  end
+
   # Delete a deploy
   #
   def self.delete(dep)
@@ -44,8 +80,12 @@ class Deploy
   def self.launch(host, dep, task)
     begin
       if host.nil?
-        error = "host not found"
+        error = "Error: host not found"
         raise ExecutionError, error
+      end
+      if !Misc::is_port_open?(host.ip, host.ssh_port)
+        error = "Error: host "+host.hostname+" unreachable"
+        raise TargetUnreachable, error
       end
 
       cfg_root = "data/deploys/"+dep+"/configs/"
@@ -63,6 +103,54 @@ class Deploy
       #   raise FormatException, ret[1]
       # end
 
+      ret = Deploy.deploy(host, path, cfg_root, task)
+      return ret
+    rescue ExecutionError => e
+      return [4, e.message] # 4 == execution error
+    rescue TargetUnreachable => e
+      return [6, e.message] # 6 == host unreachable
+    end
+  end
+
+  # Undeploy a given deploy on the defined host
+  #
+  def self.undeploy(host, dep, task)
+    begin
+      if host.nil?
+        error = "Error: host not found"
+        raise ExecutionError, error
+      end
+      if !Misc::is_port_open?(host.ip, host.ssh_port)
+        error = "Error: host "+host.hostname+" unreachable"
+        raise TargetUnreachable, error
+      end
+
+      cfg_root = "data/deploys/"+dep+"/configs/"
+      if host.user != "root" && File.exists?("data/deploys/"+dep+"/undeploy.sudo")
+        path = "data/deploys/"+dep+"/undeploy.sudo"
+        sudo = true
+      else
+        path = "data/deploys/"+dep+"/undeploy"
+        sudo = false
+      end
+
+      # TODO
+      # ret = check_deploy(dep, sudo)
+      # if ret[0] == 5
+      #   raise FormatException, ret[1]
+      # end
+
+      ret = Deploy.deploy(host, path, cfg_root, task)
+      return ret
+    rescue ExecutionError => e
+      return [4, e.message] # 4 == execution error
+    rescue TargetUnreachable => e
+      return [6, e.message] # 6 == host unreachable
+    end
+  end
+
+  def self.deploy(host, path, cfg_root, task)
+    begin
       condition = false
       gdoit = true
       skip = false

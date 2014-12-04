@@ -14,4 +14,13 @@ class ASYD < Sinatra::Application
       erb :task_detail
     end
   end
+
+  get '/task/del/:id' do
+    task = Task.first(:id => params[:id])
+    task.notifications.each do |notification|
+      notification.destroy
+    end
+    task.reload
+    task.destroy
+  end
 end

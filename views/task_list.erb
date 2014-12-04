@@ -17,20 +17,24 @@
               <th class="td-actions">
                 <%=t('host.status')%>
               </th>
-              <th>
+              <th class="td-actions">
                 <%=t('task.started', date: '')%>
+              </th>
+              <th class="td-actions">
+                <%=t('action.other')%>
               </th>
             </tr>
           </thead>
           <tbody>
             <% @tasks_progress.each do |task| %>
-              <tr>
+              <tr id="task<%=task.id%>">
                 <td><a href="/task/<%=task.id%>">#<%=task.id%></a></td>
                 <td>
                   <%=t('task.actions.'+task.action.to_s)%> <% if task.action == :installing %><%=t('packages')%><% else %><%=task.object%><% end %> on <%=task.target_type%>: <%=task.target%>
                 </td>
                 <td class="td-actions"><i class="icon-gear icon-spin icon-large"></i></td>
                 <td><%=task.created_at.in_time_zone(timezone).strftime("%F %T %Z")%></td>
+                <td class="td-actions"><a data-toggle="tooltip" data-original-title="<%=t('action.remove')%>" href="#delTask" class="text-info hint" data-placement="left" onclick="delTask('<%=task.id%>')"><i class="icon-trash icon-large"></i></a></td>
               </tr>
             <% end %>
           </tbody>
@@ -58,14 +62,17 @@
               <th class="td-actions">
                 <%=t('host.status')%>
               </th>
-              <th>
+              <th class="td-actions">
                 <%=t('task.finished', date: '')%>
+              </th>
+              <th class="td-actions">
+                <%=t('action.other')%>
               </th>
             </tr>
           </thead>
           <tbody>
             <% @tasks_completed.each do |task| %>
-              <tr>
+              <tr id="task<%=task.id%>">
                 <td><a href="/task/<%=task.id%>">#<%=task.id%></a></td>
                 <td>
                   <%=t('task.actions.'+task.action.to_s)%> <% if task.action == :installing %><%=t('packages')%><% else %><%=task.object%><% end %> on <%=task.target_type%>: <%=task.target%>
@@ -78,6 +85,7 @@
                   <% end %>
                 </td>
                 <td><%=task.updated_at.in_time_zone(timezone).strftime("%F %T %Z")%></td>
+                <td class="td-actions"><a data-toggle="tooltip" data-original-title="<%=t('action.remove')%>" href="#delTask" class="text-info hint" data-placement="left" onclick="delTask('<%=task.id%>')"><i class="icon-trash icon-large"></i></a></td>
               </tr>
             <% end %>
           </tbody>
