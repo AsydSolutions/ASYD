@@ -19,10 +19,10 @@ class Deploy
       f.gsub!(/\r\n?/, "\n")
       f.each_line do |line|
         if !line.match(/^# ?alert:/i).nil?
-          if alerts[deploy].nil?
+          if alerts[deploy].nil? #first alert on the deploy
             alert = line.gsub!(/^# ?alert:/i, "").strip
             alerts[deploy] = HTMLEntities.new.encode(HTMLEntities.new.encode(alert))
-          else
+          else #more alerts with newlines
             alert = line.gsub!(/^# ?alert:/i, "").strip
             alerts[deploy] = alerts[deploy]+"<br />"+HTMLEntities.new.encode(HTMLEntities.new.encode(alert))
           end
@@ -58,7 +58,7 @@ class Deploy
     return alerts
   end
 
-  # Return if it can be undeployed
+  # Return true if it can be undeployed
   #
   def self.can_undeploy?(dep)
     if File.exists?("data/deploys/"+dep+"/undeploy")
@@ -149,10 +149,12 @@ class Deploy
     end
   end
 
+  # Deploys the file in "path" (def, def.sudo, undeploy or undeploy.sudo)
+  #
   def self.deploy(host, path, cfg_root, task)
     begin
-      condition = false
-      gdoit = true
+      condition = false #indicates if you are inside a conditional block
+      gdoit = true #global doit, used for conditional blocks
       skip = false
 
       f = File.open(path, "r").read
@@ -292,7 +294,7 @@ class Deploy
         # /CONFIG DIR BLOCK
 
         # EXEC BLOCK
-        # TODO: improve this method
+        #
         elsif line.start_with?("exec")
           doit = true
           m = line.match(/^exec (.(var:|[^:])+)/i)
@@ -307,29 +309,10 @@ class Deploy
                   raise FormatException, error
                 end
                 doit = check_condition(m2, other_host)
-                # if complies then execute the command on remote host
-                if doit
-                  line = line.split(/(?<!var):/i, 2)
-                  cmd = parse(host, line[1].strip) #parse for vars
-                  ret = other_host.exec_cmd(cmd)
-                  msg = "Executed '"+cmd+"' on "+other_host.hostname
-                  msg = msg+": "+ret unless ret.nil?
-                  NOTEX.synchronize do
-                    notification = Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
-                  end
-                end
-              else
+                exec_host = other_host #execute on remote host
+              else #no host defined
                 doit = check_condition(m2, host)
-                if doit
-                  line = line.split(/(?<!var):/i, 2)
-                  cmd = parse(host, line[1].strip) #parse for vars
-                  ret = host.exec_cmd(cmd)
-                  msg = "Executed '"+cmd+"' on "+host.hostname
-                  msg = msg+": "+ret unless ret.nil?
-                  NOTEX.synchronize do
-                    notification = Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
-                  end
-                end
+                exec_host = host #execute in host normally
               end
             elsif !m2[0].nil? #no conditionals but remote execution
               other_host = Host.first(:hostname => m2[0].strip)
@@ -337,27 +320,19 @@ class Deploy
                 error = "Host "+m2[0].strip+" not found"
                 raise FormatException, error
               end
-              if doit
-                line = line.split(/(?<!var):/i, 2)
-                cmd = parse(host, line[1].strip) #parse for vars
-                ret = other_host.exec_cmd(cmd)
-                msg = "Executed '"+cmd+"' on "+other_host.hostname
-                msg = msg+": "+ret unless ret.nil?
-                NOTEX.synchronize do
-                  notification = Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
-                end
-              end
+              exec_host = other_host #use remote
             end
           else #just act normally, no params
-            if doit
-              line = line.split(/(?<!var):/i, 2)
-              cmd = parse(host, line[1].strip) #parse for vars
-              ret = host.exec_cmd(cmd)
-              msg = "Executed '"+cmd+"' on "+host.hostname
-              msg = msg+": "+ret unless ret.nil?
-              NOTEX.synchronize do
-                notification = Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
-              end
+            exec_host = host #use host
+          end
+          if doit #we have doit and exec_host defined, so execute the command
+            line = line.split(/(?<!var):/i, 2)
+            cmd = parse(host, line[1].strip) #parse for vars
+            ret = exec_host.exec_cmd(cmd)
+            msg = "Executed '"+cmd+"' on "+exec_host.hostname
+            msg = msg+": "+ret unless ret.nil?
+            NOTEX.synchronize do
+              notification = Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
             end
           end
         # /EXEC BLOCK
@@ -383,44 +358,44 @@ class Deploy
         # /MONITOR BLOCK
         # DEPLOY BLOCK
         elsif line.start_with?("deploy")
-            doit = true
-            m = line.match(/^deploy if (.+)(?<!var):/i)
-            if !m.nil?
-              doit = check_condition(m, host)
-            end
-            if doit
-              line = line.split(/(?<!var):/i, 2)
-              deploys = line[1].split(' ')
-              deploys.each do |deploy|
-                ret = Deploy.launch(host, deploy, task)
-                if ret == 1
-                  msg = "Deploy "+deploy+" successfully deployed on "+host.hostname
-                  NOTEX.synchronize do
-                    notification = Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
-                  end
-                elsif ret[0] == 5
-                  raise FormatException, ret[1]
-                elsif ret[0] == 4
-                  raise ExecutionError, ret[1]
+          doit = true
+          m = line.match(/^deploy if (.+)(?<!var):/i)
+          if !m.nil?
+            doit = check_condition(m, host)
+          end
+          if doit
+            line = line.split(/(?<!var):/i, 2)
+            deploys = line[1].split(' ')
+            deploys.each do |deploy|
+              ret = Deploy.launch(host, deploy, task)
+              if ret == 1
+                msg = "Deploy "+deploy+" successfully deployed on "+host.hostname
+                NOTEX.synchronize do
+                  notification = Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
                 end
+              elsif ret[0] == 5
+                raise FormatException, ret[1]
+              elsif ret[0] == 4
+                raise ExecutionError, ret[1]
               end
             end
+          end
         # /DEPLOY BLOCK
 
         # REBOOT BLOCK
         elsif line.start_with?("reboot")
-            doit = true
-            m = line.match(/^reboot if (.+)/)
-            if !m.nil?
-              doit = check_condition(m, host)
+          doit = true
+          m = line.match(/^reboot if (.+)/)
+          if !m.nil?
+            doit = check_condition(m, host)
+          end
+          if doit
+            host.reboot
+            msg = "Reboot "+host.hostname
+            NOTEX.synchronize do
+              notification = Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
             end
-            if doit
-              host.reboot
-              msg = "Reboot "+host.hostname
-              NOTEX.synchronize do
-                notification = Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
-              end
-            end
+          end
         # /REBOOT BLOCK
 
         # undefined command
