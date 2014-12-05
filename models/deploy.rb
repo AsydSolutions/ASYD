@@ -178,6 +178,12 @@ class Deploy
           end
         end
 
+        # Set variables from a Deploy
+        if m = line.match(/^var (.+) = (exec)/i)
+          varname = m[1] #we create varname here
+          line = line.split(/ = /, 2)[1].strip #and remove the start of the line so we have only the exec part
+        end
+
         # IGNORE
         if line.start_with?("#") || line.strip.empty? || skip || !gdoit
           # Ignore comments, empty lines, if it's a "skip" (conditional) line or if the global "doit" for the block is false
@@ -402,6 +408,16 @@ class Deploy
         else
           error = "Bad formatting, check your deploy file"
           raise FormatException, error
+        end
+
+        # Here we set the value itself of the var if varname is defined
+        if !varname.nil?
+          value = ret #the output of exec goes in ret
+          host.add_var(varname, value) #and we save the variable as a host variable
+          NOTEX.synchronize do
+            msg = "Setting variable "+varname+" with value "+value
+            notification = Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
+          end
         end
       end
       return 1
