@@ -101,14 +101,23 @@ para cualquier comando.
 
 *Sintáxis:* `exec [host] [if <condition>]: command`
 
-**6. monitor**
+**6. var**
+
+Este comando te permite asignar una variable de host desde un archivo "def" o "undeploy", la cual puede ser
+llamada luego como una variable normal (<%VAR:varname%> - ver [Variables](variables.md)). Las variables pueden
+ser asignadas con el resultado de un comando "exec" - asegurate de que el comando produce una respuesta. Si una
+variable con el mismo nombre existe, el valor será reemplazado por el nuevo.
+
+*Sintáxis:* `var <varname> = exec [host] [if <condition>]: command`
+
+**7. monitor**
 Este comando te permite monitorear un servicio. El parámetro del servicio debe tener el mismo nombre
 que el archivo "monitor" en el interior del directorio `data/monitors`, el cual debe existir. También
 puedes especificar distintos servicios separados por espacios. También accepta opcionalmente condicionales.
 
 *Sintáxis:* `monitor [if <condition>]: service`
 
-**7. deploy**
+**8. deploy**
 
 Con este comando puedes lanzar otros deploys desde un deploy, permitiéndote incluso crear
 un meta-deploy definiendo los deploys que deberían ser lanzados dependiendo de los condicionales.
@@ -116,7 +125,7 @@ El deploy indicado debe existir. Este comando también accepta opcionalmente con
 
 *Sintáxis:* `deploy [if <condition>]: another_deploy`
 
-**8. reboot**
+**9. reboot**
 
 Este comando simplemente reinicia un sistema. Este comando no requiere el doble punto - : - y el único
 parámetro opcional permitido es un condicional. **Date cuenta** de qué este comando debería siempre

@@ -104,7 +104,16 @@ parameters for any command.
 
 *Syntax:* `exec [host] [if <condition>]: command`
 
-**6. monitor**
+**6. var**
+
+This command allows you to set a host variable from a "def" or "undeploy" file, which can be called
+later as a normal variable (<%VAR:varname%> - see [Variables](variables.md)). The variable can be
+set with the output of an "exec" command - make sure the command produces an output. If a variable
+with the same name exists, it will be overwritten to the new value.
+
+*Syntax:* `var <varname> = exec [host] [if <condition>]: command`
+
+**7. monitor**
 
 This command allows you to monitor a service. The service parameter must have the same name
 as the "monitor" file inside the `data/monitors` directory, which must exist. You can
@@ -112,7 +121,7 @@ also specify several services separated by spaces. It also accepts optionally co
 
 *Syntax:* `monitor [if <condition>]: service`
 
-**7. deploy**
+**8. deploy**
 
 With this command you can also launch other deploys from a deploy, even allowing you to create
 a meta-deploy defining the deploys that should be launched depending on conditionals. The
@@ -120,7 +129,7 @@ named deploy must exist. This command also accepts conditionals optionally.
 
 *Syntax:* `deploy [if <condition>]: another_deploy`
 
-**8. reboot**
+**9. reboot**
 
 It simply reboots a system. This command doesn't requires the double dot - : - and the only
 optional parameter allowed is a conditional. **Please note** that this command should always

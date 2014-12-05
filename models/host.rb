@@ -153,7 +153,7 @@ class Host
   def add_var(name, value)
     vars = self.opt_vars #load opt_vars
     if !vars[name].nil?
-      return false #error = varname exists
+      del_var(name)
     end
     vars[name] = value #add a new variable to the hash and update
     self.update(:opt_vars => nil)
