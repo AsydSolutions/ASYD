@@ -118,7 +118,7 @@ class Host
         end
         #upload the ssh key
         ssh.scp.upload!("data/ssh_key.pub", "/tmp/ssh_key.pub")
-        ssh.exec "mkdir -p $HOME/.ssh && touch $HOME/.ssh/authorized_keys && cat /tmp/ssh_key.pub >> $HOME/.ssh/authorized_keys && rm /tmp/ssh_key.pub"
+        ssh.exec "mkdir -p $HOME/.ssh && touch $HOME/.ssh/authorized_keys && egrep -q \"^$(cat /tmp/ssh_key.pub | sed 's/[^-A-Za-z0-9_]/\\\\&/g')$\" $HOME/.ssh/authorized_keys || cat /tmp/ssh_key.pub >> $HOME/.ssh/authorized_keys && rm -f /tmp/ssh_key.pub"
       end
       if !host.save
         raise #couldn't save the object
