@@ -179,7 +179,7 @@ class Deploy
         end
 
         # Set variables from a Deploy
-        if m = line.match(/^var (.+) = (exec)/i)
+        if gdoit && m = line.match(/^var (.+) = (exec)/i)
           varname = m[1] #we create varname here
           line = line.split(/ = /, 2)[1].strip #and remove the start of the line so we have only the exec part
         end
@@ -619,13 +619,16 @@ class Deploy
         host.monitor_service(service)
         line = ""
       elsif line.match(/<%VAR:.+%>/i)
-        varname = line.match(/<%VAR:(.+)%>/i)[1]
-        if !host.opt_vars[varname].nil?
-          line.gsub!(/<%VAR:.+%>/i, host.opt_vars[varname])
-        else
-          host.hostgroups.each do |hostgroup|
-            if !hostgroup.opt_vars[varname].nil?
-              line.gsub!(/<%VAR:.+%>/i, hostgroup.opt_vars[varname])
+        vars = line.scan(/<%VAR:(.+?)%>/i)
+        vars.each do |varname|
+          varname = varname[0].strip
+          if !host.opt_vars[varname].nil?
+            line.gsub!(/<%VAR:#{varname}%>/i, host.opt_vars[varname])
+          else
+            host.hostgroups.each do |hostgroup|
+              if !hostgroup.opt_vars[varname].nil?
+                line.gsub!(/<%VAR:#{varname}%>/i, hostgroup.opt_vars[varname])
+              end
             end
           end
         end
@@ -875,7 +878,7 @@ class Deploy
     condition = st.match(/(.+)(==|!=|>=|<=)(.+)/)
     case condition[2]
     when "=="
-      if condition[1].nan? && condition[3].nan?
+      if condition[1].nan? || condition[3].nan?
         if condition[1].downcase == condition[3].downcase
           return true
         else
@@ -889,7 +892,7 @@ class Deploy
         end
       end
     when "!="
-      if condition[1].nan? && condition[3].nan?
+      if condition[1].nan? || condition[3].nan?
         if condition[1].downcase == condition[3].downcase
           return false
         else
