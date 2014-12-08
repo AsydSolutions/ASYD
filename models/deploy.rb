@@ -413,7 +413,9 @@ class Deploy
         # Here we set the value itself of the var if varname is defined
         if !varname.nil?
           value = ret.strip #the output of exec goes in ret
-          host.add_var(varname, value) #and we save the variable as a host variable
+          HOSTEX.synchronize do
+            host.add_var(varname, value) #and we save the variable as a host variable
+          end
           NOTEX.synchronize do
             msg = "Setting variable "+varname+" with value "+value
             notification = Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
