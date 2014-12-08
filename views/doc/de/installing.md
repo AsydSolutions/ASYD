@@ -17,12 +17,12 @@ Auf RedHat basierten Systemen:
 
 **2. Installiere ASYD von git**
 
-Installiere Bundler und Klone das git repository:
+Installiere Bundler und Klone das git Repository:
 
     gem install bundler
     git clone https://github.com/AsydSolutions/asyd.git
 
-Oder installiere die Development Version (Empfohlen da derzeit noch große Änderungen vorgenommen werden).
+Oder installiere die Development Version. (Empfohlen da derzeit noch große Änderungen vorgenommen werden)
 
     git clone https://github.com/AsydSolutions/asyd.git -b devel
 
@@ -41,4 +41,4 @@ Greife via Port 3000 und Localhost bzw. der Server IP auf ASYD zu:
 **4. Setup**
 
 
-Beim ersten öffnen wird der User Account generiert sowie ein SSH key Importiert bzw. Generiert.
+Beim ersten öffnen wird der User Account angelegt sowie ein SSH key Importiert bzw. Generiert.
