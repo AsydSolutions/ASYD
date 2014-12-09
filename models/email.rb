@@ -38,7 +38,7 @@ class Email
         # Maybe, in future we should verify it, but the info is a bit obscure: http://www.rubydoc.info/github/meskyanichi/backup/Backup/Notifier/Mail#openssl_verify_mode-instance_method
         mail.delivery_method :smtp, address: cfg.host, port: cfg.port.to_i, user_name: cfg.user, password: cfg.password, authentication: 'plain', enable_starttls_auto: cfg.tls, return_response: true, openssl_verify_mode: "none"
         response = mail.deliver!
-        
+
       elsif cfg.method == :sendmail
         mail.delivery_method :sendmail, :location => cfg.path
         mail.deliver!
@@ -52,11 +52,12 @@ class Email
       NOTEX.synchronize do
         notification = Notification.create(:type => :error, :sticky => true, :message => e.message)
       end
-      return false;
+      return false
     rescue => e
       NOTEX.synchronize do
         notification = Notification.create(:type => :error, :sticky => true, :message => e.message)
       end
+      return false
     end
   end
 
