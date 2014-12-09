@@ -1,6 +1,8 @@
 module Monitoring
 
   TTL = 15 #store/refresh the status for 15 seconds
+  $mem_mail = ProcessShared::SharedMemory.new(2048)
+  $mem_mail.write_object({})
 
   class Notification
     include DataMapper::Resource
@@ -159,20 +161,45 @@ module Monitoring
               MNOTEX.synchronize do
                 last = Monitoring::Notification.last(:host_hostname => host.hostname)
                 if last.nil? #no previous notification
-                  error = "Unable to get monitoring status for host "+host.hostname
-                  Monitoring::Notification.create(:type => :error, :message => error, :host_hostname => host.hostname, :service => "system")
+                  msg = "Unable to get monitoring status for host "+host.hostname
+                  Monitoring::Notification.create(:type => :error, :message => msg, :host_hostname => host.hostname, :service => "system")
                 else
                   if last.acknowledge == false && last.dismiss == true #the last notification was already dismissed and is not acknowledged
-                    error = "Unable to get monitoring status for host "+host.hostname
-                    Monitoring::Notification.create(:type => :error, :message => error, :host_hostname => host.hostname, :service => "system")
+                    msg = "Unable to get monitoring status for host "+host.hostname
+                    Monitoring::Notification.create(:type => :error, :message => msg, :host_hostname => host.hostname, :service => "system")
                   end
                 end
+                if last.nil? || last.acknowledge == false
+                  errmail = $mem_mail.read_object
+                  if errmail[host.hostname].nil?
+                    errmail[host.hostname] = 1
+                  else
+                    errmail[host.hostname] = errmail[host.hostname]+1
+                  end
+                  if errmail[host.hostname] == 4
+                    errmail[host.hostname] = 0
+                    subject = "Critical: Host "+host.hostname+" Down"
+                    msg = "Unable to get monitoring status for host "+host.hostname
+                    Monitoring.notify_by_mail(subject, msg)
+                  end
+                  $mem_mail.write_object(errmail)
+                end
               end
-            else #the host recovered?
+            elsif stat == 2 #TODO: warnings
               MNOTEX.synchronize do
                 last = Monitoring::Notification.last(:host_hostname => host.hostname)
                 if !last.nil?
                   last.update(:acknowledge => false, :dismiss => true)
+                end
+              end
+            elsif stat == 1 #the host recovered?
+              MNOTEX.synchronize do
+                last = Monitoring::Notification.last(:host_hostname => host.hostname, :dismiss => false)
+                if !last.nil?
+                  last.update(:acknowledge => false, :dismiss => true)
+                  subject = "Recovery: Host "+host.hostname+" Up"
+                  msg = "The host "+host.hostname+" recovered"
+                  Monitoring.notify_by_mail(subject, msg)
                 end
               end
             end
@@ -183,5 +210,12 @@ module Monitoring
       Process.waitall
       sleep TTL
     end
+  end
+
+  def self.notify_by_mail(subject, msg)
+    users = User.all(:receive_notifications => true)
+    users.each do |user|
+      Email.mail(user.email, subject, msg)
+    end unless users.nil?
   end
 end
