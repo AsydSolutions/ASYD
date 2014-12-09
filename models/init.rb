@@ -49,3 +49,4 @@ end
 MOTEX = ProcessShared::Mutex.new #mutex for monitoring handling
 MNOTEX = ProcessShared::Mutex.new #mutex for monitoring::notification handling
 NOTEX = ProcessShared::Mutex.new #mutex for notification handling
+HOSTEX = ProcessShared::Mutex.new #mutex for hosts operations
