@@ -45,27 +45,19 @@ class Email
       end
     rescue *SMTP_ERRORS => e
       NOTEX.synchronize do
-        notification = Notification.create(:type => :error, :sticky => true, :message => e.message)
+        notification = Notification.create(:type => :error, :sticky => false, :message => "Email error: "+e.message)
       end
       return false
     rescue *SSL_ERRORS => e
       NOTEX.synchronize do
-        notification = Notification.create(:type => :error, :sticky => true, :message => e.message)
+        notification = Notification.create(:type => :error, :sticky => false, :message => "Email error: "+e.message)
       end
       return false
     rescue => e
       NOTEX.synchronize do
-        notification = Notification.create(:type => :error, :sticky => true, :message => e.message)
+        notification = Notification.create(:type => :error, :sticky => false, :message => "Email error: "+e.message)
       end
       return false
-    end
-  end
-
-  def edit(method, data)
-    if method == "sendmail"
-
-    elsif method == "smtp"
-
     end
   end
 end
