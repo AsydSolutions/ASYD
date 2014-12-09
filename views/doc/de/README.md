@@ -23,4 +23,4 @@
 <br/>
 Bitte lies die gesamte Dokumentation bevor du Deploys erstellst oder Basics und Monitoring falls du deine Server mit ASYD verwalten willst.
 
-Sollten Solaris oder OpenIndiana oder ähnliche Hosts verwendet werden, lies bitte ebenso die Solaris spezifische Dokumentation.
+Sollten Solaris oder OpenIndiana oder Ã¤hnliche Hosts verwendet werden, lies bitte ebenso die Solaris spezifische Dokumentation.
