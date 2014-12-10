@@ -8,6 +8,8 @@ class User
   property :username, String, :key => true
   property :email, String
   property :password, BCryptHash
+  property :receive_notifications, Boolean, :default => true 
+  property :token, String
   property :created_at, DateTime
   property :updated_at, DateTime
   has n, :team_members
@@ -36,6 +38,26 @@ class User
       return false
     end
   end
+
+  def self.reset_token(email)
+
+    @email = email.downcase
+    @un = self.first(:email => email)
+
+    @newtoken = SecureRandom.urlsafe_base64
+
+    @un.update(:token => @newtoken)
+
+    @reset_path = "http://asyd.lsys.net/password/reset?token=#{@newtoken}"
+
+    Email.mail(@email, "Password recovery", "Hello #{@un.username},\nClick to Reset Your Password: #{@reset_path}")
+
+  end
+
+  def self.find_by_auth_token(token)
+#    return self.first(:token, token) ? true : false
+  end
+    
 
   def is_admin?
     is_admin = self.teams.count(:capabilities => :admin)

@@ -1,6 +1,6 @@
 class ASYD < Sinatra::Application
   get '/hosts/overview' do
-    status 200
+    protected!
     @groups = Hostgroup.all
     @hosts = Host.all
     @host_status = {}
@@ -11,7 +11,7 @@ class ASYD < Sinatra::Application
   end
 
   get '/host/:host' do
-    status 200
+    protected!
     @host = Host.first(:hostname => params[:host])
     if @host.nil?
       erb :oops
@@ -22,7 +22,7 @@ class ASYD < Sinatra::Application
   end
 
   post '/host/add' do
-    status 200
+    protected!
     HOSTEX.synchronize do
       Host.init(params['hostname'], params['ip'], params['user'], params['ssh_port'].to_i, params['password'])
     end
@@ -35,7 +35,7 @@ class ASYD < Sinatra::Application
   end
 
   post '/host/del' do
-    status 200
+    protected!
     if params['revoke'] == "true"
       revoke = true
     else
@@ -50,6 +50,7 @@ class ASYD < Sinatra::Application
   end
 
   post '/host/reboot' do
+    protected!
     host = Host.first(:hostname => params['hostname'])
     host.reboot
     hostlist = '/hosts/overview'
@@ -67,7 +68,7 @@ class ASYD < Sinatra::Application
   end
 
   post '/host/del-var' do
-    status 200
+    protected!
     HOSTEX.synchronize do
       host = Host.first(:hostname => params['hostname'])
       host.del_var(params['var_name'])
@@ -77,6 +78,7 @@ class ASYD < Sinatra::Application
   end
 
   post '/host/edit' do
+    protected!
     HOSTEX.synchronize do
       oldhost = Host.first(:hostname => params['old_hostname'])
       newhost = Host.create!(:hostname => params['hostname'],

@@ -7,6 +7,7 @@ en:
     servers: "Servers"
     deploys: "Deploys"
     tasks: "Tasks"
+    login: "Login"
 
   action:
     one: "Action"
@@ -26,11 +27,13 @@ en:
     setup: "Setup!"
     details: "Details"
     save: "Save"
+    saved: "Saved changes"
 
   asyd:
     login: "ASYD Login"
     setup: "ASYD Setup"
     doc: "ASYD Documentation"
+    recovery: "Password recovery"
 
   ssh:
     generate: "Generate key pair"
@@ -40,10 +43,16 @@ en:
     port: "SSH port"
 
   username: "Username"
+  token:
+    invalid: "The token received is already invalid"
+    wait: "You must wait at least 5 minutes to ask a new password"
   password:
     one: "Password"
     repeat: "Repeat password"
     match: "Password must match"
+    change: "Change password"
+    new: "New password"
+    wrong: "Wrong password"
   email: "E-Mail"
   name: "Name"
   ip: "IP address"
@@ -60,10 +69,18 @@ en:
     not_found:
       short: "Oops! we cannot find this place."
       detail: "Why not try going back to the <a href='/'>dashboard</a> or using the top menu!"
+    not_authorized:
+      short: "Yikes! It seems you can&#39;t go behind this point."
+      detail: "<a href='/'>Dashboard</a> is cool, go back to it or us the top menu"
+    forbidden:
+      short: "Not enough ASYD on your veins to continue."
+      detail: "Go back to <a href='/'>dashboard</a> and don&#39;t come back here."
     host:
       auth: "Authentication error, please check the provided password"
       unreach: "Host unreachable, please check the network"
       misc: "Error adding the host"
+    email:
+      invalid: "The email doesn&#39;t exist in our database."
 
   group:
     one: "Hostgroup"

@@ -1,6 +1,10 @@
 class ASYD < Sinatra::Application
+
+  before /^(\/hostgroup)/ do
+    protected!
+  end
+
   get '/hostgroup/:hostgroup' do
-    status 200
     @hostgroup = Hostgroup.first(:name => params[:hostgroup])
     @host_status = {}
     @hostgroup.hosts.each do |host|
@@ -10,20 +14,17 @@ class ASYD < Sinatra::Application
   end
 
   post '/hostgroup/add' do
-    status 200
     Hostgroup.create(:name => params['hostgroup'])
     redirect to '/hosts/overview'
   end
 
   post '/hostgroup/del' do
-    status 200
     hostgroup = Hostgroup.first(:name => params['hostgroup'])
     hostgroup.delete
     redirect to '/hosts/overview'
   end
 
   post '/hostgroup/add-member' do
-    status 200
     hostgroup = Hostgroup.first(:name => params['hostgroup'])
     params['hostname'].each do |hostname|
       host = Host.first(:hostname => hostname)
@@ -34,7 +35,6 @@ class ASYD < Sinatra::Application
   end
 
   post '/hostgroup/del-member' do
-    status 200
     hostgroup = Hostgroup.first(:name => params['hostgroup'])
     host = Host.first(:hostname => params['hostname'])
     hostgroup.del_member(host)
@@ -43,7 +43,6 @@ class ASYD < Sinatra::Application
   end
 
   post '/hostgroup/add-var' do
-    status 200
     hostgroup = Hostgroup.first(:name => params['hostgroup'])
     hostgroup.add_var(params['var_name'], params['value'])
     redir = '/hostgroup/'+params['hostgroup']
@@ -51,7 +50,6 @@ class ASYD < Sinatra::Application
   end
 
   post '/hostgroup/del-var' do
-    status 200
     hostgroup = Hostgroup.first(:name => params['hostgroup'])
     hostgroup.del_var(params['var_name'])
     redir = '/hostgroup/'+params['hostgroup']

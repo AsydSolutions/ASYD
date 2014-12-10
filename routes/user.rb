@@ -1,9 +1,9 @@
+require 'time'
+
 class ASYD < Sinatra::Application
 
   before /^(\/user|team)/ do
-    unless user.is_admin?
-      redirect "/"
-    end
+    dangerzone!
   end
 
   get '/users' do
@@ -77,4 +77,92 @@ class ASYD < Sinatra::Application
     userlist = '/users'
     redirect to userlist
   end
+
+  get "/password/request/?" do
+    erb :password_request, :layout => false
+  end
+
+  post "/password/request" do
+    @un = User.first(:email => params['email'])
+    if !@un.nil?
+      elapsed_time = Time.now - @un.updated_at
+      if ( elapsed_time.to_s.to_i > 300 )
+        User.reset_token(params['email'])
+        @un.updated_at = Time.now
+        @un.save
+        @un.reload
+        erb "Link was sended to #{@params[:email]}"
+      else
+        erb "<div class='alert alert-error'>"+t('token.wait')+"</div>" 
+      end
+    else
+      erb "<div class='alert alert-error'>"+t('error.email.invalid')+"</div>" 
+    end
+  end
+
+  get "/password/reset?" do
+    if !params[:token].nil?
+      @un = User.first(:token => (params['token']))
+      if !@un.nil?
+        erb :password_reset, :layout => false, :locals => {:token => params['token']}
+      else
+        erb "<div class='alert alert-error'>"+t('token.invalid')+"</div>"
+      end
+    else
+      halt 401
+    end
+  end
+
+  post "/password/reset" do
+    if !params['token'].nil?
+      @un = User.first(:token => (params['token']) )
+      if !@un.nil?
+        if @un.username == params['username']
+          if params['confirm_password'] == params['password']
+            @encpw = BCrypt::Password.create(params['password'])
+            @un.password = @encpw
+          else
+            erb t('password.match')
+          end
+        else
+          halt 403
+        end
+        un.token = nil
+        @un.updated_at = Time.now
+        @un.save
+        @un.reload
+        redirect '/'
+      else
+        erb "<div class='alert alert-error'>"+t('token.invalid')+"</div>"
+      end
+    else
+      halt 401
+    end
+  end
+
+  get "/password/change" do
+    protected!
+    erb :password_change
+  end
+
+          
+  post "/password/change" do
+    protected!
+    @un = User.first(:username => (session[:username]))
+    if @un.password == params['password']
+      if params['new_password'] == params['confirm_password']
+        @un.password = BCrypt::Password.create(params['new_password'])
+        @un.updated_at = Time.now
+        @un.save
+        @un.reload()
+        erb "<div class='alert alert-info'>"+t('action.saved')+"</div>" 
+      else
+        erb "<div class='alert alert-error'>"+t('password.match')+"</div>" 
+      end
+    else
+      erb "<div class='alert alert-error'>"+t('password.wrong')+"</div>" 
+    end
+  end
+    
+
 end

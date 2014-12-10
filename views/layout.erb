@@ -71,9 +71,12 @@
                     <li><a href="/settings">System Settings</a></li>
                     <li class="divider"></li>
                   <%end%>
+                  <li><a href="/password/change"><%=t('password.change')%></a></li>
                   <li><a href="/logout"><%=t('menu.logout')%></a></li>
                 </ul>
               </li>
+              <%else%>
+                <li><a href="/login"><%=t('menu.login')%></a></li>
               <%end%>
             </ul>
           </div>

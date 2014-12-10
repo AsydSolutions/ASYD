@@ -1,6 +1,6 @@
 class ASYD < Sinatra::Application
   get '/deploys/list' do
-    status 200
+    protected!
     @deploys = Deploy.all
     @deploy_alerts = Deploy.get_alerts
     @undeploy_alerts = Deploy.get_undeploy_alerts

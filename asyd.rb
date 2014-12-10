@@ -1,29 +1,35 @@
 require 'sinatra'
+
 require_relative 'routes/init'
 require_relative 'models/init'
 
+require_relative 'helpers/init'
+
+
+log = File.new("logs/asyd.log", "a")
+STDOUT.reopen(log)
+STDERR.reopen(log)
+
 class ASYD < Sinatra::Application
+
   configure do
     set :public_folder, Proc.new { File.join(root, "static/lib") }
     # set :environment, :production
-    enable :sessions
+    set :environment, :dump_errors, :raise_errors
+    enable :logging, :sessions
   end
 
+
   helpers do
-    def user
-      if session[:username]
-        User.first(:username => session[:username])
-      else
-        nil
-      end
-    end
     def timezone
       session[:timezone] ? session[:timezone] : "UTC"
     end
+
     def t(*args)
       I18n.t(*args)
     end
   end
+
 
   before do
     loc = request.env["HTTP_ACCEPT_LANGUAGE"] ? request.env["HTTP_ACCEPT_LANGUAGE"][0,2] : "en"
@@ -34,10 +40,6 @@ class ASYD < Sinatra::Application
   before /^(?!\/(setup))(?!\/(login))/ do
     if !File.directory? 'data'
       redirect '/setup'
-    else
-      if !session[:username] then
-        redirect '/login'
-      end
     end
   end
 
@@ -45,6 +47,16 @@ class ASYD < Sinatra::Application
   not_found do
     status 404
     erb :oops
+  end
+
+  error 401 do
+    status 401
+    erb :not_auth
+  end
+
+  error 403 do
+    status 403
+    erb :forbidden
   end
 
   # monitoring on the background

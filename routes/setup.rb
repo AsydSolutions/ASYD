@@ -1,19 +1,16 @@
 class ASYD < Sinatra::Application
   get '/setup' do
-    status 200
-    home = '/'
     if File.directory? 'data'
-      redirect to home
+      #redirect to home
+      halt 404
     else
       erb :setup, :layout => false
     end
   end
 
   post '/setup' do
-    status 200
-    home = '/'
     if File.directory? 'data'
-      redirect to home
+      halt 404
     else
       if params['password'].empty? || params['username'].empty? || params['email'].empty?
         @error = 'All fields required'

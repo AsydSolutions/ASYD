@@ -1,4 +1,10 @@
 class ASYD < Sinatra::Application
+
+  before /^(\/task)/ do
+    protected!
+  end
+
+
   get '/task/list' do
     @tasks_progress = Task.all(:status => :in_progress, :order => [ :id.desc ])
     @tasks_completed = Task.all(:status => [ :finished, :failed ], :order => [ :id.desc ])
