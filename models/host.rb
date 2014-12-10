@@ -24,7 +24,7 @@ class Host
 
   def self.init(hostname, ip, user, ssh_port, password)
     begin
-      host = Host.new(:hostname => hostname)
+      host = Host.new(:hostname => hostname.strip)
       #set the parameters as object properties
       host.ip = ip
       host.user = user
