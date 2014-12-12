@@ -145,6 +145,27 @@ class ASYD < Sinatra::Application
     else
       halt 401
     end
-  end    
+  end
+
+  get "/password/change" do
+    erb :password_change
+  end
+
+  post "/password/change" do
+    un = User.first(:username => (session[:username]))
+    if un.password == params['password']
+      if params['new_password'] == params['confirm_password']
+        un.password = BCrypt::Password.create(params['new_password'])
+        un.updated_at = Time.now
+        un.save
+        un.reload()
+        erb "<div class='alert alert-info'>"+t('action.saved')+"</div>" 
+      else
+        erb "<div class='alert alert-error'>"+t('password.match')+"</div>" 
+      end
+    else
+      erb "<div class='alert alert-error'>"+t('password.wrong')+"</div>" 
+    end
+  end
 
 end
