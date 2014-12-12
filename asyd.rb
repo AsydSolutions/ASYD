@@ -31,7 +31,7 @@ class ASYD < Sinatra::Application
   end
 
   # Check if ASYD was installed or user is logged in before doing anything
-  before /^(?!\/(setup))(?!\/(login))/ do
+  before /^(?!\/(setup))(?!\/(login))(^(?!\/(password\/request)))(^(?!\/(password\/reset)))/ do
     if !File.directory? 'data'
       redirect '/setup'
     else

@@ -9,6 +9,7 @@ class User
   property :email, String
   property :password, BCryptHash
   property :receive_notifications, Boolean, :default => true 
+  property :token, String
   property :created_at, DateTime
   property :updated_at, DateTime
   has n, :team_members
