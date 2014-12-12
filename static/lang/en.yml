@@ -7,6 +7,7 @@ en:
     servers: "Servers"
     deploys: "Deploys"
     tasks: "Tasks"
+    login: "Login"
 
   action:
     one: "Action"
@@ -26,11 +27,13 @@ en:
     setup: "Setup!"
     details: "Details"
     save: "Save"
+    saved: "Saved changes"
 
   asyd:
     login: "ASYD Login"
     setup: "ASYD Setup"
     doc: "ASYD Documentation"
+    recovery: "Password recovery"
 
   ssh:
     generate: "Generate key pair"
@@ -40,10 +43,16 @@ en:
     port: "SSH port"
 
   username: "Username"
+  token:
+    invalid: "The token received is already invalid"
+    wait: "You must wait at least 5 minutes to ask a new password"
   password:
     one: "Password"
     repeat: "Repeat password"
     match: "Password must match"
+    change: "Change password"
+    new: "New password"
+    wrong: "Wrong password"
   email: "E-Mail"
   name: "Name"
   ip: "IP address"
@@ -64,6 +73,8 @@ en:
       auth: "Authentication error, please check the provided password"
       unreach: "Host unreachable, please check the network"
       misc: "Error adding the host"
+    email:
+      invalid: "The email doesn&#39;t exist in our database."
 
   group:
     one: "Hostgroup"
