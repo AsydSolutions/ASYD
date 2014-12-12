@@ -69,6 +69,15 @@ en:
     not_found:
       short: "Oops! we cannot find this place."
       detail: "Why not try going back to the <a href='/'>dashboard</a> or using the top menu!"
+    not_authorized:
+      short: "Yikes! It seems you can&#39;t go behind this point."
+      detail: "<a href='/'>Dashboard</a> is cool, go back to it or us the top menu"
+    forbidden:
+      short: "Hmm... It looks like your pass is forbidden."
+      detail: "Why not go elsewhere, for example the <a href='/'>dashboard</a>."
+    internal500:
+      short: "Our apologies, something isn&#39;t working."
+      detail: "Thank you for your patience, as we fix that."
     host:
       auth: "Authentication error, please check the provided password"
       unreach: "Host unreachable, please check the network"
