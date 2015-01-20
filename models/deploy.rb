@@ -501,11 +501,15 @@ class Deploy
         cmd = pkg_path+" && "+cmd+" -U -I -x "+pkg    ## NOT FULLY TESTED, DEVELOPMENT IN PROGRESS
       end
       result = host.exec_cmd(cmd)
-      if result.include? "\nE: "
-        raise ExecutionError, result
+      unless result.nil?
+        if result.include? "\nE: "
+          raise ExecutionError, result
+        else
+          result = result.split("\n").last
+          return [1, result]
+        end
       else
-        result = result.split("\n").last
-        return [1, result]
+        return [1, "--"]
       end
     rescue FormatException
       error = "Invalid characters detected on package name: "+pkg
