@@ -32,18 +32,18 @@ class ASYD < Sinatra::Application
 
   # Check if ASYD was installed or user is logged in before doing anything
   # Now also checks if ASYD must update
-  before /^(?!\/(setup))(?!\/(login))(^(?!\/(password\/request)))(^(?!\/(password\/reset)))/ do
+  before /^(?!\/(setup))(?!\/(login))(?!\/(logout))(?!\/(update))(?!\/(confirm_update))(^(?!\/(password\/request)))(^(?!\/(password\/reset)))/ do
     if !File.directory? 'data'
       redirect '/setup'
     else
       if !session[:username] then
         redirect '/login'
       else
-        if File.directory? 'data' && File.directory? 'installer'
+        if File.directory? 'data' and File.directory? 'installer' then
           require_relative 'installer/updater'
-          @actions = Updater.update_actions
-          if @actions.length > 0
-            erb :updater
+          actions = Updater.update_actions
+          if actions.length > 0
+            redirect '/update'
           else
             Updater.remove_installer_dir
           end

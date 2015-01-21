@@ -1,9 +1,18 @@
 class ASYD < Sinatra::Application
   get '/confirm_update' do
-    include Updater
-
+    if !session[:username] then
+      redirect '/login'
+    end
     Updater.update
     redirect to '/'
+  end
+
+  get '/update' do
+    if !session[:username] then
+      redirect '/login'
+    end
+    @actions = Updater.update_actions
+    erb :updater
   end
 end
 
@@ -24,6 +33,7 @@ module Updater
 
     #-#-#
     # Check for monit deploy version
+    old_version = nil
     path = "data/deploys/monit/def" # the old def file
     f = File.open(path, "r").read
     f.gsub!(/\r\n?/, "\n")
@@ -32,6 +42,7 @@ module Updater
         old_version = line.gsub!(/^# ?version:/i, "").strip
       end
     end
+    new_version = nil
     path = "installer/monit/def" # the new def file
     f = File.open(path, "r").read
     f.gsub!(/\r\n?/, "\n")
@@ -40,7 +51,7 @@ module Updater
         new_version = line.gsub!(/^# ?version:/i, "").strip
       end
     end
-    if old_version.nil? || Gem::Version.new(old_version) < Gem::Version.new(new_version)
+    if old_version.nil? or Gem::Version.new(old_version) < Gem::Version.new(new_version) then
       actions << "update_monit"
     end
     #-#-#
