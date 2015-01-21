@@ -2,6 +2,7 @@
 # Will be executed on every new system added to ASYD
 # Modify accordingly to your systems (i.e. firewall rules, etc)
 # Alert: This deploy is automatically executed when a host is added, are you sure you want to manually execute it?
+# Version: 0.043
 
 ###
 # For Linux:

@@ -216,3 +216,9 @@ en:
     conditionals: "Conditionals"
     monitoring: "Monitoring"
     solaris: "Solaris Specific"
+
+  update:
+    title: "Updating ASYD"
+    actions: "The following actions will be performed:"
+    link: "Click here to confirm the update"
+    update_monit: "A new version of the Monit deploy will be installed (definition files only, the configuration will be kept)"
