@@ -100,10 +100,10 @@ class ASYD < Sinatra::Application
         un.reload
         erb "An email was sent to #{params[:email]} to recover your password."
       else
-        erb "<div class='alert alert-error'>"+t('token.wait')+"</div>" 
+        erb "<div class='alert alert-error'>"+t('token.wait')+"</div>"
       end
     else
-      erb "<div class='alert alert-error'>"+t('error.email.invalid')+"</div>" 
+      erb "<div class='alert alert-error'>"+t('error.email.invalid')+"</div>"
     end
   end
 
@@ -159,13 +159,25 @@ class ASYD < Sinatra::Application
         un.updated_at = Time.now
         un.save
         un.reload()
-        erb "<div class='alert alert-info'>"+t('action.saved')+"</div>" 
+        erb "<div class='alert alert-info'>"+t('action.saved')+"</div>"
       else
-        erb "<div class='alert alert-error'>"+t('password.match')+"</div>" 
+        erb "<div class='alert alert-error'>"+t('password.match')+"</div>"
       end
     else
-      erb "<div class='alert alert-error'>"+t('password.wrong')+"</div>" 
+      erb "<div class='alert alert-error'>"+t('password.wrong')+"</div>"
     end
+  end
+
+  get "/users/:user/notifications/:action" do
+    user = User.first(:username => params[:user])
+    if params[:action] == "enable"
+      user.receive_notifications = true
+      user.save
+    elsif params[:action] == "disable"
+      user.receive_notifications = false
+      user.save
+    end
+    redirect to '/users'
   end
 
 end

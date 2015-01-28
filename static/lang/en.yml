@@ -28,6 +28,9 @@ en:
     details: "Details"
     save: "Save"
     saved: "Saved changes"
+    notifications:
+      enable: "Notifications Disabled -> Enable"
+      disable: "Notifications Enabled -> Disable"
 
   asyd:
     login: "ASYD Login"
