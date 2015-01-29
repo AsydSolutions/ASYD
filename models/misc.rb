@@ -88,11 +88,15 @@ module Misc
           return true
         rescue Errno::ECONNREFUSED, Errno::EHOSTUNREACH
           return false
+        rescue
+          return false
         end
       end
     rescue Timeout::Error
+      return false
+    rescue
+      return false
     end
-    return false
   end
 
   # Executes a command on a remote host
