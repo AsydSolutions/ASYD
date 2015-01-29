@@ -606,7 +606,7 @@ class Deploy
       return [5, error]
     rescue ExecutionError => e
       err = e.message.split("\n")
-      error = "Error installing "+pkg+" on "+host.hostname+": "+err.last
+      error = "Error uninstalling "+pkg+" on "+host.hostname+": "+err.last
       return [4, error]
     rescue => e
       error = "Something really bad happened when uninstalling "+pkg+" on "+host.hostname+": "+e.message
