@@ -515,8 +515,9 @@ class Deploy
       error = "Invalid characters detected on package name: "+pkg
       return [5, error]
     rescue ExecutionError => e
-      error = e.message.split("\n")
-      return [4, error.last]
+      err = e.message.split("\n")
+      error = "Error installing "+pkg+" on "+host.hostname+": "+err.last
+      return [4, error]
     rescue => e
       error = "Something really bad happened when installing "+pkg+" on "+host.hostname+": "+e.message
       return [4, error]
@@ -604,8 +605,9 @@ class Deploy
       error = "Invalid characters detected on package name: "+pkg
       return [5, error]
     rescue ExecutionError => e
-      error = e.message.split("\n")
-      return [4, error.last]
+      err = e.message.split("\n")
+      error = "Error installing "+pkg+" on "+host.hostname+": "+err.last
+      return [4, error]
     rescue => e
       error = "Something really bad happened when uninstalling "+pkg+" on "+host.hostname+": "+e.message
       return [4, error]
