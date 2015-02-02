@@ -105,7 +105,7 @@ module Monitoring
     # 2 == problem
     # 1 == all ok
     def is_ok?
-      if self.opt_vars["monitored"].nil? or self.opt_vars["monitored"].to_i == 0
+      if self.opt_vars["monitored"].nil? or self.opt_vars["monitored"].to_i != 1
         return 4
       else
         hoststatus = nil
