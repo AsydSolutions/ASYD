@@ -15,7 +15,7 @@ class Host
   property :arch, String
   property :pkg_mgr, String
   property :monit_pw, String
-  property :monitored, Boolean, :default => false # <-- TO BE DEPRECATED
+  property :monitored, Boolean, :default => false # <-- DEPRECATED, keep for compatibility, will be removed in 2 releases
   property :opt_vars, Object
   property :created_at, DateTime
   property :updated_at, DateTime

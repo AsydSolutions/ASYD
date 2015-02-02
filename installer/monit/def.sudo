@@ -103,3 +103,6 @@ if <%DIST%> == OpenBSD
 
 endif
 ###
+
+# Last, we set the monitored flag
+var monitored = exec: echo 1

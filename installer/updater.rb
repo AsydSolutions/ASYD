@@ -23,6 +23,13 @@ module Updater
       if action == "update_monit"
         FileUtils.mv("installer/monit/def", "data/deploys/monit/def")
         FileUtils.mv("installer/monit/def.sudo", "data/deploys/monit/def.sudo")
+      elsif action == "update_monitored_status"
+        hosts = Host.all(:monitored => true)
+        hosts.each do |host|
+          host.add_var("monitored", "1")
+          host.monitored = false
+          host.save
+        end
       end
     end
     remove_installer_dir
@@ -51,8 +58,16 @@ module Updater
         new_version = line.gsub!(/^# ?version:/i, "").strip
       end
     end
-    if old_version.nil? or Gem::Version.new(old_version) < Gem::Version.new(new_version) then
+    if old_version.nil? or old_version.to_f < new_version.to_f then
       actions << "update_monit"
+    end
+    #-#-#
+
+    #-#-#
+    # Migration from old host.monitored to new "monitored" opt_var
+    hosts = Host.all(:monitored => true)
+    if hosts.length > 0
+      actions << "update_monitored_status"
     end
     #-#-#
 

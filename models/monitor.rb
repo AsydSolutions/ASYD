@@ -33,8 +33,6 @@ module Monitoring
         if ret != 1
           raise ExecutionError, ret[1]
         end
-        self.monitored = true
-        self.save
       rescue ExecutionError => e
         NOTEX.synchronize do
           msg = "Unable to monitor host "+self.hostname+": "+e.message
@@ -107,7 +105,7 @@ module Monitoring
     # 2 == problem
     # 1 == all ok
     def is_ok?
-      if self.monitored == false
+      if self.opt_vars["monitored"].nil? or self.opt_vars["monitored"].to_i == 0
         return 4
       else
         hoststatus = nil
@@ -155,7 +153,7 @@ module Monitoring
           forks.delete(id) #and we remove it from the forks array
         end
         frk = Spork.spork do #so we can continue executing a new fork
-          if host.monitored #do things
+          if host.opt_vars["monitored"].to_i == 1 #do things
             stat = host.get_status
             if stat == 3 #the host is down
               MNOTEX.synchronize do
