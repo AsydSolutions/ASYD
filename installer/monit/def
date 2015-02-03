@@ -2,19 +2,19 @@
 # Will be executed on every new system added to ASYD
 # Modify accordingly to your systems (i.e. firewall rules, etc)
 # Alert: This deploy is automatically executed when a host is added, are you sure you want to manually execute it?
+# Version: 0.05
 
 ###
 # For Linux:
 if <%PKG_MANAGER%> == apt or <%PKG_MANAGER%> == yum or <%PKG_MANAGER%> == pacman or <%PKG_MANAGER%> == zypper
 
   # install monit:
-  install: curl tar gzip
+  install: wget tar gzip
   exec: mkdir -p /etc/monit/conf.d
-  exec if <%ARCH%> == x86_64: curl -o /tmp/monit.tar.gz http://mmonit.com/monit/dist/binary/5.10/monit-5.10-linux-x64.tar.gz
-  exec if <%ARCH%> == i686: curl -o /tmp/monit.tar.gz http://mmonit.com/monit/dist/binary/5.10/monit-5.10-linux-x86.tar.gz
-  exec: cd /tmp && tar xzf /tmp/monit.tar.gz
-  exec: mv /tmp/monit-5.10/bin/monit /usr/bin/
-  exec: rm -r /tmp/monit*
+  exec if <%ARCH%> == x86_64: wget http://github.com/AsydSolutions/monit/releases/download/release-5-11-asyd/monit-linux-x64 -O /tmp/monit
+  exec if <%ARCH%> == i686: wget http://github.com/AsydSolutions/monit/releases/download/release-5-11-asyd/monit-linux-x86 -O /tmp/monit
+  exec: mv /tmp/monit /usr/bin/
+  exec: chmod +x /usr/bin/monit
 
   config file: monitrc, /etc/monit/monitrc
 
@@ -39,8 +39,8 @@ endif
 
 
 ###
-# For Solaris:
-if <%DIST%> == Solaris or <%DIST%> == OpenIndiana
+# For Solaris (SPARC architecture not supported for now):
+if <%DIST%> == Solaris and <%ARCH%> != sparc or <%DIST%> == OpenIndiana and <%ARCH%> != sparc
 
   # first upload the admin file for non-interactive pkgadd
   config file: solaris-admin, /etc/admin
@@ -56,16 +56,16 @@ if <%DIST%> == Solaris or <%DIST%> == OpenIndiana
 
   # install monit
   exec: mkdir -p /etc/monit/conf.d
-  exec if <%ARCH%> == sparc: wget http://mmonit.com/monit/dist/binary/5.10/monit-5.10-solaris-sparc.tar.gz -O /tmp/monit.tar.gz
-  exec if <%ARCH%> != sparc: wget http://mmonit.com/monit/dist/binary/5.10/monit-5.10-solaris-x64.tar.gz -O /tmp/monit.tar.gz
-  exec: cd /tmp && gzip -dc /tmp/monit.tar.gz | tar xf -
-  exec: mv /tmp/monit-5.10/bin/monit /usr/bin/
-  exec: rm -r /tmp/monit*
+  exec if <%ARCH%> != sparc: wget http://github.com/AsydSolutions/monit/releases/download/release-5-11-asyd/monit-solaris-x86_64 -O /tmp/monit
+  exec: mv /tmp/monit /usr/bin/
+  exec: chmod +x /usr/bin/monit
 
   config file: monitrc, /etc/monit/monitrc
 
-  exec: echo "mo:2345:respawn:/usr/bin/monit -Ic /etc/monit/monitrc" >> /etc/inittab
-  exec: init q
+  exec: mv /etc/inittab /tmp/inittab
+  exec: echo "mo:2345:respawn:/usr/bin/monit -Ic /etc/monit/monitrc" >> /tmp/inittab
+  exec: uniq /tmp/inittab > /etc/inittab
+  exec: /usr/sbin/init q
 
 endif
 ###
@@ -80,16 +80,17 @@ if <%DIST%> == OpenBSD
 
   # install monit
   exec: mkdir -p /etc/monit/conf.d
-  exec if <%ARCH%> == amd64: wget http://mmonit.com/monit/dist/binary/5.10/monit-5.10-openbsd-x64.tar.gz -O /tmp/monit.tar.gz
-  exec if <%ARCH%> == i386: wget http://mmonit.com/monit/dist/binary/5.10/monit-5.10-openbsd-x86.tar.gz -O /tmp/monit.tar.gz
-  exec: cd /tmp && gzip -dc /tmp/monit.tar.gz | tar xf -
-  exec: mv /tmp/monit-5.10/bin/monit /usr/bin/
-  exec: rm -r /tmp/monit*
+  exec if <%ARCH%> == amd64: wget http://github.com/AsydSolutions/monit/releases/download/release-5-11-asyd/monit-openbsd-x64 -O /tmp/monit
+  exec if <%ARCH%> == i386: wget http://github.com/AsydSolutions/monit/releases/download/release-5-11-asyd/monit-openbsd-x86 -O /tmp/monit
+  exec: mv /tmp/monit /usr/bin/
+  exec: chmod +x /usr/bin/monit
 
   config file: monitrc, /etc/monit/monitrc
   config file: initscript, /etc/rc.d/monit
   exec: chmod +x /etc/rc.d/monit
-  exec: echo 'pkg_scripts="$pkg_scripts monit"' >> /etc/rc.conf.local
+  exec: mv /etc/rc.conf.local /tmp/rc.conf.local
+  exec: echo 'pkg_scripts="$pkg_scripts monit"' >> /tmp/rc.conf.local
+  exec: uniq /tmp/rc.conf.local > /etc/rc.conf.local
 
   exec: /usr/bin/monit -c /etc/monit/monitrc quit
   exec: sleep 1
@@ -97,3 +98,6 @@ if <%DIST%> == OpenBSD
 
 endif
 ###
+
+# Last, we set the monitored flag
+var monitored = exec: echo 1

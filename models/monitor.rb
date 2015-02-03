@@ -1,6 +1,8 @@
 module Monitoring
 
   TTL = 15 #store/refresh the status for 15 seconds
+  $mem_mail = ProcessShared::SharedMemory.new(2048)
+  $mem_mail.write_object({})
 
   class Notification
     include DataMapper::Resource
@@ -31,8 +33,6 @@ module Monitoring
         if ret != 1
           raise ExecutionError, ret[1]
         end
-        self.monitored = true
-        self.save
       rescue ExecutionError => e
         NOTEX.synchronize do
           msg = "Unable to monitor host "+self.hostname+": "+e.message
@@ -105,7 +105,7 @@ module Monitoring
     # 2 == problem
     # 1 == all ok
     def is_ok?
-      if self.monitored == false
+      if self.opt_vars["monitored"].nil? or self.opt_vars["monitored"].to_i != 1
         return 4
       else
         hoststatus = nil
@@ -153,26 +153,84 @@ module Monitoring
           forks.delete(id) #and we remove it from the forks array
         end
         frk = Spork.spork do #so we can continue executing a new fork
-          if host.monitored #do things
+          if host.opt_vars["monitored"].to_i == 1 #do things
             stat = host.get_status
             if stat == 3 #the host is down
               MNOTEX.synchronize do
                 last = Monitoring::Notification.last(:host_hostname => host.hostname)
                 if last.nil? #no previous notification
-                  error = "Unable to get monitoring status for host "+host.hostname
-                  Monitoring::Notification.create(:type => :error, :message => error, :host_hostname => host.hostname, :service => "system")
+                  msg = "Unable to get monitoring status for host "+host.hostname
+                  Monitoring::Notification.create(:type => :error, :message => msg, :host_hostname => host.hostname, :service => "system")
                 else
                   if last.acknowledge == false && last.dismiss == true #the last notification was already dismissed and is not acknowledged
-                    error = "Unable to get monitoring status for host "+host.hostname
-                    Monitoring::Notification.create(:type => :error, :message => error, :host_hostname => host.hostname, :service => "system")
+                    msg = "Unable to get monitoring status for host "+host.hostname
+                    Monitoring::Notification.create(:type => :error, :message => msg, :host_hostname => host.hostname, :service => "system")
                   end
                 end
+                if last.nil? || last.acknowledge == false
+                  errmail = $mem_mail.read_object
+                  if errmail[host.hostname].nil?
+                    errmail[host.hostname] = 1
+                  else
+                    if errmail[host.hostname] < -2
+                      errmail[host.hostname] = 0
+                    else
+                      errmail[host.hostname] = errmail[host.hostname]+1
+                    end
+                  end
+                  if errmail[host.hostname] == 2 #first email alert at second check (30 seconds since failure)
+                    errmail[host.hostname] = -2 #then we set the counter to -2 so we get an email every minute
+                    subject = "Critical: Host "+host.hostname+" Down"
+                    msg = "Unable to get monitoring status for host "+host.hostname
+                    Monitoring.notify_by_mail(subject, msg)
+                  end
+                  $mem_mail.write_object(errmail)
+                end
               end
-            else #the host recovered?
+            elsif stat == 2 #warning
               MNOTEX.synchronize do
                 last = Monitoring::Notification.last(:host_hostname => host.hostname)
                 if !last.nil?
                   last.update(:acknowledge => false, :dismiss => true)
+                end
+                  errmail = $mem_mail.read_object
+                  if errmail[host.hostname].nil?
+                    errmail[host.hostname] = 1
+                  else
+                    errmail[host.hostname] = errmail[host.hostname]+1
+                  end
+                  if errmail[host.hostname] == 2 #first email alert at second check (30 seconds since failure)
+                    errmail[host.hostname] = -18 #then we set the counter to -18 so the next email will arrive in 5 minutes
+                    subject = "Warning: Check failed on Host "+host.hostname
+                    msg = ""
+                    status = Status.new(host, true)
+                    unless status.system_status.nil? || status.system_status == 'down'
+                      if status.system_status != 'ok'
+                        msg = msg+"System: "+status.system_status+"\n\n"
+                      end
+                      status.services.each do |service|
+                        if service[1] != 'ok'
+                          msg = msg+service[0]+": "+service[1]+"\n\n"
+                        end
+                      end unless status.services.nil?
+                    end
+                    Monitoring.notify_by_mail(subject, msg)
+                  end
+                  $mem_mail.write_object(errmail)
+              end
+            elsif stat == 1 #the host recovered?
+              errmail = $mem_mail.read_object
+              unless errmail[host.hostname].nil?
+                errmail[host.hostname] = 0
+                $mem_mail.write_object(errmail)
+              end
+              MNOTEX.synchronize do
+                last = Monitoring::Notification.last(:host_hostname => host.hostname, :dismiss => false)
+                if !last.nil?
+                  last.update(:acknowledge => false, :dismiss => true)
+                  subject = "Recovery: Host "+host.hostname+" Up"
+                  msg = "The host "+host.hostname+" recovered"
+                  Monitoring.notify_by_mail(subject, msg)
                 end
               end
             end
@@ -183,5 +241,12 @@ module Monitoring
       Process.waitall
       sleep TTL
     end
+  end
+
+  def self.notify_by_mail(subject, msg)
+    users = User.all(:receive_notifications => true)
+    users.each do |user|
+      Email.mail(user.email, subject, msg)
+    end unless users.nil?
   end
 end

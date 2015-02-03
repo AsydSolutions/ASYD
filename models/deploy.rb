@@ -83,7 +83,7 @@ class Deploy
         error = "Error: host not found"
         raise ExecutionError, error
       end
-      if !Misc::is_port_open?(host.ip, host.ssh_port)
+      if !Misc::is_port_open?(host.ip, host.ssh_port, pingback=true)
         error = "Error: host "+host.hostname+" unreachable"
         raise TargetUnreachable, error
       end
@@ -120,7 +120,7 @@ class Deploy
         error = "Error: host not found"
         raise ExecutionError, error
       end
-      if !Misc::is_port_open?(host.ip, host.ssh_port)
+      if !Misc::is_port_open?(host.ip, host.ssh_port, pingback=true)
         error = "Error: host "+host.hostname+" unreachable"
         raise TargetUnreachable, error
       end
@@ -501,18 +501,23 @@ class Deploy
         cmd = pkg_path+" && "+cmd+" -U -I -x "+pkg    ## NOT FULLY TESTED, DEVELOPMENT IN PROGRESS
       end
       result = host.exec_cmd(cmd)
-      if result.include? "\nE: "
-        raise ExecutionError, result
+      unless result.nil?
+        if result.include? "\nE: "
+          raise ExecutionError, result
+        else
+          result = result.split("\n").last
+          return [1, result]
+        end
       else
-        result = result.split("\n").last
-        return [1, result]
+        return [1, "--"]
       end
     rescue FormatException
       error = "Invalid characters detected on package name: "+pkg
       return [5, error]
     rescue ExecutionError => e
-      error = e.message.split("\n")
-      return [4, error.last]
+      err = e.message.split("\n")
+      error = "Error installing "+pkg+" on "+host.hostname+": "+err.last
+      return [4, error]
     rescue => e
       error = "Something really bad happened when installing "+pkg+" on "+host.hostname+": "+e.message
       return [4, error]
@@ -600,8 +605,9 @@ class Deploy
       error = "Invalid characters detected on package name: "+pkg
       return [5, error]
     rescue ExecutionError => e
-      error = e.message.split("\n")
-      return [4, error.last]
+      err = e.message.split("\n")
+      error = "Error uninstalling "+pkg+" on "+host.hostname+": "+err.last
+      return [4, error]
     rescue => e
       error = "Something really bad happened when uninstalling "+pkg+" on "+host.hostname+": "+e.message
       return [4, error]

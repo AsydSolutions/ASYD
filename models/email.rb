@@ -1,6 +1,13 @@
 class Email
   include DataMapper::Resource
 
+
+  SMTP_ERRORS = [Timeout::Error, Errno::EINVAL, Errno::ECONNRESET, EOFError,
+                 Net::HTTPBadResponse, Net::HTTPHeaderSyntaxError, Net::ProtocolError,
+                 Errno::ECONNREFUSED, Net::SMTPSyntaxError, Net::SMTPFatalError]
+
+  SSL_ERRORS = [OpenSSL::SSL::SSLError]
+
   def self.default_repository_name #here we use the hosts_db for the Host objects
    :config_db
   end
@@ -26,22 +33,31 @@ class Email
         end
       end
       if cfg.method == :smtp
-        mail.delivery_method :smtp, address: cfg.host, port: cfg.port.to_i, user_name: cfg.user, password: cfg.password, authentication: 'plain', enable_starttls_auto: cfg.tls
-        mail.deliver!
+        mail.raise_delivery_errors = true
+        # setting open_ssl_verify_mode to true, makes mail to use the SSL, if it's valid or self-signed
+        # Maybe, in future we should verify it, but the info is a bit obscure: http://www.rubydoc.info/github/meskyanichi/backup/Backup/Notifier/Mail#openssl_verify_mode-instance_method
+        mail.delivery_method :smtp, address: cfg.host, port: cfg.port.to_i, user_name: cfg.user, password: cfg.password, authentication: 'plain', enable_starttls_auto: cfg.tls, return_response: true, openssl_verify_mode: "none"
+        response = mail.deliver!
+
       elsif cfg.method == :sendmail
         mail.delivery_method :sendmail, :location => cfg.path
         mail.deliver!
       end
-    rescue
+    rescue *SMTP_ERRORS => e
+      NOTEX.synchronize do
+        notification = Notification.create(:type => :error, :sticky => false, :message => "Email error: "+e.message)
+      end
       return false
-    end
-  end
-
-  def edit(method, data)
-    if method == "sendmail"
-
-    elsif method == "smtp"
-
+    rescue *SSL_ERRORS => e
+      NOTEX.synchronize do
+        notification = Notification.create(:type => :error, :sticky => false, :message => "Email error: "+e.message)
+      end
+      return false
+    rescue => e
+      NOTEX.synchronize do
+        notification = Notification.create(:type => :error, :sticky => false, :message => "Email error: "+e.message)
+      end
+      return false
     end
   end
 end

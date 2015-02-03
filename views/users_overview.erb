@@ -35,6 +35,11 @@
 								<%=user.email%>
 							</td>
 							<td class="td-actions">
+								<% if user.receive_notifications == true %>
+									<a data-toggle="tooltip" data-original-title="<%=t('action.notifications.disable')%>" href="/users/<%=user.username%>/notifications/disable" class="btn btn-inverse btn-mini btn-icon-only hint"><i class="btn-icon-only icon-bell"></i></a>
+								<% else %>
+									<a data-toggle="tooltip" data-original-title="<%=t('action.notifications.enable')%>" href="/users/<%=user.username%>/notifications/enable" class="btn btn-inverse disabled btn-mini btn-icon-only hint" style="cursor: pointer; cursor: hand;"><span class="btn-icon-only icon-stack" style="margin-left: -11px;"><i class="btn-icon-only icon-bell"></i><strong class="btn-icon-only icon-stack-base" style="font-size: 16px;">/</strong></span></a>
+								<% end %>
 								<a data-toggle="tooltip" data-original-title="<%=t('action.edit')%>" href="#editUser" class="btn btn-info btn-mini btn-icon-only hint" onclick="passDataToModal('<%=user.username%>', '#editUser')"><i class="btn-icon-only icon-edit"></i></a>
 								<a data-toggle="tooltip" data-original-title="<%=t('action.remove')%>" href="#delUser" class="btn btn-danger btn-mini btn-icon-only hint" onclick="passDataToModal('<%=user.username%>', '#delUser')"><i class="btn-icon-only icon-remove"></i></a>
 							</td>

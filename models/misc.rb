@@ -62,7 +62,12 @@ module Misc
 
   # Get max allocable forks
   def self.get_max_forks
-    free_mem = %x(free -m |grep cache: |awk '{print $4}')
+    free_version = %x(free -V |awk '{print $4}')
+    if Gem::Version.new(free_version) >= Gem::Version.new('3.3.10')
+      free_mem = %x(free -m |grep Mem: |awk '{print $7}')
+    else
+      free_mem = %x(free -m |grep cache: |awk '{print $4}')
+    end
     max_forks = free_mem.to_i / 30
     return max_forks
   end
@@ -74,20 +79,20 @@ module Misc
       return 0
   end
 
-  def self.is_port_open?(ip, port)
-    begin
-      Timeout::timeout(2) do
-        begin
-          s = TCPSocket.new(ip, port)
-          s.close
-          return true
-        rescue Errno::ECONNREFUSED, Errno::EHOSTUNREACH
-          return false
-        end
+  # Checks if a port is open (so if the host is reachable)
+  def self.is_port_open?(ip, port, pingback=false, seconds=2)
+    Timeout::timeout(seconds) do
+      begin
+        s = TCPSocket.new(ip, port)
+        s.gets if pingback
+        s.close
+        true
+      rescue Errno::ECONNREFUSED, Errno::EHOSTUNREACH
+        false
       end
-    rescue Timeout::Error
     end
-    return false
+  rescue Timeout::Error
+    false
   end
 
   # Executes a command on a remote host

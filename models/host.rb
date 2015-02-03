@@ -15,7 +15,7 @@ class Host
   property :arch, String
   property :pkg_mgr, String
   property :monit_pw, String
-  property :monitored, Boolean, :default => false
+  property :monitored, Boolean, :default => false # <-- DEPRECATED, keep for compatibility, will be removed in 2 releases
   property :opt_vars, Object
   property :created_at, DateTime
   property :updated_at, DateTime
@@ -24,7 +24,7 @@ class Host
 
   def self.init(hostname, ip, user, ssh_port, password)
     begin
-      host = Host.new(:hostname => hostname)
+      host = Host.new(:hostname => hostname.strip)
       #set the parameters as object properties
       host.ip = ip
       host.user = user
@@ -118,7 +118,7 @@ class Host
         end
         #upload the ssh key
         ssh.scp.upload!("data/ssh_key.pub", "/tmp/ssh_key.pub")
-        ssh.exec "mkdir -p $HOME/.ssh && touch $HOME/.ssh/authorized_keys && cat /tmp/ssh_key.pub >> $HOME/.ssh/authorized_keys && rm /tmp/ssh_key.pub"
+        ssh.exec "mkdir -p $HOME/.ssh && touch $HOME/.ssh/authorized_keys && mv $HOME/.ssh/authorized_keys /tmp/authorized_keys && cat /tmp/ssh_key.pub >> /tmp/authorized_keys && uniq /tmp/authorized_keys > $HOME/.ssh/authorized_keys && rm /tmp/ssh_key.pub && rm /tmp/authorized_keys"
       end
       if !host.save
         raise #couldn't save the object

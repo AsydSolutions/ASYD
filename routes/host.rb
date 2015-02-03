@@ -88,7 +88,6 @@ class ASYD < Sinatra::Application
                             :arch => oldhost.arch,
                             :pkg_mgr => oldhost.pkg_mgr,
                             :monit_pw => oldhost.monit_pw,
-                            :monitored => oldhost.monitored,
                             :opt_vars => oldhost.opt_vars,
                             :created_at => oldhost.created_at)
       oldhost.hostgroups.each do |group|

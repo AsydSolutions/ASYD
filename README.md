@@ -1,3 +1,5 @@
+![ASYD Logo](https://raw.githubusercontent.com/AsydSolutions/ASYD/master/static/lib/img/asyd-logo.png)
+
 **[ASYD](http://www.asyd.eu/) is the easiest server deployment automation system.
 Powerful, versatile, agentless and fully opensource, with integrated web interface and monitoring.**
 
