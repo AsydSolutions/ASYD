@@ -209,12 +209,12 @@ module Monitoring
                         msg = msg+"System: "+status.system_status+"\n\n"
                       end
                       status.services.each do |service|
-                        if service[1] != 'ok'
+                        if service[1] != 'ok' and service[1] != 'not monitored'
                           msg = msg+service[0]+": "+service[1]+"\n\n"
                         end
                       end unless status.services.nil?
                     end
-                    Monitoring.notify_by_mail(subject, msg)
+                    Monitoring.notify_by_mail(subject, msg) unless msg.empty?
                   end
                   $mem_mail.write_object(errmail)
               end
