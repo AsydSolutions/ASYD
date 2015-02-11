@@ -2,8 +2,8 @@ Basics
 ======
 <br/>
 
-Almost everything in ASYD works using the web interface, it allows you to manage
-all the systems, hostgroups, users, teams, monitor your servers and manage and launch
+Almost everything in ASYD works using the web interface. It allows you to manage
+all the systems, hostgroups, users, teams, and monitor your servers and manage and launch
 deploys.
 
 The monitoring is handled by [monit](http://mmonit.com/monit/) on the remote hosts,
@@ -13,19 +13,19 @@ which communicates with the ASYD server.
 Adding Hosts and Hostgroups:
 ----------------------------
 <br/>
-Once you are logged in to ASYD, go to the "Server overview" section, there you will
+Once you are logged in to ASYD, go to the "Server overview" section. There you will
 see the existing hosts and hostgroups, the hosts belonging to a hostgroup and the system
 status for your servers.
 
-On the overview you can open in detail the hosts or hostgroups, perform a reboot of a
+On the overview you can open the details the hosts or hostgroups, perform a reboot of a
 remote system, remove existing hosts and hostgroups or add new.
 
-For adding a new server, click on the "Add host" button and a prompt will appear,
-there you need to provide a unique hostname, the server IP, the user for that host,
-the ssh port if you configured a non-standard port, and the password for that user.
-ASYD then will add the ASYD ssh key on the ~/.ssh/authorized_keys file of the target host
+For adding a new server, click on the "Add host" button and a prompt will appear.
+There you need to provide a unique hostname, the server IP, the user for that host,
+the ssh port (if you configured a non-standard port), and the password for that user.
+ASYD then will add the ASYD ssh key to the ~/.ssh/authorized_keys file of the target host
 for all the future access, thus the provided password won't be stored at all. Alternatively,
-you can leave the password field empty, then ASYD will try to auth against the host using the
+you can leave the password field empty. Then ASYD will try to auth against the host using the
 SSH key created or provided at the setup.
 
 Please note that if you are using a non-root user (like in the case of ubuntu or similar),
