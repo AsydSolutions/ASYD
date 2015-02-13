@@ -453,7 +453,7 @@ class Deploy
         if host.user != "root"
           cmd = "sudo "+pkg_mgr
         end
-        cmd = cmd+"-get update && "+cmd+"-get -y -q install "+pkg
+        cmd = cmd+"-get update && "+cmd+"-get -y -q --no-install-recommends install "+pkg
       #2. yum
       elsif pkg_mgr == "yum"
         if host.user != "root"
