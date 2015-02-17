@@ -33,12 +33,12 @@ you need to be sure that the user has admin privileges, the command "sudo" is in
 and the user won't be prompted for a sudo password, as ASYD deploying system is non-interactive.
 This can be achieved by adding `%sudo   ALL=(ALL:ALL) NOPASSWD:ALL` on the `/etc/sudoers` file.
 
-After the new host it's added, it will start the monitoring deploy on the background, in this
+After the new host it's added, it will start the monitoring deploy on the background. At this
 time the server will appear as "not monitored". When the monitoring setup has completed,
 opening the host detail will display you all the system information, the status reported by
-monit, and it will also allow you to create new custom variables for the host.
+monit. It will also allow you to create new custom variables for the host.
 
-For adding a new hostgroup, click on "Add group" button and a prompt will appear, there
+For adding a new hostgroup, click on the "Add group" button, and a prompt will appear. There
 you need to provide a unique name for the new hostgroup.
 
 After the new hostgroup it's created, you can open the detail of the group and add servers
@@ -71,13 +71,13 @@ ASYD data structure:
   initialization routines and `config.ru` allows Phusion Passenger to start and manage
   the application.
   * `installer/`: contains the predefined monitor files and the monitoring deploy
-  for launching monit to the added hosts. This folder gets deleted after the setup is complete.
+  for launching monit on the added hosts. This folder gets deleted after the setup is complete.
   * `models/`: contains all the ASYD core, all the functions for it to work.
   * `routes/`: contains the routes and actions to be performed depending on the request.
   * `views/`: contains all the views (web pages) to be displayed on the web interface.
   * `static/lib/`: contains all the javascript, css and images for the views.
   * `data/`: stores ASYD data
-    * `data/db/`: several SQLite DB files for storing hosts, hostgroups, users, teams,
+    * `data/db/`: several SQLite DB files to store hosts, hostgroups, users, teams,
     tasks, notifications, monitoring notifications and system status.
     * `data/deploys/`: where the deploys are stored (detailed information on the
     [Deploys](deploys.md) section of the documentantion).
