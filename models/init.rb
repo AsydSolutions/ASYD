@@ -41,6 +41,22 @@ require_relative "email"
 DataMapper.finalize
 if File.directory? 'data'
   DataMapper.auto_upgrade!
+  # Some cleanup to avoid fragmentation
+  repository(:tasks_db).adapter.select('VACUUM')
+  repository(:notifications_db).adapter.select('VACUUM')
+  repository(:hosts_db).adapter.select('VACUUM')
+  repository(:monitoring_db).adapter.select('VACUUM')
+  repository(:users_db).adapter.select('VACUUM')
+  repository(:status_db).adapter.select('VACUUM')
+  repository(:config_db).adapter.select('VACUUM')
+  # And we set the synchronous to normal
+  repository(:tasks_db).adapter.select('PRAGMA synchronous = 1')
+  repository(:notifications_db).adapter.select('PRAGMA synchronous = 1')
+  repository(:monitoring_db).adapter.select('PRAGMA synchronous = 1')
+  repository(:hosts_db).adapter.select('PRAGMA synchronous = 1')
+  repository(:users_db).adapter.select('PRAGMA synchronous = 1')
+  repository(:status_db).adapter.select('PRAGMA synchronous = 1')
+  repository(:config_db).adapter.select('PRAGMA synchronous = 1')
   if Email.all.first.nil?
     Email.create
   end

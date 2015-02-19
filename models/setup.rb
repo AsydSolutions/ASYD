@@ -19,5 +19,13 @@ class Setup
     end
       # Create models databases
       DataMapper.auto_migrate!
+      # And now we set some SQLite pragmas for performance
+      repository(:tasks_db).adapter.select('PRAGMA journal_mode = WAL')
+      repository(:notifications_db).adapter.select('PRAGMA journal_mode = WAL')
+      repository(:hosts_db).adapter.select('PRAGMA journal_mode = WAL')
+      repository(:monitoring_db).adapter.select('PRAGMA journal_mode = WAL')
+      repository(:users_db).adapter.select('PRAGMA journal_mode = WAL')
+      repository(:status_db).adapter.select('PRAGMA journal_mode = WAL')
+      repository(:config_db).adapter.select('PRAGMA journal_mode = WAL')
   end
 end
