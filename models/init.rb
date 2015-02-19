@@ -49,7 +49,7 @@ if File.directory? 'data'
   repository(:users_db).adapter.select('VACUUM')
   repository(:status_db).adapter.select('VACUUM')
   repository(:config_db).adapter.select('VACUUM')
-  # And we set the synchronous to normal
+  # Set the synchronous to normal
   repository(:tasks_db).adapter.select('PRAGMA synchronous = 1')
   repository(:notifications_db).adapter.select('PRAGMA synchronous = 1')
   repository(:monitoring_db).adapter.select('PRAGMA synchronous = 1')
@@ -57,6 +57,14 @@ if File.directory? 'data'
   repository(:users_db).adapter.select('PRAGMA synchronous = 1')
   repository(:status_db).adapter.select('PRAGMA synchronous = 1')
   repository(:config_db).adapter.select('PRAGMA synchronous = 1')
+  # And the cache size to 1m
+  repository(:tasks_db).adapter.select('PRAGMA default_cache_size = 1000')
+  repository(:notifications_db).adapter.select('PRAGMA default_cache_size = 1000')
+  repository(:monitoring_db).adapter.select('PRAGMA default_cache_size = 1000')
+  repository(:hosts_db).adapter.select('PRAGMA default_cache_size = 1000')
+  repository(:users_db).adapter.select('PRAGMA default_cache_size = 1000')
+  repository(:status_db).adapter.select('PRAGMA default_cache_size = 1000')
+  repository(:config_db).adapter.select('PRAGMA default_cache_size = 1000')
   if Email.all.first.nil?
     Email.create
   end
