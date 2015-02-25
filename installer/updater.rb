@@ -38,6 +38,18 @@ module Updater
         repository(:users_db).adapter.select('PRAGMA journal_mode = WAL')
         repository(:status_db).adapter.select('PRAGMA journal_mode = WAL')
         repository(:config_db).adapter.select('PRAGMA journal_mode = WAL')
+      elsif action == "populate_stats"
+        repository(:stats_db).adapter.select('PRAGMA journal_mode = WAL')
+        hosts = Host.all(:order => [ :created_at.desc ])
+        hosts.each do |host|
+          stat = HostStats.first(:created_at => host.created_at.beginning_of_day)
+          if !stat
+            HostStats.new(:created_at => host.created_at.beginning_of_day, :total_hosts = 1)
+          else
+            stat.total_hosts = stat.total_hosts + 1
+            stat.save
+          end
+        end
       end
     end
     remove_installer_dir
@@ -84,6 +96,13 @@ module Updater
     journal = repository(:tasks_db).adapter.select('PRAGMA journal_mode')[0]
     if journal != "wal"
       actions << "update_journal"
+    end
+    #-#-#
+
+    #-#-#
+    # Populate HostStats database
+    if Host.all.count != 0 && HostStats.all.count == 0
+      actions << "populate_stats"
     end
     #-#-#
 
