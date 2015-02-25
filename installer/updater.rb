@@ -44,7 +44,7 @@ module Updater
         hosts.each do |host|
           stat = HostStats.first(:created_at => host.created_at.beginning_of_day)
           if !stat
-            HostStats.new(:created_at => host.created_at.beginning_of_day, :total_hosts = 1)
+            HostStats.create(:created_at => host.created_at.beginning_of_day, :total_hosts => 1)
           else
             stat.total_hosts = stat.total_hosts + 1
             stat.save
