@@ -40,11 +40,12 @@ module Updater
         repository(:config_db).adapter.select('PRAGMA journal_mode = WAL')
       elsif action == "populate_stats"
         repository(:stats_db).adapter.select('PRAGMA journal_mode = WAL')
-        hosts = Host.all(:order => [ :created_at.desc ])
+        hosts = Host.all(:order => [ :created_at.asc ])
         hosts.each do |host|
+          t_hosts = HostStats.last.total_hosts ? HostStats.last.total_hosts : 0
           stat = HostStats.first(:created_at => host.created_at.beginning_of_day)
           if !stat
-            HostStats.create(:created_at => host.created_at.beginning_of_day, :total_hosts => 1)
+            HostStats.create(:created_at => host.created_at.beginning_of_day, :total_hosts => t_hosts+1)
           else
             stat.total_hosts = stat.total_hosts + 1
             stat.save
