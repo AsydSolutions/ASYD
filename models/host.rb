@@ -130,6 +130,21 @@ class Host
         msg = "Monitoring setup for "+host.hostname+" in progress"
         Notification.create(:type => :info, :message => msg)
       end
+
+      # Add the new server to the statistics
+      if HostStats.last.nil?
+        t_hosts = 0
+      else
+        t_hosts = HostStats.last.total_hosts
+      end
+      stat = HostStats.first(:created_at => host.created_at.beginning_of_day)
+      if !stat
+        HostStats.create(:created_at => host.created_at.beginning_of_day, :total_hosts => t_hosts+1)
+      else
+        stat.total_hosts = stat.total_hosts + 1
+        stat.save
+      end
+
       return host #return the object itself
     rescue Net::SSH::AuthenticationFailed
       NOTEX.synchronize do
@@ -182,6 +197,17 @@ class Host
     end
     self.hostgroup_members.all.destroy
     reload
+
+    # remove the server from the statistics
+    t_hosts = HostStats.last.total_hosts
+    stat = HostStats.first(:created_at => DateTime.now.beginning_of_day)
+    if !stat
+      HostStats.create(:created_at => DateTime.now.beginning_of_day, :total_hosts => t_hosts-1)
+    else
+      stat.total_hosts = stat.total_hosts - 1
+      stat.save
+    end
+
     return self.destroy
   end
 end
