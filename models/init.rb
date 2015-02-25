@@ -36,8 +36,10 @@ require_relative "user"
 require_relative "team"
 DataMapper.setup(:status_db, "sqlite3:data/db/status.db") #load the status database
 require_relative "status"
-DataMapper.setup(:config_db, "sqlite3:data/db/config.db") #load the status database
+DataMapper.setup(:config_db, "sqlite3:data/db/config.db") #load the config database
 require_relative "email"
+DataMapper.setup(:stats_db, "sqlite3:data/db/stats.db") #load the stats database
+require_relative "stats"
 DataMapper.finalize
 if File.directory? 'data'
   DataMapper.auto_upgrade!
@@ -49,6 +51,7 @@ if File.directory? 'data'
   repository(:users_db).adapter.select('VACUUM')
   repository(:status_db).adapter.select('VACUUM')
   repository(:config_db).adapter.select('VACUUM')
+  repository(:stats_db).adapter.select('VACUUM')
   # Set the synchronous to normal
   repository(:tasks_db).adapter.select('PRAGMA default_synchronous = 1')
   repository(:notifications_db).adapter.select('PRAGMA default_synchronous = 1')
@@ -57,6 +60,7 @@ if File.directory? 'data'
   repository(:users_db).adapter.select('PRAGMA default_synchronous = 1')
   repository(:status_db).adapter.select('PRAGMA default_synchronous = 1')
   repository(:config_db).adapter.select('PRAGMA default_synchronous = 1')
+  repository(:stats_db).adapter.select('PRAGMA default_synchronous = 1')
   # And the cache size to 1m
   repository(:tasks_db).adapter.select('PRAGMA default_cache_size = 1000')
   repository(:notifications_db).adapter.select('PRAGMA default_cache_size = 1000')
@@ -65,6 +69,7 @@ if File.directory? 'data'
   repository(:users_db).adapter.select('PRAGMA default_cache_size = 1000')
   repository(:status_db).adapter.select('PRAGMA default_cache_size = 1000')
   repository(:config_db).adapter.select('PRAGMA default_cache_size = 1000')
+  repository(:stats_db).adapter.select('PRAGMA default_cache_size = 1000')
   if Email.all.first.nil?
     Email.create
   end
