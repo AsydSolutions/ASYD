@@ -228,3 +228,13 @@ en:
     update_monit: "* A new version of the Monit deploy will be installed (definition files only, the configuration will be kept)."
     update_monitored_status: "* ASYD now uses a custom variable instead of a property to define if a host is monitored or not (giving the user the ability to change it). The old properties will be now migrated to this new system."
     update_journal: "* For performance improvements, the journaling type of the SQLite databases will be switched to Write-Ahead Logging"
+    populate_host_stats: "* New metrics on the dashboard requires to create and populate a Host Stats database"
+    populate_task_stats: "* New metrics on the dashboard requires to create and populate a Task Stats database"
+
+  dashboard:
+    host:
+      stats: "Host Stats"
+      total: "%{hosts} Total hosts"
+      failed: "%{hosts} Failed hosts"
+    task:
+      stats: "Task Stats"
