@@ -38,7 +38,7 @@ module Updater
         repository(:users_db).adapter.select('PRAGMA journal_mode = WAL')
         repository(:status_db).adapter.select('PRAGMA journal_mode = WAL')
         repository(:config_db).adapter.select('PRAGMA journal_mode = WAL')
-      elsif action == "populate_stats"
+      elsif action == "populate_host_stats"
         repository(:stats_db).adapter.select('PRAGMA journal_mode = WAL')
         hosts = Host.all(:order => [ :created_at.asc ])
         hosts.each do |host|
@@ -54,6 +54,19 @@ module Updater
             stat.total_hosts = stat.total_hosts + 1
             stat.save
           end
+        end
+      elsif action == "populate_task_stats"
+        repository(:stats_db).adapter.select('PRAGMA journal_mode = WAL')
+        tasks = Task.all(:order => [ :created_at.asc ])
+        tasks.each do |task|
+          stat = TaskStats.first(:created_at => task.created_at.beginning_of_day)
+          if !stat
+            stat = TaskStats.create(:created_at => task.created_at.beginning_of_day)
+          end
+          stat.started_tasks = stat.started_tasks + 1
+          stat.completed_tasks = stat.completed_tasks + 1 if task.status == :finished
+          stat.failed_tasks = stat.failed_tasks + 1 if task.status == :failed
+          stat.save
         end
       end
     end
@@ -105,9 +118,12 @@ module Updater
     #-#-#
 
     #-#-#
-    # Populate HostStats database
-    if Host.all.count != 0 && HostStats.all.count == 0
-      actions << "populate_stats"
+    # Populate HostStats and TaskStats database
+    if Host.all.count != 0 and HostStats.all.count == 0
+      actions << "populate_host_stats"
+    end
+    if Task.all.count != 0 and TaskStats.all.count == 0
+      actions << "populate_task_stats"
     end
     #-#-#
 
