@@ -15,4 +15,23 @@ class Task
   property :updated_at, DateTime
 
   has n, :notifications, :repository => :notifications_db
+
+  # Update stats (new task)
+  after :create do
+    stat = TaskStats.first(:created_at => DateTime.now.beginning_of_day)
+    if !stat
+      stat = TaskStats.create(:created_at => DateTime.now.beginning_of_day)
+    end
+    stat.started_tasks = stat.started_tasks + 1
+  end
+  # Update stats (finished/failed task)
+  after :update do
+    stat = TaskStats.first(:created_at => DateTime.now.beginning_of_day)
+    if !stat
+      stat = TaskStats.create(:created_at => DateTime.now.beginning_of_day)
+    end
+    stat.completed_tasks = stat.completed_tasks + 1 if self.status == :finished
+    stat.failed_tasks = stat.failed_tasks + 1 if self.status == :failed
+    stat.save
+  end
 end
