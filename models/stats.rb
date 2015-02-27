@@ -23,7 +23,7 @@ class TaskStats
 
   # This function gets a series of date,value and fills the missing dates to complete a month
   def self.fill_missing_dates(series)
-    last_day = series.last[0]
+    last_day = series.last[0] unless series.empty?
     series.map do |date, value|
       [date, value]
     end.inject([]) do |series, date_and_value|
