@@ -23,7 +23,9 @@ class Task
       stat = TaskStats.create(:created_at => DateTime.now.beginning_of_day)
     end
     stat.started_tasks = stat.started_tasks + 1
+    stat.save
   end
+
   # Update stats (finished/failed task)
   after :update do
     stat = TaskStats.first(:created_at => DateTime.now.beginning_of_day)

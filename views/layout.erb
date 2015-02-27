@@ -17,6 +17,10 @@
   <script type="text/javascript" language="javascript" src="/js/base.js"></script>
   <script type="text/javascript" language="javascript" src="/js/jqBootstrapValidation.min.js"></script>
   <script type="text/javascript" language="javascript" src="/js/modernizr.min.js"></script>
+  <% if request.path_info == "/" %>
+    <script type="text/javascript" language="javascript" src="//www.google.com/jsapi"></script>
+    <script type="text/javascript" language="javascript" src="/js/chartkick.js"></script>
+  <% end %>
   <% if request.path_info.start_with?("/deploys/") %>
     <script type="text/javascript" language="javascript" src="/js/codemirror.js"></script>
     <link rel="stylesheet" type="text/css" href="/css/codemirror.css">
@@ -160,7 +164,7 @@
             <div class="span2 offset6">
               <% file = open('http://www.asyd.eu/asyd.version') %>
               <% last_ver = file.read.strip %>
-              <% curr_ver = 0.052 %>
+              <% curr_ver = 0.053 %>
               <%= '<div class="text-error">' unless last_ver.to_f <= curr_ver %> v <%= curr_ver %> <%= "Update available</div>" unless last_ver.to_f <= curr_ver %>
             </div>
           </div>
