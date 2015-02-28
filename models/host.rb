@@ -157,9 +157,9 @@ class Host
     else
       t_hosts = HostStats.last.total_hosts
     end
-    stat = HostStats.first(:created_at => host.created_at.beginning_of_day)
+    stat = HostStats.first(:created_at => DateTime.now.beginning_of_day)
     if !stat
-      HostStats.create(:created_at => host.created_at.beginning_of_day, :total_hosts => t_hosts+1)
+      HostStats.create(:created_at => DateTime.now.beginning_of_day, :total_hosts => t_hosts+1)
     else
       stat.total_hosts = stat.total_hosts + 1
       stat.save
