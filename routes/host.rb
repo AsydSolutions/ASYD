@@ -79,7 +79,7 @@ class ASYD < Sinatra::Application
   post '/host/edit' do
     HOSTEX.synchronize do
       oldhost = Host.first(:hostname => params['old_hostname'])
-      newhost = Host.create!(:hostname => params['hostname'],
+      newhost = Host.create(:hostname => params['hostname'],
                             :ip => params['ip'],
                             :ssh_port => params['ssh_port'],
                             :user => oldhost.user,

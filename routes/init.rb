@@ -1,5 +1,6 @@
 require 'tzinfo'
 require 'process_shared'
+require 'chartkick'
 require_relative 'setup'
 require_relative 'login'
 require_relative 'user'
