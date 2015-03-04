@@ -71,6 +71,29 @@ module Monitoring
       end
     end
 
+    def unmonitor_service(service, task = nil)
+      begin
+        if self.user != "root"
+          exec_cmd("sudo rm /etc/monit/conf.d/"+service)
+          exec_cmd("sudo /usr/bin/monit -c /etc/monit/monitrc reload")
+        else
+          exec_cmd("rm /etc/monit/conf.d/"+service)
+          exec_cmd("/usr/bin/monit -c /etc/monit/monitrc reload")
+        end
+        return 1
+      rescue => e
+        NOTEX.synchronize do
+          msg = "Error un-monitoring "+service+": "+e.message
+          if task.nil?
+            ::Notification.create(:type => :error, :sticky => true, :message => msg)
+          else
+            ::Notification.create(:type => :error, :sticky => true, :message => msg, :task => task)
+          end
+        end
+        return 5
+      end
+    end
+
     def get_status
       short = true
       stat = Status.new(self, short)

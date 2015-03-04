@@ -121,6 +121,30 @@ $(function () {
     return false;
   });
 
+  $('a[unmonitor-confirm]').click(function () {
+    var mon = $(this).attr('data-monitor');
+    var e = document.getElementById('selectHostMonitor');
+    var target = e.options[e.selectedIndex].value;
+    if (!target) {
+      alert('Select a host/hostgroup');
+      return false;
+    }
+    var host = target.split(';');
+    if ($('#dataConfirmModal').length) {
+      document.getElementById("dataConfirmModal").remove();
+    }
+    if (!$('#dataConfirmModal').length) {
+      $('body').append('<div id="dataConfirmModal" class="modal fade" role="dialog" aria-labelledby="dataConfirmLabel" aria-hidden="true"><div class="modal-header"><a type="button" class="close" data-dismiss="modal" aria-hidden="true">×</a><h3 id="dataConfirmLabel">Please Confirm</h3></div><div class="modal-body"></div><div class="modal-footer"><form id="unmonitorForm" action="/monitors/unmonitor" method="post"><input type="hidden" name="monitor" value="'+mon+'"><input type="hidden" name="target" value="'+target+'"><a class="btn" data-dismiss="modal" aria-hidden="true">Cancel</a><button type="submit" class="btn btn-primary">Un-Monitor!</button></div></div>');
+    }
+    if (Modernizr.csstransforms3d === false){
+      $('#dataConfirmModal').removeClass('fade');
+    }
+    var text = $(this).attr('unmonitor-confirm') + host[0] + ' ' + host[1] + '?';
+    $('#dataConfirmModal').find('.modal-body').html(text);
+    $('#dataConfirmModal').modal({show:true});
+    return false;
+  });
+
   $(document).ready(function () {
     if (Modernizr.csstransforms3d === false){
       $('.modal').removeClass('fade');

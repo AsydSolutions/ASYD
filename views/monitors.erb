@@ -39,7 +39,8 @@
                   <%=monitor%>
                 </td>
                 <td class="td-actions">
-                  <a data-toggle="tooltip" data-original-title="<%=t('monitor.one')%>" data-monitor="<%=monitor%>" class="btn btn-success btn-mini btn-icon-only hint" monitor-confirm="<%= t('dialog.monitor_service.confirm', monitor: monitor)%>"><i class="btn-icon-only icon-eye-open"></i></a>
+                  <a data-toggle="tooltip" data-original-title="<%=t('monitor.one')%>" data-monitor="<%=monitor%>" class="btn btn-success btn-mini btn-icon-only hint" monitor-confirm="<%= t('dialog.monitor_service.confirm', monitor: monitor)%>"><i class="btn-icon-only icon-eye-open" style="font-size: 14px;"></i></a>
+                  <a data-toggle="tooltip" data-original-title="<%=t('monitor.unmonitor')%>" data-monitor="<%=monitor%>" class="btn btn-inverse btn-mini btn-icon-only hint" unmonitor-confirm="<%= t('dialog.monitor_service.unmonitor', monitor: monitor)%>"><i class="btn-icon-only icon-eye-close" style="font-size: 14px;"></i></a>
                   <a data-toggle="tooltip" data-original-title="<%=t('action.details')%>" href="/monitors/<%=monitor%>" class="btn btn-info btn-mini btn-icon-only hint"><i class="btn-icon-only icon-folder-open"></i></a>
                   <a data-toggle="tooltip" data-original-title="<%=t('action.del')%>" href="#delMonitor" class="btn btn-danger btn-mini btn-icon-only hint" onclick="passDataToModal('<%=monitor%>', '#delMonitor')"><i class="btn-icon-only icon-remove"></i></a>
                 </td>

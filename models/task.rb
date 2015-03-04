@@ -6,7 +6,7 @@ class Task
   end
 
   property :id, Serial
-  property :action, Enum[ :installing, :deploying, :undeploying, :monitoring ]
+  property :action, Enum[ :installing, :deploying, :undeploying, :monitoring, :unmonitoring ]
   property :object, String
   property :target, String
   property :target_type, Enum[ :host, :hostgroup ]

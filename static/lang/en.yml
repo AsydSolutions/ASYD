@@ -142,6 +142,7 @@ en:
   monitor:
     one: "Monitor"
     other: "Monitors"
+    unmonitor: "Stop Monitoring"
 
   task:
     one: "Task"
@@ -153,6 +154,7 @@ en:
       deploying: "Deploying"
       undeploying: "Undeploying"
       monitoring: "Monitoring"
+      unmonitoring: "Un-Monitoring"
     status:
       text: "Status:"
       in_progress: "In Progress"
@@ -221,6 +223,7 @@ en:
     monitor_service:
       title: "Monitor Service"
       confirm: "Do you want to monitor service %{monitor} on "
+      unmonitor: "Do you want to stop monitoring service %{monitor} on "
 
   docu:
     index: "Index"
