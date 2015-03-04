@@ -6,6 +6,7 @@ en:
     dashboard: "Dashboard"
     servers: "Servers"
     deploys: "Deploys"
+    monitoring: "Monitoring"
     tasks: "Tasks"
     login: "Login"
 
@@ -138,6 +139,10 @@ en:
     other: "Teams"
     add: "Add team"
 
+  monitor:
+    one: "Monitor"
+    other: "Monitors"
+
   task:
     one: "Task"
     other: "Tasks"
@@ -147,6 +152,7 @@ en:
       installing: "Installing"
       deploying: "Deploying"
       undeploying: "Undeploying"
+      monitoring: "Monitoring"
     status:
       text: "Status:"
       in_progress: "In Progress"
@@ -209,6 +215,12 @@ en:
     del_deploy:
       title: "Delete Deploy"
       confirm: "Are you sure you want to delete the deploy %{deploy}?"
+    del_monitor:
+      title: "Delete Monitor"
+      confirm: "Are you sure you want to delete the monitor file for service %{monitor}?"
+    monitor_service:
+      title: "Monitor Service"
+      confirm: "Do you want to monitor service %{monitor} on "
 
   docu:
     index: "Index"

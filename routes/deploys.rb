@@ -152,7 +152,7 @@ class ASYD < Sinatra::Application
               if result != 1
                 NOTEX.synchronize do
                   msg = "Error when deploying "+params['deploy']+" on "+host.hostname+": "+result[1]
-                  notification = Notification.create(:type => :error, :dismiss => true, :message => result[1], :task => task)
+                  notification = Notification.create(:type => :error, :dismiss => true, :message => msg, :task => task)
                 end
                 success.put_int(0, 0)
               end

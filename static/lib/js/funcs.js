@@ -97,6 +97,30 @@ $(function () {
     }
   });
 
+  $('a[monitor-confirm]').click(function () {
+    var mon = $(this).attr('data-monitor');
+    var e = document.getElementById('selectHostMonitor');
+    var target = e.options[e.selectedIndex].value;
+    if (!target) {
+      alert('Select a host/hostgroup');
+      return false;
+    }
+    var host = target.split(';');
+    if ($('#dataConfirmModal').length) {
+      document.getElementById("dataConfirmModal").remove();
+    }
+    if (!$('#dataConfirmModal').length) {
+      $('body').append('<div id="dataConfirmModal" class="modal fade" role="dialog" aria-labelledby="dataConfirmLabel" aria-hidden="true"><div class="modal-header"><a type="button" class="close" data-dismiss="modal" aria-hidden="true">×</a><h3 id="dataConfirmLabel">Please Confirm</h3></div><div class="modal-body"></div><div class="modal-footer"><form id="monitorForm" action="/monitors/monitor" method="post"><input type="hidden" name="monitor" value="'+mon+'"><input type="hidden" name="target" value="'+target+'"><a class="btn" data-dismiss="modal" aria-hidden="true">Cancel</a><button type="submit" class="btn btn-primary">Monitor!</button></div></div>');
+    }
+    if (Modernizr.csstransforms3d === false){
+      $('#dataConfirmModal').removeClass('fade');
+    }
+    var text = $(this).attr('monitor-confirm') + host[0] + ' ' + host[1] + '?';
+    $('#dataConfirmModal').find('.modal-body').html(text);
+    $('#dataConfirmModal').modal({show:true});
+    return false;
+  });
+
   $(document).ready(function () {
     if (Modernizr.csstransforms3d === false){
       $('.modal').removeClass('fade');
@@ -148,6 +172,12 @@ $(function () {
           'emptyTable': 'You haven\'t added any deploys yet'
         }
       });
+      $('#montable').dataTable({
+        'pageLength': 10,
+        'language': {
+          'emptyTable': 'You haven\'t added any monitors yet'
+        }
+      });
       $('#attable').dataTable({
         'lengthChange': false,
         'searching': false,
@@ -169,6 +199,9 @@ $(function () {
         'placeholder': 'Select host',
       });
       $('#selectHostDeploy').select2( {
+        'placeholder': 'Select host or hostgroup',
+      });
+      $('#selectHostMonitor').select2( {
         'placeholder': 'Select host or hostgroup',
       });
       $('#selectHostInstall').select2( {
@@ -215,6 +248,32 @@ var editDeploy = function (path)
 
 var saveDeployFile = function () {
   $.post('/deploys/edit', {
+    path: $('#filePath').text(),
+    text: $('#editBox').val()
+  }, function () {
+    $("#saved").show().delay(2000).fadeOut();
+  });
+};
+
+var editMonitor = function (path)
+{
+  $('.CodeMirror').each(function (i, el) {
+    el.parentNode.removeChild(el);
+  });
+  $.ajax({url:"/monitors/get_file_contents/" + path, cache: false, async: false, success: function (result) {
+    $('#editBox').val(result);
+  }});
+  $('#filePath').html(path);
+  var editor = CodeMirror.fromTextArea(editBox, {
+    mode: "text/x-sh"
+  });
+  editor.on("change", function () {
+    editor.save();
+  });
+};
+
+var saveMonitorFile = function () {
+  $.post('/monitors/edit', {
     path: $('#filePath').text(),
     text: $('#editBox').val()
   }, function () {
