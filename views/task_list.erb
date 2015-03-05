@@ -25,7 +25,7 @@
               </th>
             </tr>
           </thead>
-          <tbody>
+          <tbody id="active">
             <% @tasks_progress.each do |task| %>
               <tr id="task<%=task.id%>">
                 <td><a href="/task/<%=task.id%>">#<%=task.id%></a></td>
@@ -94,3 +94,6 @@
     </div>
   </div>
 </div>
+<script>
+setInterval( function(){ reloadTasks(); }, 5000 )
+</script>

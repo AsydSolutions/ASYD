@@ -341,6 +341,15 @@ var getTaskNotifications = function (task_id, refreshing = false) {
   });
 };
 
+var reloadTasks = function (){
+  $.get('/task/list', function (data) {
+    var newDoc = $(data).contents();
+    if ( $('#active tr').length !== newDoc.find("#active tr").length ){
+      location.reload();
+    }
+  });
+};
+
 var delTask = function (id) {
   $.get('/task/del/' + id, function (data) {
     $('#task' + id).remove();
