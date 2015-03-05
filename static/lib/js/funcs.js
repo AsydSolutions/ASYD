@@ -320,8 +320,18 @@ var editTeam = function (name) {
 };
 
 var getTaskNotifications = function (task_id) {
+  var accordions = [];
+  $( ".accordion-body" ).each( function( index ) {
+    if ($( this ).attr('id') !== "nocollapse"){
+      accordions[index+1] = $( this ).attr('class');
+    }
+  });
   $.get('/notifications/bytask/' + task_id, function (data) {
     $('#taskNotifications').html(data);
+    for (var index in accordions){
+      $( ".accordion-body:nth-child(" + index + ")" ).attr('class', accordions[index]);
+    }
+    var interval = setTimeout(function() { getTaskNotifications(task_id); }, 2000);
   });
 };
 
