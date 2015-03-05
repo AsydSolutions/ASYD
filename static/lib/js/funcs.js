@@ -319,7 +319,7 @@ var editTeam = function (name) {
   });
 };
 
-var getTaskNotifications = function (task_id) {
+var getTaskNotifications = function (task_id, refreshing = false) {
   var accordions = [];
   $( ".accordion-body" ).each( function( index ) {
     if ($( this ).attr('id') !== "nocollapse"){
@@ -331,7 +331,13 @@ var getTaskNotifications = function (task_id) {
     for (var index in accordions){
       $( ".accordion-body:nth-child(" + index + ")" ).attr('class', accordions[index]);
     }
-    var interval = setTimeout(function() { getTaskNotifications(task_id); }, 2000);
+    if ( document.getElementById("finished") !== null ){
+      if ( refreshing ){
+        location.reload();
+      }
+    } else {
+      var interval = setTimeout(function() { getTaskNotifications(task_id, true); }, 2000);
+    }
   });
 };
 
