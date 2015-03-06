@@ -1,15 +1,18 @@
 <div class="row">
-  <div class="span4">
+  <div class="span3">
     <div class="widget widget-table action-table">
       <div class="widget-header">
         <i class="icon-sitemap"></i><h3><%= @base %></h3>
       </div>
       <div class="widget-content">
-        <div class="accordion accordion-invisible"><%= Misc::render_path(@base) %></div>
+        <div class="accordion accordion-invisible">
+          <%= Misc::render_path(@base) %>
+          <div class="accordion-inner accordion-invisible"><a href="#NewFile" data-toggle="modal"><i class="icon-expand-alt" style="font-size:14px"></i> add new</a></div>
+        </div>
       </div>
     </div>
   </div>
-  <div class="span8">
+  <div class="span9">
     <div class="widget">
       <div class="widget-header">
         <i class="icon-pencil"></i><h3 id="filePath"></h3>
@@ -25,7 +28,65 @@
     <button class="btn btn-large input-block-level btn-primary" onclick="saveDeployFile()">Save</button><br/><br/><br/>
   </div>
 </div>
+<div id="saved">Saved</div>
 <script>
 editDeploy('<%= @base %>def');
 </script>
-<div id="saved">Saved</div>
+
+<div id="NewFile" class="modal hide fade" style="width: 56%; margin-left: -27%; padding-bottom: 25px;" tabindex="-1" role="dialog" aria-labelledby="New File" aria-hidden="true">
+  <div class="modal-header text-center">
+    <a type="button" class="close" data-dismiss="modal" aria-hidden="true">×</a>
+    <h3 id="NewFileLabel">New File</h3>
+  </div>
+    <div class="modal-body" style="margin-top: 10px;">
+      <div class="span3 text-center">
+      <form id="createFile" action="/deploys/<%= @deploy %>/create_file" method="post">
+        <h4>Create file</h4><legend></legend>
+        <input data-toggle="tooltip" data-original-title="Full path where to create the new file (e.g.: configs/dir/file.txt)" name='path' type="text" class="input-block-level hint" placeholder="path" autofocus required><br/>
+        <button type="submit" class="btn input-block-level btn-primary">Create</button>
+      </form>
+      </div>
+      <div class="span3 offset1 text-center">
+        <form id="uploadFile" action="/deploys/<%= @deploy %>/upload_file" enctype="multipart/form-data" method="post">
+          <h4>Upload file</h4><legend></legend>
+          <input name="file" type="file" class="filestyle" required><br/>
+          <input data-toggle="tooltip" data-original-title="Path where to upload the file (including filename)" name='path' type="text" class="input-block-level hint" placeholder="path" autofocus required><br/>
+          <button type="submit" class="btn input-block-level btn-primary">Create</button>
+        </form>
+      </div>
+    </div>
+</div>
+
+<div id="delFile" class="modal hide fade no-csstransforms3d" tabindex="-1" role="dialog" aria-labelledby="Delete File" aria-hidden="true">
+  <div class="modal-header">
+    <a type="button" class="close" data-dismiss="modal" aria-hidden="true">×</a>
+    <h3 id="delFileLabel"><%=t('dialog.attention')%></h3>
+  </div>
+  <div class="modal-body">
+    <p>Do you really want to delete the file "<b id="dataInput"></b>"? (this action cannot be undone!!!)</p>
+  </div>
+  <div class="modal-footer">
+    <form id="delFileform" action="/deploys/<%= @deploy %>/del_file" method="post">
+      <input type="hidden" name="path" id="dataInput" value="">
+      <a class="btn" data-dismiss="modal" aria-hidden="true"><%=t('action.cancel')%></a>
+      <button type="submit" class="btn btn-primary"><%=t('action.del')%></button>
+    </form>
+  </div>
+</div>
+
+<div id="delFolder" class="modal hide fade no-csstransforms3d" tabindex="-1" role="dialog" aria-labelledby="Delete Folder" aria-hidden="true">
+  <div class="modal-header">
+    <a type="button" class="close" data-dismiss="modal" aria-hidden="true">×</a>
+    <h3 id="delFolderLabel"><%=t('dialog.attention')%></h3>
+  </div>
+  <div class="modal-body">
+    <p>Do you really want to delete the folder "<b id="dataInput"></b>" and all it's content? (this action cannot be undone!!!)</p>
+  </div>
+  <div class="modal-footer">
+    <form id="delFolderform" action="/deploys/<%= @deploy %>/del_folder" method="post">
+      <input type="hidden" name="path" id="dataInput" value="">
+      <a class="btn" data-dismiss="modal" aria-hidden="true"><%=t('action.cancel')%></a>
+      <button type="submit" class="btn btn-primary"><%=t('action.del')%></button>
+    </form>
+  </div>
+</div>

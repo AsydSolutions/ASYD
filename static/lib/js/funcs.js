@@ -44,6 +44,11 @@ $(function () {
 
   $('.hint').tooltip();
 
+  var flst = $('script[src="/js/bootstrap-filestyle.min.js"]').length;
+  if (flst !== 0) {
+    $(":file").filestyle({input: false, classButton: "btn input-block-level"});
+  }
+
   $('a[deploy-confirm]').click(function () {
     var dep = $(this).attr('data-deploy');
     var e = document.getElementById('selectHostDeploy');

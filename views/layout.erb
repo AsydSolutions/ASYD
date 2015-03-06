@@ -40,6 +40,9 @@
     <script type="text/javascript" language="javascript" src="/js/select2.min.js"></script>
   <% end %>
   <!-- Select2 -->
+  <% if request.path_info.start_with?("/deploys/") %>
+    <script type="text/javascript" src="/js/bootstrap-filestyle.min.js"> </script>
+  <% end %>
   <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
   <!--[if lt IE 9]>
     <script type="text/javascript" language="javascript" src="/js/html5.js"></script>
@@ -165,7 +168,7 @@
             <div class="span2 offset6">
               <% file = open('http://www.asyd.eu/asyd.version') %>
               <% last_ver = file.read.strip %>
-              <% curr_ver = 0.055 %>
+              <% curr_ver = 0.056 %>
               <%= '<div class="text-error">' unless last_ver.to_f <= curr_ver %> v <%= curr_ver %> <%= "Update available</div>" unless last_ver.to_f <= curr_ver %>
             </div>
           </div>

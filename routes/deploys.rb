@@ -11,6 +11,7 @@ class ASYD < Sinatra::Application
 
   get '/deploys/:dep' do
     @base = 'data/deploys/'+params[:dep]+'/'
+    @deploy = params[:dep]
     erb :deploy_detail
   end
 
@@ -305,5 +306,52 @@ class ASYD < Sinatra::Application
     end
     deploys = '/deploys/list'
     redirect to deploys
+  end
+
+  post '/deploys/:deploy/create_file' do
+    deploy = params[:deploy]
+    path = params['path']
+    fullpath = "data/deploys/"+deploy+"/"+path
+    unless fullpath.include? "../" or fullpath.include? "|" or fullpath.include? "\\"
+      FileUtils.mkdir_p File.dirname(fullpath)
+      FileUtils.touch fullpath
+    end
+    deploy_view = '/deploys/'+deploy
+    redirect to deploy_view
+  end
+
+  post '/deploys/:deploy/upload_file' do
+    deploy = params[:deploy]
+    path = params[:path]
+    file = params[:file][:tempfile]
+    fullpath = "data/deploys/"+deploy+"/"+path
+    unless fullpath.include? "../" or fullpath.include? "|" or fullpath.include? "\\"
+      FileUtils.mkdir_p File.dirname(fullpath)
+      File.open(fullpath, "w") do |f|
+        f.write(file.read)
+      end
+    end
+    deploy_view = '/deploys/'+deploy
+    redirect to deploy_view
+  end
+
+  post '/deploys/:deploy/del_file' do
+    deploy = params[:deploy]
+    path = params['path']
+    unless path.include? "../" or path.include? "|" or path.include? "\\"
+      FileUtils.rm path
+    end
+    deploy_view = '/deploys/'+deploy
+    redirect to deploy_view
+  end
+
+  post '/deploys/:deploy/del_folder' do
+    deploy = params[:deploy]
+    path = params['path']
+    unless path.include? "../" or path.include? "|" or path.include? "\\"
+      FileUtils.rm_r path, :secure=>true
+    end
+    deploy_view = '/deploys/'+deploy
+    redirect to deploy_view
   end
 end

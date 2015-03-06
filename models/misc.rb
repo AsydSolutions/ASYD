@@ -39,7 +39,7 @@ module Misc
   def self.render_path(path, level=0)
     nbspd = '&nbsp;' * ((level-1)*4) if level > 0
     data = '' if level == 0
-    data = '<div class="accordion-heading accordion-invisible"><a class="accordion-toggle" data-toggle="collapse" href="#collapse'+path.split("/").last+'">'+nbspd+'<i class="icon-folder-close-alt"></i> '+path.split("/").last+'</a></div><div id="collapse'+path.split("/").last+'" class="accordion-body collapse out accordion-invisible">' if level > 0
+    data = '<div class="accordion-heading accordion-invisible" style="display: inline-flex; width: 100%;"><a class="accordion-toggle" style="width: 100%" data-toggle="collapse" href="#collapse'+path.split("/").last+'">'+nbspd+'<i class="icon-folder-close-alt"></i> '+path.split("/").last+'</a><a href="#delFolder" class="accordion-toggle pull-right" onclick="passDataToModal(\''+path+'\', \'#delFolder\')"><i class="icon-trash"></i></a></div><div id="collapse'+path.split("/").last+'" class="accordion-body collapse out accordion-invisible">' if level > 0
     nbsp = '&nbsp;' * level*4
     Dir.foreach(path) do |entry|
       next if (entry == '..' || entry == '.')
@@ -48,7 +48,7 @@ module Misc
         level = level+1
         data = data+render_path(full_path, level)+'</div>'
       else
-        data = data+'<div class="accordion-inner accordion-invisible">'+nbsp+'<a href="#" onclick="editDeploy(\''+full_path+'\')"><i class="icon-file-text-alt"></i> '+entry+'</a></div>'
+        data = data+'<div class="accordion-inner accordion-invisible">'+nbsp+'<a href="#" onclick="editDeploy(\''+full_path+'\')"><i class="icon-file-text-alt"></i> '+entry+'</a><a href="#delFile" class="pull-right" onclick="passDataToModal(\''+full_path+'\', \'#delFile\')"><i class="icon-trash"></i></a></div>'
       end
     end
     return data
