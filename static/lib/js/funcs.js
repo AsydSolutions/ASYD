@@ -324,7 +324,8 @@ var editTeam = function (name) {
   });
 };
 
-var getTaskNotifications = function (task_id, refreshing = false) {
+var getTaskNotifications = function (task_id, refreshing) {
+  if (typeof(refreshing)==='undefined') refreshing = false;
   var accordions = [];
   $( ".accordion-body" ).each( function( index ) {
     if ($( this ).attr('id') !== "nocollapse"){
