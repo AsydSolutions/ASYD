@@ -63,7 +63,7 @@ if File.directory? 'data'
     repository(:monitoring_db).adapter.select('PRAGMA default_synchronous = 2')
     repository(:monitoring_db).adapter.select('PRAGMA default_cache_size = 1000')
   end
-  hosts_journal = repository(:_db).adapter.select('PRAGMA journal_mode')[0]
+  hosts_journal = repository(:hosts_db).adapter.select('PRAGMA journal_mode')[0]
   if hosts_journal != "wal"
     repository(:hosts_db).adapter.select('PRAGMA journal_mode = WAL')
     repository(:hosts_db).adapter.select('PRAGMA default_synchronous = 2')
