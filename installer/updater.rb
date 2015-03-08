@@ -30,14 +30,6 @@ module Updater
           host.monitored = false
           host.save
         end
-      elsif action == "update_journal"
-        repository(:tasks_db).adapter.select('PRAGMA journal_mode = WAL')
-        repository(:notifications_db).adapter.select('PRAGMA journal_mode = WAL')
-        repository(:hosts_db).adapter.select('PRAGMA journal_mode = WAL')
-        repository(:monitoring_db).adapter.select('PRAGMA journal_mode = WAL')
-        repository(:users_db).adapter.select('PRAGMA journal_mode = WAL')
-        repository(:status_db).adapter.select('PRAGMA journal_mode = WAL')
-        repository(:config_db).adapter.select('PRAGMA journal_mode = WAL')
       elsif action == "populate_host_stats"
         repository(:stats_db).adapter.select('PRAGMA journal_mode = WAL')
         hosts = Host.all(:order => [ :created_at.asc ])
@@ -106,14 +98,6 @@ module Updater
     hosts = Host.all(:monitored => true)
     if hosts.length > 0
       actions << "update_monitored_status"
-    end
-    #-#-#
-
-    #-#-#
-    # Change SQLite journal to WAL
-    journal = repository(:tasks_db).adapter.select('PRAGMA journal_mode')[0]
-    if journal != "wal"
-      actions << "update_journal"
     end
     #-#-#
 
