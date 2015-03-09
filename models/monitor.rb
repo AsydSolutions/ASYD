@@ -41,7 +41,7 @@ module Monitoring
       end
     end
 
-    def monitor_service(service)
+    def monitor_service(service, task = nil)
       begin
         unless File.exists?("data/monitors/"+service)
           raise
@@ -57,11 +57,40 @@ module Monitoring
           exec_cmd("/usr/bin/monit -c /etc/monit/monitrc reload")
         end
         parsed_cfg.unlink
+        return 1
       rescue
         NOTEX.synchronize do
           msg = "Monitor file not found for service "+service
-          ::Notification.create(:type => :error, :sticky => true, :message => msg)
+          if task.nil?
+            ::Notification.create(:type => :error, :sticky => true, :message => msg)
+          else
+            ::Notification.create(:type => :error, :sticky => true, :message => msg, :task => task)
+          end
         end
+        return 5
+      end
+    end
+
+    def unmonitor_service(service, task = nil)
+      begin
+        if self.user != "root"
+          exec_cmd("sudo rm /etc/monit/conf.d/"+service)
+          exec_cmd("sudo /usr/bin/monit -c /etc/monit/monitrc reload")
+        else
+          exec_cmd("rm /etc/monit/conf.d/"+service)
+          exec_cmd("/usr/bin/monit -c /etc/monit/monitrc reload")
+        end
+        return 1
+      rescue => e
+        NOTEX.synchronize do
+          msg = "Error un-monitoring "+service+": "+e.message
+          if task.nil?
+            ::Notification.create(:type => :error, :sticky => true, :message => msg)
+          else
+            ::Notification.create(:type => :error, :sticky => true, :message => msg, :task => task)
+          end
+        end
+        return 5
       end
     end
 
@@ -105,7 +134,7 @@ module Monitoring
     # 2 == problem
     # 1 == all ok
     def is_ok?
-      if self.opt_vars["monitored"].nil? or self.opt_vars["monitored"].to_i != 1
+      if self.opt_vars.nil? or self.opt_vars["monitored"].nil? or self.opt_vars["monitored"].to_i != 1
         return 4
       else
         hoststatus = nil
@@ -248,5 +277,21 @@ module Monitoring
     users.each do |user|
       Email.mail(user.email, subject, msg)
     end unless users.nil?
+  end
+end
+
+class Monitor
+  # Return a list of monitors
+  #
+  def self.all
+    monitors = Misc::get_files("data/monitors/")
+    return monitors
+  end
+
+  # Delete a monitor
+  #
+  def self.delete(monitor)
+    path='data/monitors/'+monitor
+    FileUtils.rm_r path, :secure=>true
   end
 end

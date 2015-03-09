@@ -21,13 +21,13 @@
     <script type="text/javascript" language="javascript" src="//www.google.com/jsapi"></script>
     <script type="text/javascript" language="javascript" src="/js/chartkick.js"></script>
   <% end %>
-  <% if request.path_info.start_with?("/deploys/") %>
+  <% if request.path_info.start_with?("/deploys/") || request.path_info.start_with?("/monitors/") %>
     <script type="text/javascript" language="javascript" src="/js/codemirror.js"></script>
     <link rel="stylesheet" type="text/css" href="/css/codemirror.css">
   <% end %>
   <script type="text/javascript" language="javascript" src="/js/funcs.js"></script>
   <!-- DataTables -->
-  <% if request.path_info.start_with?("/host") || request.path_info.start_with?("/deploys/list") || request.path_info.start_with?("/task/list") || request.path_info.start_with?("/users") %>
+  <% if request.path_info.start_with?("/host") || request.path_info.start_with?("/deploys/list") || request.path_info.start_with?("/monitors/list") || request.path_info.start_with?("/task/list") || request.path_info.start_with?("/users") %>
     <link rel="stylesheet" type="text/css" href="/css/jquery.dataTables.css">
     <link rel="stylesheet" type="text/css" href="/css/datatables-bootstrap.css">
     <script type="text/javascript" language="javascript" src="/js/jquery.dataTables.min.js"></script>
@@ -35,11 +35,14 @@
   <% end %>
   <!-- DataTables -->
   <!-- Select2 -->
-  <% if request.path_info.start_with?("/host") || request.path_info.start_with?("/deploys/list") %>
+  <% if request.path_info.start_with?("/host") || request.path_info.start_with?("/deploys/list") || request.path_info.start_with?("/monitors/list") %>
     <link rel="stylesheet" type="text/css" href="/css/select2.css">
     <script type="text/javascript" language="javascript" src="/js/select2.min.js"></script>
   <% end %>
   <!-- Select2 -->
+  <% if request.path_info.start_with?("/deploys/") %>
+    <script type="text/javascript" src="/js/bootstrap-filestyle.min.js"> </script>
+  <% end %>
   <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
   <!--[if lt IE 9]>
     <script type="text/javascript" language="javascript" src="/js/html5.js"></script>
@@ -93,6 +96,7 @@
             <li <% if request.path_info == "/" %>class="active"<%end%>><a href="/"><i class="icon-dashboard"></i><span><%=t('menu.dashboard')%></span></a></li>
             <li <% if request.path_info.start_with?("/host") %>class="active"<%end%>><a href="/hosts/overview"><i class="icon-hdd"></i><span><%=t('menu.servers')%></span></a></li>
             <li <% if request.path_info.start_with?("/deploy") %>class="active"<%end%>><a href="/deploys/list"><i class="icon-code"></i><span><%=t('menu.deploys')%></span></a></li>
+            <li <% if request.path_info.start_with?("/monitor") %>class="active"<%end%>><a href="/monitors/list"><i class="icon-desktop"></i><span><%=t('menu.monitoring')%></span></a></li>
             <li <% if request.path_info.start_with?("/task") %>class="active"<%end%>><a href="/task/list"><i class="icon-tasks"></i><span><%=t('menu.tasks')%></span></a></li>
           </ul>
         </div>
@@ -164,7 +168,7 @@
             <div class="span2 offset6">
               <% file = open('http://www.asyd.eu/asyd.version') %>
               <% last_ver = file.read.strip %>
-              <% curr_ver = 0.054 %>
+              <% curr_ver = 0.06 %>
               <%= '<div class="text-error">' unless last_ver.to_f <= curr_ver %> v <%= curr_ver %> <%= "Update available</div>" unless last_ver.to_f <= curr_ver %>
             </div>
           </div>

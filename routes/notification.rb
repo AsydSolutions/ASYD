@@ -22,6 +22,7 @@ class ASYD < Sinatra::Application
 
   get '/notifications/bytask/:taskid' do
     task = Task.first(:id => params[:taskid])
+    @finished = true if task.status != :in_progress
     @notifications = task.notifications.all(:order => [ :host.desc, :created_at.asc])
     @hosts = Array.new
     @errors = Array.new

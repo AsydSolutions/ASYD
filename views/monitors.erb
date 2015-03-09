@@ -1,0 +1,83 @@
+<div class="row">
+  <div class="span8">
+    <div class="widget widget-table action-table">
+      <div class="widget-header">
+        <i class="icon-desktop"></i><h3><%=t('monitor.other')%></h3>
+      </div>
+      <div class="widget-content">
+        <div style="position:absolute; margin:10px; z-index:90;">
+          <select name="target" class="input" id="selectHostMonitor" style="position:absolute; margin:10px; z-index:90;">
+            <option></option>
+            <optgroup label="<%=t('group.other')%>">
+            <% @hostgroups.each do |hostgroup| %>
+              <option value="hostgroup;<%=hostgroup.name%>"><%=hostgroup.name%></option>
+            <% end %>
+            <optgroup label="<%=t('host.other')%>">
+            <% @hosts.each do |host| %>
+              <option value="host;<%=host.hostname%>"><%=host.hostname%></option>
+            <% end %>
+          </select>
+        </div>
+        <div class="visible-phone visible-tablet"><br /></div>
+          <form id="createMonitor" action="/monitors/new" method="post">
+            <table id="montable" class="stripe row-border">
+              <thead style="text-align:left;">
+                <tr>
+                  <th>
+                    <%=t('monitor.one')%>
+                  </th>
+                </th>
+                <th class="td-actions">
+                  <%=t('action.other')%>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <% @monitors.each do |monitor| %>
+              <tr>
+                <td>
+                  <%=monitor%>
+                </td>
+                <td class="td-actions">
+                  <a data-toggle="tooltip" data-original-title="<%=t('monitor.one')%>" data-monitor="<%=monitor%>" class="btn btn-success btn-mini btn-icon-only hint" monitor-confirm="<%= t('dialog.monitor_service.confirm', monitor: monitor)%>"><i class="btn-icon-only icon-eye-open" style="font-size: 14px;"></i></a>
+                  <a data-toggle="tooltip" data-original-title="<%=t('monitor.unmonitor')%>" data-monitor="<%=monitor%>" class="btn btn-inverse btn-mini btn-icon-only hint" unmonitor-confirm="<%= t('dialog.monitor_service.unmonitor', monitor: monitor)%>"><i class="btn-icon-only icon-eye-close" style="font-size: 14px;"></i></a>
+                  <a data-toggle="tooltip" data-original-title="<%=t('action.details')%>" href="/monitors/<%=monitor%>" class="btn btn-info btn-mini btn-icon-only hint"><i class="btn-icon-only icon-folder-open"></i></a>
+                  <a data-toggle="tooltip" data-original-title="<%=t('action.del')%>" href="#delMonitor" class="btn btn-danger btn-mini btn-icon-only hint" onclick="passDataToModal('<%=monitor%>', '#delMonitor')"><i class="btn-icon-only icon-remove"></i></a>
+                </td>
+              </tr>
+              <% end %>
+              <tr>
+                <td>
+                  <input type="text" name="monitor_name" class="input" placeholder="Monitor Name" required>
+                </td>
+                <td class="td-actions">
+                  <button type="submit" class="btn btn-primary btn-mini btn-icon-only hint" data-placement="left" data-toggle="tooltip" data-original-title="Create New Monitor">
+                    <i class="btn-icon-only icon-plus"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div id="delMonitor" class="modal hide fade no-csstransforms3d" tabindex="-1" role="dialog" aria-labelledby="<%=t('dialog.del_monitor.title')%>" aria-hidden="true">
+  <div class="modal-header">
+    <a type="button" class="close" data-dismiss="modal" aria-hidden="true">×</a>
+    <h3 id="delMonitorLabel"><%=t('dialog.attention')%></h3>
+  </div>
+  <div class="modal-body">
+    <p><%=t('dialog.del_monitor.confirm', monitor: '<b id="dataInput"></b>')%></p>
+  </div>
+  <div class="modal-footer">
+    <form id="delMonitorform" action="/monitors/del" method="post">
+      <input type="hidden" name="monitor" id="dataInput" value="">
+      <a class="btn" data-dismiss="modal" aria-hidden="true"><%=t('action.cancel')%></a>
+      <button type="submit" class="btn btn-primary"><%=t('action.del')%></button>
+    </form>
+  </div>
+</div>

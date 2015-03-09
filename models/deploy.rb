@@ -354,10 +354,12 @@ class Deploy
             line = line.split(/(?<!var):/i, 2)
             services = line[1].split(' ')
             services.each do |service|
-              host.monitor_service(service)
-              msg = "Monitoring service "+service+" on "+host.hostname
-              NOTEX.synchronize do
-                notification = Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
+              ret = host.monitor_service(service, task)
+              if ret == 1
+                NOTEX.synchronize do
+                  msg = "Service "+service+" successfully monitored on "+host.hostname
+                  notification = Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
+                end
               end
             end
           end
