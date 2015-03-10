@@ -329,13 +329,13 @@ var getTaskNotifications = function (task_id, refreshing) {
   var accordions = [];
   $( ".accordion-body" ).each( function( index ) {
     if ($( this ).attr('id') !== "nocollapse"){
-      accordions[index+1] = $( this ).attr('class');
+      accordions[index] = $( this ).attr('class');
     }
   });
   $.get('/notifications/bytask/' + task_id, function (data) {
     $('#taskNotifications').html(data);
     for (var index in accordions){
-      $( ".accordion-body:nth-child(" + index + ")" ).attr('class', accordions[index]);
+      $( ".accordion-body" ).eq(index).attr('class', accordions[index]);
     }
     if ( document.getElementById("finished") !== null ){
       if ( refreshing ){
