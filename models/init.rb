@@ -95,6 +95,7 @@ if File.directory? 'data'
     repository(:stats_db).adapter.select('PRAGMA default_cache_size = 1000')
   end
 
+  # Disable wal autocheckpoint (crashes DB)
   repository(:notifications_db).adapter.select('PRAGMA wal_autocheckpoint = 0')
   repository(:tasks_db).adapter.select('PRAGMA wal_autocheckpoint = 0')
   repository(:monitoring_db).adapter.select('PRAGMA wal_autocheckpoint = 0')
