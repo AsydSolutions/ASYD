@@ -326,13 +326,13 @@ var editTeam = function (name) {
 
 var getTaskNotifications = function (task_id, refreshing) {
   if (typeof(refreshing)==='undefined') refreshing = false;
-  var accordions = [];
-  $( ".accordion-body" ).each( function( index ) {
-    if ($( this ).attr('id') !== "nocollapse"){
-      accordions[index] = $( this ).attr('class');
-    }
-  });
   $.get('/notifications/bytask/' + task_id, function (data) {
+    var accordions = [];
+    $( ".accordion-body" ).each( function( index ) {
+      if ($( this ).attr('id') !== "nocollapse"){
+        accordions[index] = $( this ).attr('class');
+      }
+    });
     $('#taskNotifications').html(data);
     for (var index in accordions){
       $( ".accordion-body" ).eq(index).attr('class', accordions[index]);
