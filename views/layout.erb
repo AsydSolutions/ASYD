@@ -108,7 +108,7 @@
           <% notifications = Notification.all(:dismiss => false) %>
           <% notifications.each do |notification| %>
             <% if notification.sticky == false %>
-              <% notification.update(:dismiss => true) %>
+              <% NOTEX.synchronize{ notification.update(:dismiss => true) } %>
               <% if notification.type == :info %>
                 <div class="alert alert-info">
               <% elsif notification.type == :error %>

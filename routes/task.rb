@@ -15,11 +15,15 @@ class ASYD < Sinatra::Application
   end
 
   get '/task/del/:id' do
-    task = Task.first(:id => params[:id])
-    task.notifications.each do |notification|
-      notification.destroy
+    TATEX.synchronize do
+      task = Task.first(:id => params[:id])
+      NOTEX.synchronize do
+        task.notifications.each do |notification|
+          notification.destroy
+        end
+      end
+      task.reload
+      task.destroy
     end
-    task.reload
-    task.destroy
   end
 end

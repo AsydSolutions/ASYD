@@ -5,7 +5,8 @@ module ASYDMutex
       begin
         yield
       ensure
-        repository(:status_db).adapter.select('PRAGMA wal_checkpoint(PASSIVE)')
+        sleep 0.05
+        repository(:status_db).adapter.select('PRAGMA wal_checkpoint(RESTART)')
         unlock
       end
     end
@@ -17,7 +18,8 @@ module ASYDMutex
       begin
         yield
       ensure
-        repository(:monitoring_db).adapter.select('PRAGMA wal_checkpoint(PASSIVE)')
+        sleep 0.05
+        repository(:monitoring_db).adapter.select('PRAGMA wal_checkpoint(RESTART)')
         unlock
       end
     end
@@ -29,8 +31,21 @@ module ASYDMutex
       begin
         yield
       ensure
-        repository(:tasks_db).adapter.select('PRAGMA wal_checkpoint(PASSIVE)')
-        repository(:notifications_db).adapter.select('PRAGMA wal_checkpoint(PASSIVE)')
+        sleep 0.05
+        repository(:notifications_db).adapter.select('PRAGMA wal_checkpoint(RESTART)')
+        unlock
+      end
+    end
+  end
+
+  class Tatex < ProcessShared::Mutex
+    def synchronize
+      lock
+      begin
+        yield
+      ensure
+        sleep 0.05
+        repository(:tasks_db).adapter.select('PRAGMA wal_checkpoint(RESTART)')
         unlock
       end
     end
@@ -42,7 +57,8 @@ module ASYDMutex
       begin
         yield
       ensure
-        repository(:hosts_db).adapter.select('PRAGMA wal_checkpoint(PASSIVE)')
+        sleep 0.05
+        repository(:hosts_db).adapter.select('PRAGMA wal_checkpoint(RESTART)')
         unlock
       end
     end

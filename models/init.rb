@@ -132,4 +132,5 @@ end
 MOTEX = ASYDMutex::Motex.new #mutex for monitoring handling
 MNOTEX = ASYDMutex::Mnotex.new #mutex for monitoring::notification handling
 NOTEX = ASYDMutex::Notex.new #mutex for notification handling
+TATEX = ASYDMutex::Tatex.new #mutex for task handling
 HOSTEX = ASYDMutex::Hostex.new #mutex for hosts operations
