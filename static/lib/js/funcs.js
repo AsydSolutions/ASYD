@@ -350,7 +350,11 @@ var getTaskNotifications = function (task_id, refreshing) {
 var reloadTasks = function (){
   $.get('/task/list', function (data) {
     var newDoc = $(data).contents();
-    if ( $('#active tr').length !== newDoc.find("#active tr").length ){
+    currlength = $('#active tr').length;
+    if ( $('#active tr .dataTables_empty').length !== 0 ) {
+      currlength = 0;
+    }
+    if ( currlength !== newDoc.find("#active tr").length ){
       location.reload();
     }
   });
