@@ -100,6 +100,7 @@ if File.directory? 'data'
   repository(:tasks_db).adapter.select('PRAGMA wal_autocheckpoint = 0')
   repository(:monitoring_db).adapter.select('PRAGMA wal_autocheckpoint = 0')
   repository(:hosts_db).adapter.select('PRAGMA wal_autocheckpoint = 0')
+  repository(:status_db).adapter.select('PRAGMA wal_autocheckpoint = 0')
 
   # Some cleanup to avoid fragmentation
   repository(:tasks_db).adapter.select('VACUUM')
@@ -128,7 +129,7 @@ if File.directory? 'data'
   end
 end
 
-MOTEX = ProcessShared::Mutex.new #mutex for monitoring handling
+MOTEX = ASYDMutex::Motex.new #mutex for monitoring handling
 MNOTEX = ASYDMutex::Mnotex.new #mutex for monitoring::notification handling
 NOTEX = ASYDMutex::Notex.new #mutex for notification handling
 HOSTEX = ASYDMutex::Hostex.new #mutex for hosts operations

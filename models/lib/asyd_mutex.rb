@@ -1,4 +1,16 @@
 module ASYDMutex
+  class Motex < ProcessShared::Mutex
+    def synchronize
+      lock
+      begin
+        yield
+      ensure
+        repository(:status_db).adapter.select('PRAGMA wal_checkpoint(PASSIVE)')
+        unlock
+      end
+    end
+  end
+
   class Mnotex < ProcessShared::Mutex
     def synchronize
       lock

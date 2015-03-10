@@ -127,7 +127,6 @@ module Monitoring
       return stat
     end
 
-    # @param refresh [Boolean] refresh the status?
     # Status codes:
     # 4 == not monitored
     # 3 == host down
@@ -137,10 +136,7 @@ module Monitoring
       if self.opt_vars.nil? or self.opt_vars["monitored"].nil? or self.opt_vars["monitored"].to_i != 1
         return 4
       else
-        hoststatus = nil
-        MOTEX.synchronize do
-          hoststatus = HostStatus.first(:host_hostname => self.hostname)
-        end
+        hoststatus = HostStatus.first(:host_hostname => self.hostname)
         if hoststatus.nil?
           return self.get_status
         else
