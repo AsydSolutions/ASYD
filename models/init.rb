@@ -19,6 +19,7 @@ require_relative "lib/spork"
 require_relative "lib/flavored_markdown"
 require_relative "lib/errors"
 require_relative "lib/URI-monkey-patch"
+require_relative "lib/asyd_mutex"
 require_relative "misc"
 require_relative "setup"
 require_relative "deploy"
@@ -94,6 +95,11 @@ if File.directory? 'data'
     repository(:stats_db).adapter.select('PRAGMA default_cache_size = 1000')
   end
 
+  repository(:notifications_db).adapter.select('PRAGMA wal_autocheckpoint = 0')
+  repository(:tasks_db).adapter.select('PRAGMA wal_autocheckpoint = 0')
+  repository(:monitoring_db).adapter.select('PRAGMA wal_autocheckpoint = 0')
+  repository(:hosts_db).adapter.select('PRAGMA wal_autocheckpoint = 0')
+
   # Some cleanup to avoid fragmentation
   repository(:tasks_db).adapter.select('VACUUM')
   repository(:notifications_db).adapter.select('VACUUM')
@@ -122,6 +128,6 @@ if File.directory? 'data'
 end
 
 MOTEX = ProcessShared::Mutex.new #mutex for monitoring handling
-MNOTEX = ProcessShared::Mutex.new #mutex for monitoring::notification handling
-NOTEX = ProcessShared::Mutex.new #mutex for notification handling
-HOSTEX = ProcessShared::Mutex.new #mutex for hosts operations
+MNOTEX = ASYDMutex::Mnotex.new #mutex for monitoring::notification handling
+NOTEX = ASYDMutex::Notex.new #mutex for notification handling
+HOSTEX = ASYDMutex::Hostex.new #mutex for hosts operations
