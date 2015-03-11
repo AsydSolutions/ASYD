@@ -19,7 +19,7 @@ require_relative "lib/spork"
 require_relative "lib/flavored_markdown"
 require_relative "lib/errors"
 require_relative "lib/URI-monkey-patch"
-require_relative "lib/asyd_mutex"
+require_relative "lib/asyd-wal"
 require_relative "misc"
 require_relative "setup"
 require_relative "deploy"
@@ -129,8 +129,13 @@ if File.directory? 'data'
   end
 end
 
-MOTEX = ASYDMutex::Motex.new #mutex for monitoring handling
-MNOTEX = ASYDMutex::Mnotex.new #mutex for monitoring::notification handling
-NOTEX = ASYDMutex::Notex.new #mutex for notification handling
-TATEX = ASYDMutex::Tatex.new #mutex for task handling
-HOSTEX = ASYDMutex::Hostex.new #mutex for hosts operations
+MOTEX = Awal::Mutex.new #mutex for monitoring handling
+MNOTEX = Awal::Mutex.new #mutex for monitoring::notification handling
+NOTEX = Awal::Mutex.new #mutex for notification handling
+TATEX = Awal::Mutex.new #mutex for task handling
+HOSTEX = Awal::Mutex.new #mutex for hosts operations
+
+# check for checkpoints
+walcheck = Spork.spork do
+  Awal::should_checkpoint?
+end

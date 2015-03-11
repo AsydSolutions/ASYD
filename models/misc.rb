@@ -179,6 +179,8 @@ module Misc
     end
   end
 
+  # Perform a reboot
+  #
   def reboot
     begin
       Net::SSH.start(self.ip, self.user, :port => self.ssh_port, :keys => "data/ssh_key") do |ssh|
