@@ -30,7 +30,6 @@ module Awal
   #
   def self.checkpoint(database)
     begin
-      p database
       ret = repository(database).adapter.select('PRAGMA wal_checkpoint(TRUNCATE)')
       raise if ret[0].busy == 1
       return true
