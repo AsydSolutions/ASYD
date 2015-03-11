@@ -114,12 +114,7 @@ if File.directory? 'data'
 
   # Checkpoint at exit to ensure database consistency
   at_exit {
-    repository(:tasks_db).adapter.select('PRAGMA wal_checkpoint(TRUNCATE)')
-    repository(:notifications_db).adapter.select('PRAGMA wal_checkpoint(TRUNCATE)')
-    repository(:hosts_db).adapter.select('PRAGMA wal_checkpoint(TRUNCATE)')
-    repository(:monitoring_db).adapter.select('PRAGMA wal_checkpoint(TRUNCATE)')
     repository(:users_db).adapter.select('PRAGMA wal_checkpoint(TRUNCATE)')
-    repository(:status_db).adapter.select('PRAGMA wal_checkpoint(TRUNCATE)')
     repository(:config_db).adapter.select('PRAGMA wal_checkpoint(TRUNCATE)')
     repository(:stats_db).adapter.select('PRAGMA wal_checkpoint(TRUNCATE)')
   }
