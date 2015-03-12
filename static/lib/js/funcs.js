@@ -362,7 +362,7 @@ var reloadTasks = function (){
 
 var delTask = function (id) {
   $.get('/task/del/' + id, function (data) {
-    $('#task' + id).remove();
+    location.reload();
   });
 };
 
