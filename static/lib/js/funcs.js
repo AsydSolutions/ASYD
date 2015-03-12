@@ -342,7 +342,7 @@ var getTaskNotifications = function (task_id, refreshing) {
         location.reload();
       }
     } else {
-      var interval = setTimeout(function() { getTaskNotifications(task_id, true); }, 2000);
+      var interval = setTimeout(function() { getTaskNotifications(task_id, true); }, 15000);
     }
   });
 };
