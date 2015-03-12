@@ -43,28 +43,6 @@ module Awal
   def self.should_checkpoint?
     while true
       stamp = Time.now.to_i
-      if MOTEX.last_lock > 1
-        if stamp > (MOTEX.last_lock + 5)
-          chp = false
-          MOTEX.synchronize do
-            chp = checkpoint(:status_db)
-          end
-          if chp
-            MOTEX.last_lock = 0
-          end
-        end
-      end
-      if MNOTEX.last_lock > 1
-        if stamp > (MNOTEX.last_lock + 10)
-          chp = false
-          MNOTEX.synchronize do
-            chp = checkpoint(:monitoring_db)
-          end
-          if chp
-            MNOTEX.last_lock = 0
-          end
-        end
-      end
       if NOTEX.last_lock > 1
         if stamp > (NOTEX.last_lock + 10)
           chp = false

@@ -59,11 +59,11 @@ if File.directory? 'data'
   repository(:stats_db).adapter.select('PRAGMA default_synchronous = 2')
   repository(:config_db).adapter.select('PRAGMA default_synchronous = 2')
   repository(:users_db).adapter.select('PRAGMA default_synchronous = 2')
+  repository(:status_db).adapter.select('PRAGMA default_synchronous = 2')
+  repository(:monitoring_db).adapter.select('PRAGMA default_synchronous = 2')
   repository(:tasks_db).adapter.select('PRAGMA default_synchronous = 1')
   repository(:notifications_db).adapter.select('PRAGMA default_synchronous = 1')
-  repository(:status_db).adapter.select('PRAGMA default_synchronous = 1')
   repository(:hosts_db).adapter.select('PRAGMA default_synchronous = 1')
-  repository(:monitoring_db).adapter.select('PRAGMA default_synchronous = 1')
 
   # Disable wal autocheckpoint (crashes DB)
   repository(:notifications_db).adapter.select('PRAGMA wal_autocheckpoint = 0')
@@ -87,6 +87,8 @@ if File.directory? 'data'
     Awal::checkpoint(:users_db)
     Awal::checkpoint(:config_db)
     Awal::checkpoint(:stats_db)
+    Awal::checkpoint(:status_db)
+    Awal::checkpoint(:monitoring_db)
   }
 
   if Email.all.first.nil?
@@ -94,8 +96,8 @@ if File.directory? 'data'
   end
 end
 
-MOTEX = Awal::Mutex.new #mutex for monitoring handling
-MNOTEX = Awal::Mutex.new #mutex for monitoring::notification handling
+MOTEX = ProcessShared::Mutex.new #mutex for monitoring handling
+MNOTEX = ProcessShared::Mutex.new #mutex for monitoring::notification handling
 NOTEX = Awal::Mutex.new #mutex for notification handling
 TATEX = Awal::Mutex.new #mutex for task handling
 HOSTEX = Awal::Mutex.new #mutex for hosts operations
