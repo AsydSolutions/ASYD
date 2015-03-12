@@ -25,7 +25,7 @@
     <script type="text/javascript" language="javascript" src="/js/codemirror.js"></script>
     <link rel="stylesheet" type="text/css" href="/css/codemirror.css">
   <% end %>
-  <script type="text/javascript" language="javascript" src="/js/funcs.js"></script>
+  <script type="text/javascript" language="javascript" src="/js/funcs.js?v=0.062"></script>
   <!-- DataTables -->
   <% if request.path_info.start_with?("/host") || request.path_info.start_with?("/deploys/list") || request.path_info.start_with?("/monitors/list") || request.path_info.start_with?("/task/list") || request.path_info.start_with?("/users") %>
     <link rel="stylesheet" type="text/css" href="/css/jquery.dataTables.css">
@@ -168,7 +168,7 @@
             <div class="span2 offset6">
               <% file = open('http://www.asyd.eu/asyd.version') %>
               <% last_ver = file.read.strip %>
-              <% curr_ver = 0.06 %>
+              <% curr_ver = 0.062 %>
               <%= '<div class="text-error">' unless last_ver.to_f <= curr_ver %> v <%= curr_ver %> <%= "Update available</div>" unless last_ver.to_f <= curr_ver %>
             </div>
           </div>
