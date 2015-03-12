@@ -167,7 +167,7 @@ $(function () {
         'pageLength': 10,
         'info': false,
         'renderer': 'bootstrap',
-        'stateSave': true,
+        'stateSave': false,
         'language': {
           'search': '<i class="icon-search"></i>',
           'emptyTable': 'You haven\'t added any hostgroup yet',
