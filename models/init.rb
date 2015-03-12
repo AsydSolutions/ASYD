@@ -114,9 +114,9 @@ if File.directory? 'data'
 
   # Checkpoint at exit to ensure database consistency
   at_exit {
-    repository(:users_db).adapter.select('PRAGMA wal_checkpoint(TRUNCATE)')
-    repository(:config_db).adapter.select('PRAGMA wal_checkpoint(TRUNCATE)')
-    repository(:stats_db).adapter.select('PRAGMA wal_checkpoint(TRUNCATE)')
+    repository(:users_db).adapter.select('PRAGMA wal_checkpoint(FULL)')
+    repository(:config_db).adapter.select('PRAGMA wal_checkpoint(FULL)')
+    repository(:stats_db).adapter.select('PRAGMA wal_checkpoint(FULL)')
   }
 
   if Email.all.first.nil?
