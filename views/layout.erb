@@ -106,7 +106,7 @@
     	<div class="main-inner">
         <div class="container">
           <% notifications = Notification.all(:dismiss => false) %>
-          <% notifications.each do |notification| %>
+          <% notifications.reverse.each do |notification| %>
             <% if notification.sticky == false %>
               <% NOTEX.synchronize{ notification.update(:dismiss => true) } %>
               <% if notification.type == :info %>
