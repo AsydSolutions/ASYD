@@ -45,39 +45,15 @@ DataMapper.finalize
 if File.directory? 'data'
   DataMapper.auto_upgrade!
 
-  # Check and configure SQLite Options
-  tasks_journal = repository(:tasks_db).adapter.select('PRAGMA journal_mode')[0]
-  if tasks_journal != "wal"
-    repository(:tasks_db).adapter.select('PRAGMA journal_mode = WAL')
-  end
-  notifications_journal = repository(:notifications_db).adapter.select('PRAGMA journal_mode')[0]
-  if notifications_journal != "wal"
-    repository(:notifications_db).adapter.select('PRAGMA journal_mode = WAL')
-  end
-  monitoring_journal = repository(:monitoring_db).adapter.select('PRAGMA journal_mode')[0]
-  if monitoring_journal != "wal"
-    repository(:monitoring_db).adapter.select('PRAGMA journal_mode = WAL')
-  end
-  hosts_journal = repository(:hosts_db).adapter.select('PRAGMA journal_mode')[0]
-  if hosts_journal != "wal"
-    repository(:hosts_db).adapter.select('PRAGMA journal_mode = WAL')
-  end
-  users_journal = repository(:users_db).adapter.select('PRAGMA journal_mode')[0]
-  if users_journal != "wal"
-    repository(:users_db).adapter.select('PRAGMA journal_mode = WAL')
-  end
-  status_journal = repository(:status_db).adapter.select('PRAGMA journal_mode')[0]
-  if status_journal != "wal"
-    repository(:status_db).adapter.select('PRAGMA journal_mode = WAL')
-  end
-  config_journal = repository(:config_db).adapter.select('PRAGMA journal_mode')[0]
-  if config_journal != "wal"
-    repository(:config_db).adapter.select('PRAGMA journal_mode = WAL')
-  end
-  stats_journal = repository(:stats_db).adapter.select('PRAGMA journal_mode')[0]
-  if stats_journal != "wal"
-    repository(:stats_db).adapter.select('PRAGMA journal_mode = WAL')
-  end
+  # Set WAL regardless
+  repository(:tasks_db).adapter.select('PRAGMA journal_mode = WAL')
+  repository(:notifications_db).adapter.select('PRAGMA journal_mode = WAL')
+  repository(:monitoring_db).adapter.select('PRAGMA journal_mode = WAL')
+  repository(:hosts_db).adapter.select('PRAGMA journal_mode = WAL')
+  repository(:users_db).adapter.select('PRAGMA journal_mode = WAL')
+  repository(:status_db).adapter.select('PRAGMA journal_mode = WAL')
+  repository(:config_db).adapter.select('PRAGMA journal_mode = WAL')
+  repository(:stats_db).adapter.select('PRAGMA journal_mode = WAL')
 
   # Set synchronous levels, NORMAL for actively checkpointed and FULL otherwise
   repository(:stats_db).adapter.select('PRAGMA default_synchronous = 2')
