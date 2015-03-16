@@ -167,7 +167,7 @@ $(function () {
         'pageLength': 10,
         'info': false,
         'renderer': 'bootstrap',
-        'stateSave': true,
+        'stateSave': false,
         'language': {
           'search': '<i class="icon-search"></i>',
           'emptyTable': 'You haven\'t added any hostgroup yet',
@@ -326,23 +326,23 @@ var editTeam = function (name) {
 
 var getTaskNotifications = function (task_id, refreshing) {
   if (typeof(refreshing)==='undefined') refreshing = false;
-  var accordions = [];
-  $( ".accordion-body" ).each( function( index ) {
-    if ($( this ).attr('id') !== "nocollapse"){
-      accordions[index+1] = $( this ).attr('class');
-    }
-  });
   $.get('/notifications/bytask/' + task_id, function (data) {
+    var accordions = [];
+    $( ".accordion-body" ).each( function( index ) {
+      if ($( this ).attr('id') !== "nocollapse"){
+        accordions[index] = $( this ).attr('class');
+      }
+    });
     $('#taskNotifications').html(data);
     for (var index in accordions){
-      $( ".accordion-body:nth-child(" + index + ")" ).attr('class', accordions[index]);
+      $( ".accordion-body" ).eq(index).attr('class', accordions[index]);
     }
     if ( document.getElementById("finished") !== null ){
       if ( refreshing ){
         location.reload();
       }
     } else {
-      var interval = setTimeout(function() { getTaskNotifications(task_id, true); }, 2000);
+      var interval = setTimeout(function() { getTaskNotifications(task_id, true); }, 15000);
     }
   });
 };
@@ -350,7 +350,11 @@ var getTaskNotifications = function (task_id, refreshing) {
 var reloadTasks = function (){
   $.get('/task/list', function (data) {
     var newDoc = $(data).contents();
-    if ( $('#active tr').length !== newDoc.find("#active tr").length ){
+    currlength = $('#active tr').length;
+    if ( $('#active tr .dataTables_empty').length !== 0 ) {
+      currlength = 0;
+    }
+    if ( currlength !== newDoc.find("#active tr").length ){
       location.reload();
     }
   });
@@ -358,7 +362,7 @@ var reloadTasks = function (){
 
 var delTask = function (id) {
   $.get('/task/del/' + id, function (data) {
-    $('#task' + id).remove();
+    location.reload();
   });
 };
 

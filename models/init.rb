@@ -19,6 +19,7 @@ require_relative "lib/spork"
 require_relative "lib/flavored_markdown"
 require_relative "lib/errors"
 require_relative "lib/URI-monkey-patch"
+require_relative "lib/asyd-wal"
 require_relative "misc"
 require_relative "setup"
 require_relative "deploy"
@@ -44,55 +45,32 @@ DataMapper.finalize
 if File.directory? 'data'
   DataMapper.auto_upgrade!
 
-  # Check and configure SQLite Options
-  tasks_journal = repository(:tasks_db).adapter.select('PRAGMA journal_mode')[0]
-  if tasks_journal != "wal"
-    repository(:tasks_db).adapter.select('PRAGMA journal_mode = WAL')
-    repository(:tasks_db).adapter.select('PRAGMA default_synchronous = 2')
-    repository(:tasks_db).adapter.select('PRAGMA default_cache_size = 1000')
-  end
-  notifications_journal = repository(:notifications_db).adapter.select('PRAGMA journal_mode')[0]
-  if notifications_journal != "wal"
-    repository(:notifications_db).adapter.select('PRAGMA journal_mode = WAL')
-    repository(:notifications_db).adapter.select('PRAGMA default_synchronous = 2')
-    repository(:notifications_db).adapter.select('PRAGMA default_cache_size = 2000')
-  end
-  monitoring_journal = repository(:monitoring_db).adapter.select('PRAGMA journal_mode')[0]
-  if monitoring_journal != "wal"
-    repository(:monitoring_db).adapter.select('PRAGMA journal_mode = WAL')
-    repository(:monitoring_db).adapter.select('PRAGMA default_synchronous = 2')
-    repository(:monitoring_db).adapter.select('PRAGMA default_cache_size = 1000')
-  end
-  hosts_journal = repository(:hosts_db).adapter.select('PRAGMA journal_mode')[0]
-  if hosts_journal != "wal"
-    repository(:hosts_db).adapter.select('PRAGMA journal_mode = WAL')
-    repository(:hosts_db).adapter.select('PRAGMA default_synchronous = 2')
-    repository(:hosts_db).adapter.select('PRAGMA default_cache_size = 1000')
-  end
-  users_journal = repository(:users_db).adapter.select('PRAGMA journal_mode')[0]
-  if users_journal != "wal"
-    repository(:users_db).adapter.select('PRAGMA journal_mode = WAL')
-    repository(:users_db).adapter.select('PRAGMA default_synchronous = 2')
-    repository(:users_db).adapter.select('PRAGMA default_cache_size = 500')
-  end
-  status_journal = repository(:status_db).adapter.select('PRAGMA journal_mode')[0]
-  if status_journal != "wal"
-    repository(:status_db).adapter.select('PRAGMA journal_mode = WAL')
-    repository(:status_db).adapter.select('PRAGMA default_synchronous = 2')
-    repository(:status_db).adapter.select('PRAGMA default_cache_size = 500')
-  end
-  config_journal = repository(:config_db).adapter.select('PRAGMA journal_mode')[0]
-  if config_journal != "wal"
-    repository(:config_db).adapter.select('PRAGMA journal_mode = WAL')
-    repository(:config_db).adapter.select('PRAGMA default_synchronous = 2')
-    repository(:config_db).adapter.select('PRAGMA default_cache_size = 500')
-  end
-  stats_journal = repository(:stats_db).adapter.select('PRAGMA journal_mode')[0]
-  if stats_journal != "wal"
-    repository(:stats_db).adapter.select('PRAGMA journal_mode = WAL')
-    repository(:stats_db).adapter.select('PRAGMA default_synchronous = 2')
-    repository(:stats_db).adapter.select('PRAGMA default_cache_size = 1000')
-  end
+  # Set WAL regardless
+  repository(:tasks_db).adapter.select('PRAGMA journal_mode = WAL')
+  repository(:notifications_db).adapter.select('PRAGMA journal_mode = WAL')
+  repository(:monitoring_db).adapter.select('PRAGMA journal_mode = WAL')
+  repository(:hosts_db).adapter.select('PRAGMA journal_mode = WAL')
+  repository(:users_db).adapter.select('PRAGMA journal_mode = WAL')
+  repository(:status_db).adapter.select('PRAGMA journal_mode = WAL')
+  repository(:config_db).adapter.select('PRAGMA journal_mode = WAL')
+  repository(:stats_db).adapter.select('PRAGMA journal_mode = WAL')
+
+  # Set synchronous levels, NORMAL for actively checkpointed and FULL otherwise
+  repository(:stats_db).adapter.select('PRAGMA default_synchronous = 2')
+  repository(:config_db).adapter.select('PRAGMA default_synchronous = 2')
+  repository(:users_db).adapter.select('PRAGMA default_synchronous = 2')
+  repository(:status_db).adapter.select('PRAGMA default_synchronous = 2')
+  repository(:monitoring_db).adapter.select('PRAGMA default_synchronous = 2')
+  repository(:tasks_db).adapter.select('PRAGMA default_synchronous = 1')
+  repository(:notifications_db).adapter.select('PRAGMA default_synchronous = 1')
+  repository(:hosts_db).adapter.select('PRAGMA default_synchronous = 1')
+
+  # Disable wal autocheckpoint (crashes DB)
+  repository(:notifications_db).adapter.select('PRAGMA wal_autocheckpoint = 0')
+  repository(:tasks_db).adapter.select('PRAGMA wal_autocheckpoint = 0')
+  repository(:monitoring_db).adapter.select('PRAGMA wal_autocheckpoint = 0')
+  repository(:hosts_db).adapter.select('PRAGMA wal_autocheckpoint = 0')
+  repository(:status_db).adapter.select('PRAGMA wal_autocheckpoint = 0')
 
   # Some cleanup to avoid fragmentation
   repository(:tasks_db).adapter.select('VACUUM')
@@ -106,14 +84,11 @@ if File.directory? 'data'
 
   # Checkpoint at exit to ensure database consistency
   at_exit {
-    repository(:tasks_db).adapter.select('PRAGMA wal_checkpoint(TRUNCATE)')
-    repository(:notifications_db).adapter.select('PRAGMA wal_checkpoint(TRUNCATE)')
-    repository(:hosts_db).adapter.select('PRAGMA wal_checkpoint(TRUNCATE)')
-    repository(:monitoring_db).adapter.select('PRAGMA wal_checkpoint(TRUNCATE)')
-    repository(:users_db).adapter.select('PRAGMA wal_checkpoint(TRUNCATE)')
-    repository(:status_db).adapter.select('PRAGMA wal_checkpoint(TRUNCATE)')
-    repository(:config_db).adapter.select('PRAGMA wal_checkpoint(TRUNCATE)')
-    repository(:stats_db).adapter.select('PRAGMA wal_checkpoint(TRUNCATE)')
+    Awal::checkpoint(:users_db)
+    Awal::checkpoint(:config_db)
+    Awal::checkpoint(:stats_db)
+    Awal::checkpoint(:status_db)
+    Awal::checkpoint(:monitoring_db)
   }
 
   if Email.all.first.nil?
@@ -123,5 +98,11 @@ end
 
 MOTEX = ProcessShared::Mutex.new #mutex for monitoring handling
 MNOTEX = ProcessShared::Mutex.new #mutex for monitoring::notification handling
-NOTEX = ProcessShared::Mutex.new #mutex for notification handling
-HOSTEX = ProcessShared::Mutex.new #mutex for hosts operations
+NOTEX = Awal::Mutex.new #mutex for notification handling
+TATEX = Awal::Mutex.new #mutex for task handling
+HOSTEX = Awal::Mutex.new #mutex for hosts operations
+
+# check for checkpoints
+walcheck = Spork.spork do
+  Awal::should_checkpoint?
+end
