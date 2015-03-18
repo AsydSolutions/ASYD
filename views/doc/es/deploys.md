@@ -110,20 +110,29 @@ variable con el mismo nombre existe, el valor será reemplazado por el nuevo.
 
 *Sintáxis:* `var <varname> = exec [host] [if <condition>]: command`
 
-**7. monitor**
-Este comando te permite monitorear un servicio. El parámetro del servicio debe tener el mismo nombre
+**7. monitor / unmonitor**
+
+Este comando te permite monitorizar (o dejar de monitorizar en el caso de "unmonitor") un servicio. El parámetro del servicio debe tener el mismo nombre
 que el archivo "monitor" en el interior del directorio `data/monitors`, el cual debe existir. También
 puedes especificar distintos servicios separados por espacios. También accepta opcionalmente condicionales.
 
 *Sintáxis:* `monitor [if <condition>]: service`
 
-**8. deploy**
+*Sintáxis:* `unmonitor [if <condition>]: service`
+
+**8. deploy / undeploy**
 
 Con este comando puedes lanzar otros deploys desde un deploy, permitiéndote incluso crear
 un meta-deploy definiendo los deploys que deberían ser lanzados dependiendo de los condicionales.
 El deploy indicado debe existir. Este comando también accepta opcionalmente condicionales.
 
 *Sintáxis:* `deploy [if <condition>]: another_deploy`
+
+El comando "undeploy" actúa de la misma forma pero usando el archivo `undeploy` en lugar
+del archivo `def` usado por los deploys.
+
+
+*Sintáxis:* `undeploy [if <condition>]: another_deploy`
 
 **9. reboot**
 
