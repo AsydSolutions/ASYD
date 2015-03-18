@@ -111,6 +111,74 @@ class ASYD < Sinatra::Application
     redirect to deploys
   end
 
+  # Execute commands
+  #
+  post '/deploys/exec-cmd' do
+    target = params['target'].split(";")
+    if target[0] == "host"
+      host = Host.first(:hostname => target[1])
+      task = nil
+      TATEX.synchronize do
+        task = Task.create(:action => :executing, :object => params['cmd'], :target => host.hostname, :target_type => :host)
+      end
+      NOTEX.synchronize do
+        notification = Notification.create(:type => :info, :message => t('task.actions.'+task.action.to_s)+" '"+params['cmd']+"' on "+host.hostname, :task => task)
+      end
+      inst = Spork.spork do
+        sleep 0.2
+        cmd = Deploy.parse(host, params['cmd'])
+        result = host.exec_cmd(cmd)
+        NOTEX.synchronize do
+          notification = Notification.create(:type => :success, :sticky => true, :message => "Result: "+result, :task => task)
+        end
+        TATEX.synchronize do
+          task.update(:status => :finished)
+        end
+      end
+    elsif target[0] == "hostgroup"
+      hostgroup = Hostgroup.first(:name => target[1])
+      task = nil
+      TATEX.synchronize do
+        task = Task.create(:action => :executing, :object => params['cmd'], :target => hostgroup.name, :target_type => :hostgroup)
+      end
+      NOTEX.synchronize do
+        notification = Notification.create(:type => :info, :message => t('task.actions.'+task.action.to_s)+" '"+params['cmd']+"' on "+hostgroup.name, :task => task)
+      end
+      inst = Spork.spork do
+        sleep 0.2
+        if !hostgroup.hosts.nil? && !hostgroup.hosts.empty? #it's a valid hostgroup
+          max_forks = Misc::get_max_forks #we get the "forkability"
+          forks = [] #and initialize an empty array
+          hostgroup.hosts.each do |host| #for each host
+            if forks.count >= max_forks #if we reached the "forkability" limit
+              id = Process.wait #then we wait for some child to finish
+              forks.delete(id) #and we remove it from the forks array
+            end
+            frk = Spork.spork do #so we can continue executing a new fork
+              cmd = Deploy.parse(host, params['cmd'])
+              result = host.exec_cmd(cmd)
+              NOTEX.synchronize do
+                msg = "Executed "+cmd+" on "+host.hostname+": "+result
+                notification = Notification.create(:type => :success, :dismiss => true, :message => msg, :task => task)
+              end
+            end
+            forks << frk #and store the fork id on the forks array
+          end
+        end
+        Process.waitall
+        NOTEX.synchronize do
+          msg = "Command successfully executed on "+target[0]+" "+target[1]
+          notification = Notification.create(:type => :success, :sticky => true, :message => msg, :task => task)
+        end
+        TATEX.synchronize do
+          task.update(:status => :finished)
+        end
+      end
+    end
+    deploys = '/deploys/list'
+    redirect to deploys
+  end
+
   # Launch a deploy
   #
   post '/deploys/deploy' do

@@ -62,7 +62,7 @@
       </div>
     </div>
   </div>
-  <div class="span4-fluid">
+  <div class="span4">
     <div class="widget">
       <div class="widget-header">
         <i class="icon-bolt"></i><h3><%= t('dialog.install.title')%></h3>
@@ -82,6 +82,28 @@
             <% end %>
           </select></div>
           <div class="control-group"><input class="btn primary" type='submit' value='Install!'></div>
+        </form>
+      </div>
+    </div>
+    <div class="widget">
+      <div class="widget-header">
+        <i class="icon-bolt"></i><h3><%= t('dialog.execute.title')%></h3>
+      </div>
+      <div class="widget-content">
+        <form id="exec_cmd" action='/deploys/exec-cmd' method='post' class="form-inline">
+          <div class="control-group"><input name='cmd' type="text" class="input-xlarge" placeholder="<%= t('dialog.execute.command')%>" required></div>
+          <div class="control-group" for"host"><select name="target" class="input-xlarge" id="selectHostExecute" required>
+            <option></option>
+            <optgroup label="<%=t('group.other')%>">
+            <% @hostgroups.each do |hostgroup| %>
+              <option value="hostgroup;<%=hostgroup.name%>"><%=hostgroup.name%></option>
+            <% end %>
+            <optgroup label="<%=t('host.other')%>">
+            <% @hosts.each do |host| %>
+              <option value="host;<%=host.hostname%>"><%=host.hostname%></option>
+              <% end %>
+          </select></div>
+          <div class="control-group"><input class="btn primary" type='submit' value='Execute!'></div>
         </form>
       </div>
     </div>

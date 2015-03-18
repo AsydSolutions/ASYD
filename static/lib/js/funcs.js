@@ -236,6 +236,9 @@ $(function () {
       $('#selectHostInstall').select2( {
         'placeholder': 'Select host or hostgroup',
       });
+      $('#selectHostExecute').select2( {
+        'placeholder': 'Select host or hostgroup',
+      });
     }
   });
 
