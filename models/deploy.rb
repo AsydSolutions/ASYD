@@ -379,7 +379,7 @@ class Deploy
               ret = host.unmonitor_service(service, task)
               if ret == 1
                 NOTEX.synchronize do
-                  msg = "Service "+service+" successfully un-monitored on "+host.hostname
+                  msg = "Service "+service+" now un-monitored on "+host.hostname
                   notification = Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
                 end
               end
@@ -401,6 +401,32 @@ class Deploy
               ret = Deploy.launch(host, deploy, task)
               if ret == 1
                 msg = "Deploy "+deploy+" successfully deployed on "+host.hostname
+                NOTEX.synchronize do
+                  notification = Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
+                end
+              elsif ret[0] == 5
+                raise FormatException, ret[1]
+              elsif ret[0] == 4
+                raise ExecutionError, ret[1]
+              end
+            end
+          end
+        # /DEPLOY BLOCK
+
+        # DEPLOY BLOCK
+        elsif line.start_with?("undeploy")
+          doit = true
+          m = line.match(/^undeploy if (.+)(?<!var):/i)
+          if !m.nil?
+            doit = check_condition(m, host)
+          end
+          if doit
+            line = line.split(/(?<!var):/i, 2)
+            deploys = line[1].split(' ')
+            deploys.each do |deploy|
+              ret = Deploy.undeploy(host, deploy, task)
+              if ret == 1
+                msg = "Deploy "+deploy+" undeployed from "+host.hostname
                 NOTEX.synchronize do
                   notification = Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
                 end
