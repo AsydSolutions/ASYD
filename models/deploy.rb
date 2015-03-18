@@ -364,6 +364,29 @@ class Deploy
             end
           end
         # /MONITOR BLOCK
+
+        # UNMONITOR BLOCK
+        elsif line.start_with?("unmonitor")
+          doit = true
+          m = line.match(/^unmonitor if (.+)(?<!var):/i)
+          if !m.nil?
+            doit = check_condition(m, host)
+          end
+          if doit
+            line = line.split(/(?<!var):/i, 2)
+            services = line[1].split(' ')
+            services.each do |service|
+              ret = host.unmonitor_service(service, task)
+              if ret == 1
+                NOTEX.synchronize do
+                  msg = "Service "+service+" successfully un-monitored on "+host.hostname
+                  notification = Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
+                end
+              end
+            end
+          end
+        # /MONITOR BLOCK
+
         # DEPLOY BLOCK
         elsif line.start_with?("deploy")
           doit = true
