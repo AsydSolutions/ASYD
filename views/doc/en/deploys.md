@@ -131,7 +131,7 @@ named deploy must exist. This command also accepts conditionals optionally.
 
 **9. reboot**
 
-It simply reboots a system. This command doesn't requires the double dot - : - and the only
+It simply reboots a system. This command doesn't requires the colon - : - and the only
 optional parameter allowed is a conditional. **Please note** that this command should always
 be used at the end of a deploy, else, the ASYD server will lose communication with the
 target host and the following commands won't be executed.
