@@ -59,6 +59,27 @@ class Hostgroup
     reload
     return self.destroy
   end
+
+  # Launches a block of code on a hostgroup (used on routes/deploys.rb and routes/monitors.rb)
+  #
+  def group_launch
+    sleep 0.2 # small delay
+    if !self.hosts.nil? && !self.hosts.empty? #it's a valid hostgroup
+      max_forks = Misc::get_max_forks #we get the "forkability"
+      forks = [] #and initialize an empty array
+      self.hosts.each do |host| #for each host
+        if forks.count >= max_forks #if we reached the "forkability" limit
+          id = Process.wait #then we wait for some child to finish
+          forks.delete(id) #and we remove it from the forks array
+        end
+        frk = Spork.spork do #so we can continue executing a new fork
+          yield host # the actual code
+        end
+        forks << frk #and store the fork id on the forks array
+      end
+    end
+    Process.waitall
+  end
 end
 
 class HostgroupMember
