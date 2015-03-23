@@ -2,7 +2,7 @@
 
 ***
 
-**I. [ASYD installeren](installing.md)**
+**I. [ASYD installeren](installatie.md)**
 
 **1. [Basis](basics.md)**
 
@@ -16,13 +16,13 @@
 
 **6. [Monitoring](monitoring.md)**
 
-*a. [Gesupporteerde systemen](systems.md)*
+*a. [Ondersteunde systemen](systems.md)*
 
 *b. [Solaris specifiek](solaris.md)*
 
 <br/>
-Gelieve de documentatie *volledig* te lezen vooralleer u deploys
- creeert, of Basis en Monitoring (aangeraden) wanneer u enkel uw
+Gelieve de documentatie *volledig* te lezen vooraleer u deploys
+ creëert, of Basis en Monitoring (aangeraden) wanneer u enkel uw
  servers wilt beheren met ASYD.
 
 Als u van plan bent om Solaris of OpenIndiana hosts toe te voegen,

@@ -2,9 +2,9 @@ Ondersteunde Systemen
 =====================
 <br/>
 
-Hoewel ASYD in theory werkt op elk systeem dat SSH ondersteunt, zijn er
+Hoewel ASYD in theorie werkt op elk systeem dat SSH ondersteunt, zijn er
  enkele systeem-specifieke zaken, zoals het install commando, of de
- monitor setup, die enkel werken op officieel ondersteunde systemen.
+ monitor set-up, die enkel werken op officieel ondersteunde systemen.
 
 *Voor ontwikkelaars: moest je ASYD toch op een ander systeem wilt
  gebruiken, kan je de lijn `raise #OS not supported yet` uit commenteren
@@ -15,7 +15,7 @@ Hoewel ASYD in theory werkt op elk systeem dat SSH ondersteunt, zijn er
 Ondersteunde Clients:
 ---------------------
 
-Je kan momenteel onderstaande systeme toevoegen gebaseerd op:
+Je kan momenteel onderstaande systemen toevoegen gebaseerd op:
 
  * Debian
  * Ubuntu

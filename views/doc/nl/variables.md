@@ -25,7 +25,7 @@ Globale variabelen:
     <%DIST_VER%> - Doelhost distributie versie
     <%ARCH%> - Doelhost architectuur
     <%PKG_MANAGER%> - Doelhost package manager
-    <%MONITOR:service%> - Niet echt een variabele, monitored 'service'
+    <%MONITOR:service%> - Niet echt een variabele, monitort 'service'
 
 <br/>
 Eigen variabelen:
@@ -33,7 +33,7 @@ Eigen variabelen:
 <br/>
 Je kan ook je eigen variabelen maken in zowel hosts als hostgroepen. Je
  kan ook de waarde van een variabele toegekend aan een hostgroep
- overriden door een variabele met dezelfde naam te definieren op de
+ overriden door een variabele met dezelfde naam te definiëren op de
  host.
 
     <%VAR:varnaam%> - Gebruik de waarde toegekend aan "varnaam"

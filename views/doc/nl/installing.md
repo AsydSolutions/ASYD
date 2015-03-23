@@ -4,7 +4,7 @@ Installatie van ASYD
 
 **1. Installeer dependencies**
 
-De meeste dependencies worden geinstalleerd via gems, maar ruby, git,
+De meeste dependencies worden geïnstalleerd via gems, maar ruby, git,
  make en enkele standaard libraries zijn vereist.
 
 Op Debian-based systemen (als root):
@@ -34,13 +34,13 @@ Installeer ASYD en  alle dependencies
 
 **3. Start ASYD**
 
-    passenger sttartt
+    passenger start
 
-Benarder je pas geinstalleerde ASYD systeem vanop de machine zelf, of
+Benarder je pas geïnstalleerde ASYD systeem vanop de machine zelf, of
  via het IP en op poort 3000
 ([http://localhost:3000/](http://localhost:3000))
 
-**4. Setup**
+**4. Set-up**
 
 Wanneer je ASYD voor de eerste maal opstart zal het voor een gebruiker,
  email, paswoord en ssh keys vragen. Deze kunnen door de gebruiker

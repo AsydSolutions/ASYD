@@ -1,7 +1,7 @@
 Solaris
 =======
 <br/>
-ASYD supporteert zowel Solaris (versie 8 en hoger) en OpenIndiana, maar
+ASYD ondersteunt zowel Solaris (versie 8 en hoger) en OpenIndiana, maar
  deze systemen hebben enkele specifieke zaken, zoals hieronder
  beschreven.
 
@@ -13,22 +13,22 @@ Doordat Solaris verschillende package managers heeft, en de manier van
  het installeren van packages anders is, afhankelijk van de versie, doet
  ASYD enkele checks met betrekking tot dit.
 
-ASYD supporteert momenteel volgende package managers:
+ASYD ondersteunt momenteel volgende package managers:
 
 **1. pkgadd**
 
 De oudste package manager voor Solaris, en beschikbaar op elk Solaris/
- OpenIndiana platform. Op Solaris 10 en hoger supporteert pkgadd URLs,
+ OpenIndiana platform. Op Solaris 10 en hoger Ondersteunt pkgadd URLs,
  waardoor je packages direct vanop internet kunt installeren door de URL
  mee te geven aan het `install` commando op een def bestand, of door
  gebruik te maken van de "Quick Install". Voor Solaris 9 en lager moet
- je eerst de package locaal downloaden en het installeren, gebruik
+ je eerst de package lokaal downloaden en het installeren, gebruik
  makende van het volledige pad.
 
 Het installatie commando voor deze package manager op ASYD voert een
  `pkgadd -a /etc/admin -d <package naam> all` uit, waardoor alle inhoud
- uit de package geinstalleerd wordt. Het `/etc/admin` bestand wordt
- geupload tijdens de monitoring setup om prompts te vermijden wanneer
+ uit de package geïnstalleerd wordt. Het `/etc/admin` bestand wordt
+ geüpload tijdens de monitoring set-up om prompts te vermijden wanneer
  pkgadd gebruikt wordt.
 
 **2. pkg**
