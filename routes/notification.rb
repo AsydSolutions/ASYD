@@ -33,6 +33,6 @@ class ASYD < Sinatra::Application
     @hosts.uniq!
     @errors.uniq!
 
-    erb :notifications, :layout => false
+    erb :'task/notifications', :layout => false
   end
 end

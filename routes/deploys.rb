@@ -6,13 +6,13 @@ class ASYD < Sinatra::Application
     @undeploy_alerts = Deploy.get_undeploy_alerts
     @hosts = Host.all
     @hostgroups = Hostgroup.all
-    erb :deploys
+    erb :'deploy/deploys'
   end
 
   get '/deploys/:dep' do
     @base = 'data/deploys/'+params[:dep]+'/'
     @deploy = params[:dep]
-    erb :deploy_detail
+    erb :'deploy/deploy_detail'
   end
 
   # Install packages

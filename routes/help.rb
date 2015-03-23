@@ -13,7 +13,7 @@ class ASYD < Sinatra::Application
     if File.exists?("static/"+@doc)
       erb :help
     else
-      erb :oops
+      not_found
     end
   end
 end

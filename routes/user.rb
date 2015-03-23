@@ -11,7 +11,7 @@ class ASYD < Sinatra::Application
   get '/users' do
     @users = User.all
     @teams = Team.all
-    erb :users_overview
+    erb :'user/users_overview'
   end
 
   post '/user/add' do
@@ -50,7 +50,7 @@ class ASYD < Sinatra::Application
 
   get '/team/edit/:team' do
     @team = Team.first(:name => params[:team])
-    erb :edit_team, :layout => false
+    erb :'user/edit_team', :layout => false
   end
 
   post '/team/edit' do  ## TODO
@@ -81,7 +81,7 @@ class ASYD < Sinatra::Application
   end
 
   get "/password/request" do
-    erb :password_request, :layout => false
+    erb :'user/password_request', :layout => false
   end
 
   post "/password/request" do
@@ -111,7 +111,7 @@ class ASYD < Sinatra::Application
     if !params[:token].nil?
       un = User.first(:token => (params['token']))
       if !un.nil?
-        erb :password_reset, :layout => false, :locals => {:token => params['token']}
+        erb :'user/password_reset', :layout => false, :locals => {:token => params['token']}
       else
         erb "<div class='alert alert-error'>"+t('token.invalid') + params['token'] +"</div>"
       end
@@ -148,7 +148,7 @@ class ASYD < Sinatra::Application
   end
 
   get "/password/change" do
-    erb :password_change
+    erb :'user/password_change'
   end
 
   post "/password/change" do

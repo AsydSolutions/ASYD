@@ -3,12 +3,12 @@ class ASYD < Sinatra::Application
     @monitors = Monitor.all
     @hosts = Host.all
     @hostgroups = Hostgroup.all
-    erb :monitors
+    erb :'monitor/monitors'
   end
 
   get '/monitors/:monitor' do
     @base = 'data/monitors/'+params[:monitor]
-    erb :monitor_detail
+    erb :'monitor/monitor_detail'
   end
 
   post '/monitors/monitor' do

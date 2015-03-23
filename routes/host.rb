@@ -7,17 +7,17 @@ class ASYD < Sinatra::Application
     @hosts.each do |host|
       @host_status[host.hostname] = host.is_ok?
     end
-    erb :hosts_overview
+    erb :'host/hosts_overview'
   end
 
   get '/host/:host' do
     status 200
     @host = Host.first(:hostname => params[:host])
     if @host.nil?
-      erb :oops
+      not_found
     else
       @status = @host.get_full_status
-      erb :host_detail
+      erb :'host/host_detail'
     end
   end
 

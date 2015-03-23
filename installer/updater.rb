@@ -12,7 +12,7 @@ class ASYD < Sinatra::Application
       redirect '/login'
     end
     @actions = Updater.update_actions
-    erb :updater
+    erb :'system/updater'
   end
 end
 

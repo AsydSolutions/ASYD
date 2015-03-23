@@ -9,9 +9,9 @@ class ASYD < Sinatra::Application
       @tls = cfg.tls
       @user = cfg.user ? cfg.user : ""
       @password = cfg.password ? cfg.password : ""
-      erb :system_settings
+      erb :'system/system_settings'
     else
-      erb :oops
+      not_found
     end
   end
 
@@ -36,7 +36,7 @@ class ASYD < Sinatra::Application
       cfg.save
       redirect to "/settings"
     else
-      erb :oops
+      not_found
     end
   end
 end

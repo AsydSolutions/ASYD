@@ -52,27 +52,6 @@ class ASYD < Sinatra::Application
     end
   end
 
-  # 404 Error!
-  not_found do
-    status 404
-    erb :oops
-  end
-
-  error 401 do
-    status 401
-    erb :error401
-  end
-
-  error 403 do
-    status 403
-    erb :error403
-  end
-
-  error 500 do
-    status 500
-    erb :error500
-  end
-
   # monitoring on the background
   bgmonit = Spork.spork do
    Monitoring.background
