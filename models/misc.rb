@@ -97,7 +97,6 @@ module Misc
 
   # Executes a command on a remote host
   #
-  # @param ip [String] target ip address
   # @param cmd [String] command to be executed
   # @return result [String] the result of executing the command
   def exec_cmd(cmd)
@@ -109,7 +108,6 @@ module Misc
 
   # Upload a file
   #
-  # @param ip [String] target ip address
   # @param local [String] path to the local file
   # @param remote [String] remote path for uploading the file
   def upload_file(local, remote)
@@ -123,7 +121,6 @@ module Misc
 
   # Download a file
   #
-  # @param ip [String] target ip address
   # @param remote [String] remote path of the file
   # @param local [String] local path to store the file
   def download_file(remote, local)
@@ -137,7 +134,6 @@ module Misc
 
   # Upload a directory
   #
-  # @param ip [String] target ip address
   # @param local [String] path to the local dir
   # @param remote [String] remote path for uploading the directory
   def upload_dir(local, remote)
@@ -167,7 +163,6 @@ module Misc
 
   # Download a directory
   #
-  # @param ip [String] target ip address
   # @param remote [String] remote path of the directory
   # @param local [String] local path to store the directory
   def download_dir(remote, local)

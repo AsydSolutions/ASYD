@@ -151,6 +151,7 @@ en:
     finished: "Finished on %{date}"
     actions:
       installing: "Installing"
+      executing: "Executing"
       deploying: "Deploying"
       undeploying: "Undeploying"
       monitoring: "Monitoring"
@@ -214,6 +215,9 @@ en:
     install:
       title: "Quick Install"
       packages: "Package(s) to install (separated by spaces)"
+    execute:
+      title: "Quick Exec"
+      command: "Command(s) to execute"
     del_deploy:
       title: "Delete Deploy"
       confirm: "Are you sure you want to delete the deploy %{deploy}?"
