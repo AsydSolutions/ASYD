@@ -1,3 +1,4 @@
+require 'time'
 require 'tzinfo'
 require 'process_shared'
 require 'chartkick'

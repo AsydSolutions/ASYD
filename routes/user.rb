@@ -1,7 +1,4 @@
-require 'time'
-
 class ASYD < Sinatra::Application
-
   before /^(\/user|team)/ do
     unless user.is_admin?
       redirect "/"
