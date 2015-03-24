@@ -1,3 +1,5 @@
+PID = Process.pid
+
 require 'sinatra'
 require_relative 'routes/init'
 require_relative 'models/init'
@@ -50,11 +52,6 @@ class ASYD < Sinatra::Application
         end
       end
     end
-  end
-
-  # monitoring on the background
-  bgmonit = Spork.spork do
-   Monitoring.background
   end
 
 end

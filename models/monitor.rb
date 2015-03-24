@@ -264,6 +264,7 @@ module Monitoring
         forks << frk #and store the fork id on the forks array
       end
       Process.waitall
+      exit unless Process.kill 0, PID
       sleep TTL
     end
   end

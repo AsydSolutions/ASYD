@@ -76,6 +76,7 @@ module Awal
           end
         end
       end
+      exit unless Process.kill 0, PID
       sleep 20
     end
   end
