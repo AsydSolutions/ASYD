@@ -1,7 +1,7 @@
 Solaris
 =======
 <br/>
-ASYD supports both Solaris (from version 8 on) and OpenIndiana, but this systems have
+ASYD supports both Solaris (from version 8 on) and OpenIndiana, but these systems have
 some particularities, described below.
 
 <br/>
@@ -27,7 +27,7 @@ The `/etc/admin` file is uploaded during the Monitoring setup to avoid prompts w
 
 **2. pkg**
 
-This package manager is available on Solaris 11 and OpenIndiana, it works similar to
+This package manager is available on Solaris 11 and OpenIndiana. It works similar to
 package managers on Linux, by downloading packages from a software repository. It has
 no special requirements.
 
@@ -56,3 +56,4 @@ package managers:
   * pkgutil: `install pkgutil [if condition]: package`
 
 Same applies to the `uninstall` command.
+

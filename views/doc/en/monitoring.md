@@ -1,7 +1,7 @@
 Monitoring
 ==========
 <br/>
-The monitoring for servers and services on ASYD is handled by [monit](http://mmonit.com/monit/).
+The monitoring of servers and services in ASYD is handled by [monit](http://mmonit.com/monit/).
 The ASYD server check against the local monit installation on the remote host for
 any changes on the status of the server itself or any service being monitored.
 
@@ -13,7 +13,7 @@ The monitoring is automatically set up on every host added to ASYD using a "depl
 which installs and configures **monit** on any of the supported systems.
 
 This "deploy" can be found under `data/deploys/monit/` after the initial setup is done.
-You can also modify this deploy according to your needs, please read the [Deploys](deploys.md)
+You can also modify this deploy according to your needs. Please read the [Deploys](deploys.md)
 section on the documentation.
 
 <br/>
