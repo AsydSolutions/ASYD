@@ -39,7 +39,7 @@ module Misc
   def self.render_path(path, level=0)
     nbspd = '&nbsp;' * ((level-1)*4) if level > 0
     data = '' if level == 0
-    data = '<div class="accordion-heading accordion-invisible"><a class="accordion-toggle" data-toggle="collapse" href="#collapse'+path.split("/").last+'">'+nbspd+'<i class="icon-folder-close-alt"></i> '+path.split("/").last+'</a></div><div id="collapse'+path.split("/").last+'" class="accordion-body collapse out accordion-invisible">' if level > 0
+    data = '<div class="accordion-heading accordion-invisible" style="display: inline-flex; width: 100%;"><a class="accordion-toggle" style="width: 100%" data-toggle="collapse" href="#collapse'+path.split("/").last+'">'+nbspd+'<i class="icon-folder-close-alt"></i> '+path.split("/").last+'</a><a href="#delFolder" class="accordion-toggle pull-right" onclick="passDataToModal(\''+path+'\', \'#delFolder\')"><i class="icon-trash"></i></a></div><div id="collapse'+path.split("/").last+'" class="accordion-body collapse out accordion-invisible">' if level > 0
     nbsp = '&nbsp;' * level*4
     Dir.foreach(path) do |entry|
       next if (entry == '..' || entry == '.')
@@ -48,7 +48,7 @@ module Misc
         level = level+1
         data = data+render_path(full_path, level)+'</div>'
       else
-        data = data+'<div class="accordion-inner accordion-invisible">'+nbsp+'<a href="#" onclick="editDeploy(\''+full_path+'\')"><i class="icon-file-text-alt"></i> '+entry+'</a></div>'
+        data = data+'<div class="accordion-inner accordion-invisible">'+nbsp+'<a href="#" onclick="editDeploy(\''+full_path+'\')"><i class="icon-file-text-alt"></i> '+entry+'</a><a href="#delFile" class="pull-right" onclick="passDataToModal(\''+full_path+'\', \'#delFile\')"><i class="icon-trash"></i></a></div>'
       end
     end
     return data
@@ -97,7 +97,6 @@ module Misc
 
   # Executes a command on a remote host
   #
-  # @param ip [String] target ip address
   # @param cmd [String] command to be executed
   # @return result [String] the result of executing the command
   def exec_cmd(cmd)
@@ -109,7 +108,6 @@ module Misc
 
   # Upload a file
   #
-  # @param ip [String] target ip address
   # @param local [String] path to the local file
   # @param remote [String] remote path for uploading the file
   def upload_file(local, remote)
@@ -123,7 +121,6 @@ module Misc
 
   # Download a file
   #
-  # @param ip [String] target ip address
   # @param remote [String] remote path of the file
   # @param local [String] local path to store the file
   def download_file(remote, local)
@@ -137,7 +134,6 @@ module Misc
 
   # Upload a directory
   #
-  # @param ip [String] target ip address
   # @param local [String] path to the local dir
   # @param remote [String] remote path for uploading the directory
   def upload_dir(local, remote)
@@ -167,7 +163,6 @@ module Misc
 
   # Download a directory
   #
-  # @param ip [String] target ip address
   # @param remote [String] remote path of the directory
   # @param local [String] local path to store the directory
   def download_dir(remote, local)
@@ -179,6 +174,8 @@ module Misc
     end
   end
 
+  # Perform a reboot
+  #
   def reboot
     begin
       Net::SSH.start(self.ip, self.user, :port => self.ssh_port, :keys => "data/ssh_key") do |ssh|

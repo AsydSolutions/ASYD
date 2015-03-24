@@ -30,6 +30,36 @@ module Updater
           host.monitored = false
           host.save
         end
+      elsif action == "populate_host_stats"
+        repository(:stats_db).adapter.select('PRAGMA journal_mode = WAL')
+        hosts = Host.all(:order => [ :created_at.asc ])
+        hosts.each do |host|
+          if HostStats.last.nil?
+            t_hosts = 0
+          else
+            t_hosts = HostStats.last.total_hosts
+          end
+          stat = HostStats.first(:created_at => host.created_at.beginning_of_day)
+          if !stat
+            HostStats.create(:created_at => host.created_at.beginning_of_day, :total_hosts => t_hosts+1)
+          else
+            stat.total_hosts = stat.total_hosts + 1
+            stat.save
+          end
+        end
+      elsif action == "populate_task_stats"
+        repository(:stats_db).adapter.select('PRAGMA journal_mode = WAL')
+        tasks = Task.all(:order => [ :created_at.asc ])
+        tasks.each do |task|
+          stat = TaskStats.first(:created_at => task.created_at.beginning_of_day)
+          if !stat
+            stat = TaskStats.create(:created_at => task.created_at.beginning_of_day)
+          end
+          stat.started_tasks = stat.started_tasks + 1
+          stat.completed_tasks = stat.completed_tasks + 1 if task.status == :finished
+          stat.failed_tasks = stat.failed_tasks + 1 if task.status == :failed
+          stat.save
+        end
       end
     end
     remove_installer_dir
@@ -68,6 +98,16 @@ module Updater
     hosts = Host.all(:monitored => true)
     if hosts.length > 0
       actions << "update_monitored_status"
+    end
+    #-#-#
+
+    #-#-#
+    # Populate HostStats and TaskStats database
+    if Host.all.count != 0 and HostStats.all.count == 0
+      actions << "populate_host_stats"
+    end
+    if Task.all.count != 0 and TaskStats.all.count == 0
+      actions << "populate_task_stats"
     end
     #-#-#
 

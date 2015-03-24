@@ -6,7 +6,7 @@ class Task
   end
 
   property :id, Serial
-  property :action, Enum[ :installing, :deploying, :undeploying ]
+  property :action, Enum[ :installing, :executing, :deploying, :undeploying, :monitoring, :unmonitoring ]
   property :object, String
   property :target, String
   property :target_type, Enum[ :host, :hostgroup ]
@@ -15,4 +15,27 @@ class Task
   property :updated_at, DateTime
 
   has n, :notifications, :repository => :notifications_db
+
+  # Update stats (new task)
+  after :create do
+    stat = TaskStats.first(:created_at => DateTime.now.beginning_of_day)
+    if !stat
+      stat = TaskStats.create(:created_at => DateTime.now.beginning_of_day)
+    end
+    stat.started_tasks = stat.started_tasks + 1
+    stat.save
+  end
+
+  # Update stats (finished/failed task)
+  after :update do
+    if self.status == :finished or self.status == :failed
+      stat = TaskStats.first(:created_at => DateTime.now.beginning_of_day)
+      if !stat
+        stat = TaskStats.create(:created_at => DateTime.now.beginning_of_day)
+      end
+      stat.completed_tasks = stat.completed_tasks + 1 if self.status == :finished
+      stat.failed_tasks = stat.failed_tasks + 1 if self.status == :failed
+      stat.save
+    end
+  end
 end

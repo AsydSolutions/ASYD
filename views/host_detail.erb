@@ -1,4 +1,4 @@
-<div class="span6">
+<div class="span7">
   <div class="row">
     <div class="widget widget-table action-table">
       <div class="widget-header">
@@ -21,6 +21,20 @@
                       <div style="width: <%=@status.used_sysmem_percent.to_i.round.to_s unless @status.nil? %>%" class="bar"><%=@status.used_sysmem_percent.to_s unless @status.nil? %>% <%=t('used')%></div>
             </div></td>
           </tr>
+          <% unless @status.services.nil? %>
+          <tr>
+            <td><strong><%=t('host.stats.services')%></strong></td>
+            <td>
+              <% @status.services.each do |service| %>
+              <p  <%= 'class="text-warning"' if service[1] == "not monitored" %>
+                  <%= 'class="text-success"' if service[1] == "ok" %>
+                  <%= 'class="text-error"' if service[1] != "ok" and service[1] != "not monitored" %> >
+                  <strong><%= service[0] %>:</strong> <%= service[1] %>
+                </p>
+              <% end %>
+            </td>
+          </tr>
+          <% end %>
         </tbody>
         </table>
       </div>
