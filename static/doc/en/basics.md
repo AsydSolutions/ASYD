@@ -3,7 +3,7 @@ Basics
 <br/>
 
 Almost everything in ASYD works using the web interface. It allows you to manage
-all the systems, hostgroups, users, teams, and monitor your servers and manage and launch
+all the systems, hostgroups, users, teams, monitor your servers and manage and launch
 deploys.
 
 The monitoring is handled by [monit](http://mmonit.com/monit/) on the remote hosts,
@@ -17,7 +17,7 @@ Once you are logged in to ASYD, go to the "Server overview" section. There you w
 see the existing hosts and hostgroups, the hosts belonging to a hostgroup and the system
 status for your servers.
 
-On the overview you can open the details the hosts or hostgroups, perform a reboot of a
+On the overview you can open the detail of the hosts or hostgroups, perform a reboot of a
 remote system, remove existing hosts and hostgroups or add new.
 
 For adding a new server, click on the "Add host" button and a prompt will appear.

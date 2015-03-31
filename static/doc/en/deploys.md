@@ -18,7 +18,7 @@ be displayed on the ASYD web interface on the "Deploys" sections.
 * A "def" file (i.e. `data/deploys/LAMP/def`) with the definition of what the deploy will do -
 packages to install, commands to execute, configurations to upload, conditions, etc.
 * Optionally, a "def.sudo" file (i.e. `data/deploys/LAMP/def.sudo`) in case we want to
-execute it as super user instead of the standard "def" when using a non-root user.
+execute this file instead of the standard "def" when using a non-root user (see note below).
 * Optionally, an "undeploy" file (i.e. `data/deploys/LAMP/undeploy`) with the steps required to
 revert (undeploy) a Deploy.
 * Optionally, an "undeploy.sudo" file (i.e. `data/deploys/LAMP/undeploy.sudo`) being the "undeploy"
