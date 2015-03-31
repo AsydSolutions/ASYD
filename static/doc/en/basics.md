@@ -2,8 +2,8 @@ Basics
 ======
 <br/>
 
-Almost everything in ASYD works using the web interface, it allows you to manage
-all the systems, hostgroups, users, teams, monitor your servers and manage and launch
+Almost everything in ASYD works using the web interface. It allows you to manage
+all the systems, hostgroups, users, teams, and monitor your servers and manage and launch
 deploys.
 
 The monitoring is handled by [monit](http://mmonit.com/monit/) on the remote hosts,
@@ -13,19 +13,19 @@ which communicates with the ASYD server.
 Adding Hosts and Hostgroups:
 ----------------------------
 <br/>
-Once you are logged in to ASYD, go to the "Server overview" section, there you will
+Once you are logged in to ASYD, go to the "Server overview" section. There you will
 see the existing hosts and hostgroups, the hosts belonging to a hostgroup and the system
 status for your servers.
 
-On the overview you can open in detail the hosts or hostgroups, perform a reboot of a
+On the overview you can open the details the hosts or hostgroups, perform a reboot of a
 remote system, remove existing hosts and hostgroups or add new.
 
-For adding a new server, click on the "Add host" button and a prompt will appear,
-there you need to provide a unique hostname, the server IP, the user for that host,
-the ssh port if you configured a non-standard port, and the password for that user.
-ASYD then will add the ASYD ssh key on the ~/.ssh/authorized_keys file of the target host
+For adding a new server, click on the "Add host" button and a prompt will appear.
+There you need to provide a unique hostname, the server IP, the user for that host,
+the ssh port (if you configured a non-standard port), and the password for that user.
+ASYD then will add the ASYD ssh key to the ~/.ssh/authorized_keys file of the target host
 for all the future access, thus the provided password won't be stored at all. Alternatively,
-you can leave the password field empty, then ASYD will try to auth against the host using the
+you can leave the password field empty. Then ASYD will try to auth against the host using the
 SSH key created or provided at the setup.
 
 Please note that if you are using a non-root user (like in the case of ubuntu or similar),
@@ -33,12 +33,12 @@ you need to be sure that the user has admin privileges, the command "sudo" is in
 and the user won't be prompted for a sudo password, as ASYD deploying system is non-interactive.
 This can be achieved by adding `%sudo   ALL=(ALL:ALL) NOPASSWD:ALL` on the `/etc/sudoers` file.
 
-After the new host it's added, it will start the monitoring deploy on the background, in this
+After the new host it's added, it will start the monitoring deploy on the background. At this
 time the server will appear as "not monitored". When the monitoring setup has completed,
 opening the host detail will display you all the system information, the status reported by
-monit, and it will also allow you to create new custom variables for the host.
+monit. It will also allow you to create new custom variables for the host.
 
-For adding a new hostgroup, click on "Add group" button and a prompt will appear, there
+For adding a new hostgroup, click on the "Add group" button, and a prompt will appear. There
 you need to provide a unique name for the new hostgroup.
 
 After the new hostgroup it's created, you can open the detail of the group and add servers
@@ -71,13 +71,13 @@ ASYD data structure:
   initialization routines and `config.ru` allows Phusion Passenger to start and manage
   the application.
   * `installer/`: contains the predefined monitor files and the monitoring deploy
-  for launching monit to the added hosts. This folder gets deleted after the setup is complete.
+  for launching monit on the added hosts. This folder gets deleted after the setup is complete.
   * `models/`: contains all the ASYD core, all the functions for it to work.
   * `routes/`: contains the routes and actions to be performed depending on the request.
   * `views/`: contains all the views (web pages) to be displayed on the web interface.
   * `static/lib/`: contains all the javascript, css and images for the views.
   * `data/`: stores ASYD data
-    * `data/db/`: several SQLite DB files for storing hosts, hostgroups, users, teams,
+    * `data/db/`: several SQLite DB files to store hosts, hostgroups, users, teams,
     tasks, notifications, monitoring notifications and system status.
     * `data/deploys/`: where the deploys are stored (detailed information on the
     [Deploys](deploys.md) section of the documentantion).
