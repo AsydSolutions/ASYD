@@ -6,8 +6,8 @@ the possibility of creating your own custom variables (see "[Basics](basics.md) 
 on the documentation).
 
 You can use any of those variables on any configuration file, deploy definition file, on the
-conditions for the conditionals and on the "monitor" files for monitoring services, and they
-will get automatically replaced (unless stated with the "noparse" parameter/tag). All the
+conditions for the conditionals and on the "monitor" files for monitoring services. These variables
+will get automatically replaced with their value (unless stated with the "noparse" parameter/tag). All the
 variables are case-insensitive, which means `<%IP%>` and `<%ip%>` will return the same value.
 
 <br/>
@@ -21,7 +21,7 @@ Global variables:
 
     <%IP%> - Target host IP
 
-    <%DIST%> - Target host linux distribution
+    <%DIST%> - Target host Linux distribution
 
     <%DIST_VER%> - Target host distribution version
 

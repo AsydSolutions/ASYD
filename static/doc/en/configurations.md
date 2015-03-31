@@ -1,7 +1,7 @@
 Configurations
 ==============
 <br/>
-The configurations are a key part on ASYD, you can put any file or folder inside the "configs" directory
+The configurations are a key part on ASYD. You can put any file or folder inside the "configs" directory
 on a deploy, and then upload them using the "def" file of the deploy.
 
 Any configuration file will get parsed looking for variables or conditionals, which gives a lot of
