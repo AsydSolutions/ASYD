@@ -3,6 +3,7 @@ require "dm-sqlite-adapter"
 require 'fileutils'
 require 'net/ssh'
 require 'net/scp'
+require 'net/http'
 require 'open-uri'
 require 'pathname'
 require 'find'
@@ -12,7 +13,6 @@ require 'timeout'
 require 'sqlite3'
 require 'redcarpet'
 require 'bcrypt'
-require 'monit'
 require 'mail'
 require 'htmlentities'
 require_relative "lib/spork"
@@ -82,13 +82,13 @@ if File.directory? 'data'
   repository(:config_db).adapter.select('VACUUM')
   repository(:stats_db).adapter.select('VACUUM')
 
-  # Checkpoint at exit to ensure database consistency
+  # Kill daemons and checkpoint at exit to ensure database consistency
   at_exit {
-    Awal::checkpoint(:users_db)
-    Awal::checkpoint(:config_db)
-    Awal::checkpoint(:stats_db)
-    Awal::checkpoint(:status_db)
-    Awal::checkpoint(:monitoring_db)
+    wck = $WALCHECK.get_int(0)
+    bgm = $BGMONIT.get_int(0)
+
+    Process.kill("TERM", wck) if wck > 0
+    Process.kill("TERM", bgm) if bgm > 0
   }
 
   if Email.all.first.nil?
@@ -102,26 +102,5 @@ NOTEX = Awal::Mutex.new #mutex for notification handling
 TATEX = Awal::Mutex.new #mutex for task handling
 HOSTEX = Awal::Mutex.new #mutex for hosts operations
 
-# check for checkpoints
-walcheck = Spork.spork do
-  Process.setsid
-  Spork.spork do
-    STDIN.reopen '/dev/null'
-    STDOUT.reopen '/dev/null', 'a'
-    STDERR.reopen STDOUT
-    Awal::should_checkpoint?
-  end
-  exit
-end
-
-# monitoring on the background
-bgmonit = Spork.spork do
-  Process.setsid
-  Spork.spork do
-    STDIN.reopen '/dev/null'
-    STDOUT.reopen '/dev/null', 'a'
-    STDERR.reopen STDOUT
-    Monitoring.background
-  end
-  exit
-end
+$WALCHECK = ProcessShared::SharedMemory.new(:int)
+$BGMONIT = ProcessShared::SharedMemory.new(:int)

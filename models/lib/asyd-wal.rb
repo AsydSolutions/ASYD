@@ -30,7 +30,9 @@ module Awal
   #
   def self.checkpoint(database)
     begin
+      p database
       ret = repository(database).adapter.select('PRAGMA wal_checkpoint(FULL)')
+      p ret
       raise if ret[0].busy == 1
       return true
     rescue
@@ -41,6 +43,18 @@ module Awal
   # Runs on backgound and check if there's checkpointeable changes
   #
   def self.should_checkpoint?
+    Signal.trap("TERM") {
+      Awal::checkpoint(:users_db)
+      Awal::checkpoint(:config_db)
+      Awal::checkpoint(:stats_db)
+      Awal::checkpoint(:status_db)
+      Awal::checkpoint(:monitoring_db)
+      Awal::checkpoint(:tasks_db)
+      Awal::checkpoint(:notifications_db)
+      Awal::checkpoint(:hosts_db)
+      exit
+    }
+
     while true
       stamp = Time.now.to_i
       if NOTEX.last_lock > 1

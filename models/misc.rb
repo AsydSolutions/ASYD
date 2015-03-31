@@ -68,7 +68,7 @@ module Misc
     else
       free_mem = %x(free -m |grep cache: |awk '{print $4}')
     end
-    max_forks = free_mem.to_i / 30
+    max_forks = free_mem.to_i / 50
     return max_forks
   end
 
