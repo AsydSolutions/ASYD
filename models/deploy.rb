@@ -720,14 +720,14 @@ class Deploy
       File.open(cfg, "r").each do |line|
         if !noparse
           if !condition
-            m = line.match(/^<%if (.+)%>$/)
+            m = line.strip.match(/^<% ?if (.+)%>$/)
             if !m.nil?
               doit = check_condition(m, host)
               condition = true
               skip = true
             end
           else
-            if line.match(/^<%endif%>$/)
+            if line.strip.match(/^<% ?endif ?%>$/)
               condition = false
               doit = true
               skip = true
@@ -735,12 +735,12 @@ class Deploy
           end
         end
         if !noparse
-          if line.match(/^<%noparse%>$/)
+          if line.strip.match(/^<% ?noparse ?%>$/)
             noparse = true
             skip = true
           end
         else
-          if line.match(/^<%\/noparse%>$/)
+          if line.strip.match(/^<% ?\/noparse ?%>$/)
             noparse = false
             skip = true
           end
