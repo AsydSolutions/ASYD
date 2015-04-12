@@ -179,9 +179,9 @@ class Deploy
         end
 
         # Set variables from a Deploy
-        if gdoit && m = line.match(/^var (.+) = (exec)/i)
+        if gdoit && m = line.match(/^var (.+) = (exec|http)/i)
           varname = m[1] #we create varname here
-          line = line.split(/ = /, 2)[1].strip #and remove the start of the line so we have only the exec part
+          line = line.split(/ = /, 2)[1].strip #and remove the start of the line so we have only the exec or http part
         end
 
         # IGNORE
@@ -300,7 +300,6 @@ class Deploy
         # /CONFIG DIR BLOCK
 
         # EXEC BLOCK
-        #
         elsif line.start_with?("exec")
           doit = true
           m = line.match(/^exec (.(var:|[^:])+)/i)
@@ -342,6 +341,41 @@ class Deploy
             end
           end
         # /EXEC BLOCK
+
+        # HTTP BLOCK
+        elsif line.match(/^http (get|post)/i)
+          doit = true
+          m = line.match(/if (.+)(?<!var):/i)
+          if !m.nil?
+            doit = check_condition(m, host)
+          end
+          method = line.match(/^http (get|post)/i)[1].upcase
+          line = line.split(/(?<!var):/i, 2)
+          if method == "GET"
+            url = line[1].strip
+            uri = URI(url)
+            ret = Net::HTTP.get(uri)
+          elsif method == "POST"
+            args = line[1].split(',')
+            url = args.shift.strip
+            options = {}
+            args.each do |arg|
+              arg = arg.split("=")
+              options[arg[0].strip] = arg[1].strip
+            end
+            uri = URI.parse(url)
+            # Create the HTTP objects
+            http = Net::HTTP.new(uri.host, uri.port)
+            request = Net::HTTP::Post.new(uri.request_uri)
+            request.set_form_data(options)
+            # Send the request
+            ret = http.request(request)
+          end
+          msg = "HTTP "+method+" "+url+": "+ret.body
+          NOTEX.synchronize do
+            notification = Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
+          end
+        # /HTTP BLOCK
 
         # MONITOR BLOCK
         elsif line.start_with?("monitor")
@@ -385,7 +419,7 @@ class Deploy
               end
             end
           end
-        # /MONITOR BLOCK
+        # /UNMONITOR BLOCK
 
         # DEPLOY BLOCK
         elsif line.start_with?("deploy")
@@ -413,7 +447,7 @@ class Deploy
           end
         # /DEPLOY BLOCK
 
-        # DEPLOY BLOCK
+        # UNDEPLOY BLOCK
         elsif line.start_with?("undeploy")
           doit = true
           m = line.match(/^undeploy if (.+)(?<!var):/i)
@@ -437,7 +471,7 @@ class Deploy
               end
             end
           end
-        # /DEPLOY BLOCK
+        # /UNDEPLOY BLOCK
 
         # REBOOT BLOCK
         elsif line.start_with?("reboot")

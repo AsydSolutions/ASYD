@@ -1,5 +1,3 @@
-# Happy fool's day :P
-
 class Host
   include DataMapper::Resource
   include Monitoring::Host
