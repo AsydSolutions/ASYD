@@ -351,12 +351,13 @@ class Deploy
           end
           method = line.match(/^http (get|post)/i)[1].upcase
           line = line.split(/(?<!var):/i, 2)
+          line = parse(host, line[1].strip)
           if method == "GET"
-            url = line[1].strip
+            url = line.strip
             uri = URI(url)
             ret = Net::HTTP.get(uri)
           elsif method == "POST"
-            args = line[1].split(',')
+            args = line.split(',')
             url = args.shift.strip
             options = {}
             args.each do |arg|
@@ -369,9 +370,10 @@ class Deploy
             request = Net::HTTP::Post.new(uri.request_uri)
             request.set_form_data(options)
             # Send the request
-            ret = http.request(request)
+            response = http.request(request)
+            ret = response.body
           end
-          msg = "HTTP "+method+" "+url+": "+ret.body
+          msg = "HTTP "+method+" "+url+": "+ret
           NOTEX.synchronize do
             notification = Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
           end
