@@ -72,7 +72,7 @@ De alerts worden toegevoegd door de lijn te starten met `# alert:`
 *Syntax:* `# Alert: Bericht dat getoond moet worden voor de deploy
  uitgevoerd wordt`
 
-**1. installatie**
+**1. installatie/uninstall**
 
 Het installatie commando kan gebruikt worden om een lijst van packages
  (gesplitst door een spatie) te definiëren die moeten geïnstalleerd
@@ -86,15 +86,13 @@ Op Solaris systemen accepteert het ook een extra argument om de package
 
 *Syntax:* `install [if <voorwaarde>]: package_a package_b package_c`
 
-**2. uninstall**
-
 Het uninstall commando werkt net als het install commando, maar voor
  het verwijderen van packages. Het accepteert ook voorwaarden en
- package manager, in het geval van Solaris
+ package manager, in het geval van [Solaris](solaris.md)
 
 *Syntax:* `uninstall [if <voorwaarde>]: package_a package_b package_c`
 
-**3. config file**
+**2. config file**
 
 Dit commando laat toe om configuraties die opgeslagen zijn in de "configs"
  map (eerste parameter) te uploaden naar het pad van de doel host
@@ -109,7 +107,7 @@ Lees ook de [Configuraties](configurations.md) documentatie.
 *Syntax:* `[noparse] config bestand [if <voorwaarde>]: bestand.conf,
  /doel/pad/bestand.conf
 
-**4. config dir**`
+**3. config dir**`
 
 Werkt hetzelfde als het "config file" commando, maar inspecteert
  recursief alle bestanden en submappen in de map, en verwerkt elk
@@ -118,7 +116,7 @@ Werkt hetzelfde als het "config file" commando, maar inspecteert
 
 *Syntax:* `[noparse] config dir [if <voorwaarde>]: config map, doel/map`
 
-**5. exec**
+**4. exec**
 
 Dit commando voert een (bash/sh) commando uit dat door de gebruiker
  gespecificeerd werd, en is dus het meest veelzijdige commando in ASYD.
@@ -132,28 +130,45 @@ Het accepteert optionele voorwaarden en ook een host parameter, waarmee
 
 *Syntax:* `exec [host] [if <voorwaarde>]: commando`
 
+**5. http**
+
+Dit commando laat toe een HTTP GET of POST te maken vanuit een deploy.
+ Deze call wordt gedaan door de ASYD server in plaats van de doelhost.
+ Dit is vooral nuttig voor samenwerking met een API, aangezien je ook
+ het "http" kan gebruiken vanuit het "var" commando om de waarde ervan
+ te gebruiken (zie volgend punt).
+
+*Syntax:* `http get [if <voorwaarde>]: url`
+
+*Syntax:* `http post [if <voorwaarde>]: url [, key1=val1, key2=val2, ...]`
+
 **6. var**
 
 Dit commando laat toe om een host variabele van een "def" of "undeploy"
  bestand te maken, dat later aangeroepen kan worden als een normale
  variabele (<%VAR:varnaam%> - zie [Variabelen](variables.md)). De
  variabele kan gezet worden met de output van het "exec" commando -
- Verifieer dat het commando een output produceert. Als een variabele met
- dezelfde naam bestaat, zal deze overschreven worden met de nieuwe
- waarde.
+ Verifieer dat het commando een output produceert - of "http". Als een
+ variabele met dezelfde naam bestaat, zal deze overschreven worden met
+ de nieuwe waarde.
 
 *Syntax:* `var <varnaam> = exec [host] [if <voorwaarde>]: commando`
 
-**7. monitor**
+*Syntax:* `var <varnaam> = http <get|post> [if <voorwaarde>]: url[m key1=val1,key2,val2, ...]`
 
-Dit commando laat u toe een service te monitoren. De service parameter 
- moet dezelfde naam hebben als het monitor bestand in de `data/monitors`
- map, dat moet bestaan. Je kan ook verschillende services specificeren,
- gescheiden meet een spatie. Het accepteert ook optionele voorwaarden.
+**7. monitor / unmonitor**
+
+Dit commando laat u toe een service te monitoren (of te stoppen met
+ monitorren met "unmonitor". De service parameter moet dezelfde naam
+ hebben als het monitor bestand in de `data/monitors` map, dat moet
+ bestaan. Je kan ook verschillende services specificeren, gescheiden
+ met een spatie. Het accepteert ook optionele voorwaarden.
 
 *Syntax:* `monitor [if <voorwaarde>]: service`
 
-**8. deploy**
+*Syntax:* `unmonitor [if <voorwaarde>]: service`
+
+**8. deploy / undeploy**
 
 Met dit commando kan je ook andere deploys van een deploy launchen, wat
  zelf toelaat om meta-deploys te creëren die voorwaarden voor deploys
@@ -161,6 +176,11 @@ Met dit commando kan je ook andere deploys van een deploy launchen, wat
  optionele voorwaarden.
 
 *Syntax:* `deploy [if <voorwaarde>]: another_deploy`
+
+Het "undeploy" commando werkt net als het 'undeploy' bestand ten
+ opzichte van het 'def' bestand
+
+*Syntax:* `undeploy [if <voorwaarde>]: another_deploy`
 
 **9. reboot**
 
