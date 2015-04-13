@@ -54,7 +54,7 @@ The alerts are done by starting a line with `# alert:`
 
 *Syntax:* `# Alert: Message to display before confirming the execution of a deploy`
 
-**1. install**
+**1. install / uninstall**
 
 The install command can be used to define a (space separated) list of packages to be installed
 on the target system. Internally, ASYD will check the kind of system on which is going to install
@@ -65,14 +65,12 @@ On Solaris systems it also accept an extra argument for defining the package man
 
 *Syntax:* `install [if <condition>]: package_a package_b package_c`
 
-**2. uninstall**
-
 The uninstall command performs like the install command, but for removing software packages.
-It also accepts conditionals optionally and package manager in the case of Solaris.
+It also accepts conditionals optionally and package manager in the case of [Solaris](solaris.md).
 
 *Syntax:* `uninstall [if <condition>]: package_a package_b package_c`
 
-**3. config file**
+**2. config file**
 
 This command allows you to upload a configuration stored in the "configs" directory (first parameter)
 to the path defined for the target host (second parameter). The name of the local file must be
@@ -83,7 +81,7 @@ but to be uploaded as-is. Please also read the [Configurations](configurations.m
 
 *Syntax:* `[noparse] config file [if <condition>]: file.conf, /destination/file.conf`
 
-**4. config dir**
+**3. config dir**
 
 Behaves the same way as the "config file" command, but inspects recursively all the files and
 subfolders inside the defined directory, parsing each one of the configuration files in there.
@@ -92,7 +90,7 @@ Like for "config file", it also accepts the optional conditionals and the "nopar
 
 *Syntax:* `[noparse] config dir [if <condition>]: confdir, /destination/dir`
 
-**5. exec**
+**4. exec**
 
 This command simply executes any user defined (bash/sh) command, thus is the most versatile
 command on ASYD. It accepts optionally conditionals and also a host parameter, on which you can
@@ -104,14 +102,26 @@ parameters for any command.
 
 *Syntax:* `exec [host] [if <condition>]: command`
 
+**5. http**
+
+This command allows you to perform an HTTP GET or POST request from a deploy. This call is performed
+by the ASYD server instead of the target host. It is particulary useful for interacting with an API,
+as you can also use "http" from the "var" command to store it's return (see next point).
+
+*Syntax:* `http get [if <condition>]: url`
+
+*Syntax:* `http post [if <condition>]: url[, key1=val1, key2=val2, ...]`
+
 **6. var**
 
 This command allows you to set a host variable from a "def" or "undeploy" file, which can be called
 later as a normal variable (<%VAR:varname%> - see [Variables](variables.md)). The variable can be
-set with the output of an "exec" command - make sure the command produces an output. If a variable
-with the same name exists, it will be overwritten to the new value.
+set with the output of an "exec" command - make sure the command produces an output - or "http" command.
+If a variable with the same name exists, it will be overwritten to the new value.
 
 *Syntax:* `var <varname> = exec [host] [if <condition>]: command`
+
+*Syntax:* `var <varname> = http <get|post> [if <condition>]: url[, key1=val1, key2=val2, ...]`
 
 **7. monitor / unmonitor**
 
