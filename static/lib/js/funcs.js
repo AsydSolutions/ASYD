@@ -44,6 +44,11 @@ $(function () {
 
   $('.hint').tooltip();
 
+  var flst = $('script[src="/js/bootstrap-filestyle.min.js"]').length;
+  if (flst !== 0) {
+    $(":file").filestyle({input: false, classButton: "btn input-block-level"});
+  }
+
   $('a[deploy-confirm]').click(function () {
     var dep = $(this).attr('data-deploy');
     var e = document.getElementById('selectHostDeploy');
@@ -53,6 +58,9 @@ $(function () {
       return false;
     }
     var host = target.split(';');
+    if ($('#dataConfirmModal').length) {
+      document.getElementById("dataConfirmModal").remove();
+    }
     if (!$('#dataConfirmModal').length) {
       $('body').append('<div id="dataConfirmModal" class="modal fade" role="dialog" aria-labelledby="dataConfirmLabel" aria-hidden="true"><div class="modal-header"><a type="button" class="close" data-dismiss="modal" aria-hidden="true">×</a><h3 id="dataConfirmLabel">Please Confirm</h3></div><div class="modal-body"></div><div class="modal-footer"><form id="deployForm" action="/deploys/deploy" method="post"><input type="hidden" name="deploy" value="'+dep+'"><input type="hidden" name="target" value="'+target+'"><a class="btn" data-dismiss="modal" aria-hidden="true">Cancel</a><button type="submit" class="btn btn-primary">Deploy!</button></div></div>');
     }
@@ -94,6 +102,54 @@ $(function () {
     }
   });
 
+  $('a[monitor-confirm]').click(function () {
+    var mon = $(this).attr('data-monitor');
+    var e = document.getElementById('selectHostMonitor');
+    var target = e.options[e.selectedIndex].value;
+    if (!target) {
+      alert('Select a host/hostgroup');
+      return false;
+    }
+    var host = target.split(';');
+    if ($('#dataConfirmModal').length) {
+      document.getElementById("dataConfirmModal").remove();
+    }
+    if (!$('#dataConfirmModal').length) {
+      $('body').append('<div id="dataConfirmModal" class="modal fade" role="dialog" aria-labelledby="dataConfirmLabel" aria-hidden="true"><div class="modal-header"><a type="button" class="close" data-dismiss="modal" aria-hidden="true">×</a><h3 id="dataConfirmLabel">Please Confirm</h3></div><div class="modal-body"></div><div class="modal-footer"><form id="monitorForm" action="/monitors/monitor" method="post"><input type="hidden" name="monitor" value="'+mon+'"><input type="hidden" name="target" value="'+target+'"><a class="btn" data-dismiss="modal" aria-hidden="true">Cancel</a><button type="submit" class="btn btn-primary">Monitor!</button></div></div>');
+    }
+    if (Modernizr.csstransforms3d === false){
+      $('#dataConfirmModal').removeClass('fade');
+    }
+    var text = $(this).attr('monitor-confirm') + host[0] + ' ' + host[1] + '?';
+    $('#dataConfirmModal').find('.modal-body').html(text);
+    $('#dataConfirmModal').modal({show:true});
+    return false;
+  });
+
+  $('a[unmonitor-confirm]').click(function () {
+    var mon = $(this).attr('data-monitor');
+    var e = document.getElementById('selectHostMonitor');
+    var target = e.options[e.selectedIndex].value;
+    if (!target) {
+      alert('Select a host/hostgroup');
+      return false;
+    }
+    var host = target.split(';');
+    if ($('#dataConfirmModal').length) {
+      document.getElementById("dataConfirmModal").remove();
+    }
+    if (!$('#dataConfirmModal').length) {
+      $('body').append('<div id="dataConfirmModal" class="modal fade" role="dialog" aria-labelledby="dataConfirmLabel" aria-hidden="true"><div class="modal-header"><a type="button" class="close" data-dismiss="modal" aria-hidden="true">×</a><h3 id="dataConfirmLabel">Please Confirm</h3></div><div class="modal-body"></div><div class="modal-footer"><form id="unmonitorForm" action="/monitors/unmonitor" method="post"><input type="hidden" name="monitor" value="'+mon+'"><input type="hidden" name="target" value="'+target+'"><a class="btn" data-dismiss="modal" aria-hidden="true">Cancel</a><button type="submit" class="btn btn-primary">Un-Monitor!</button></div></div>');
+    }
+    if (Modernizr.csstransforms3d === false){
+      $('#dataConfirmModal').removeClass('fade');
+    }
+    var text = $(this).attr('unmonitor-confirm') + host[0] + ' ' + host[1] + '?';
+    $('#dataConfirmModal').find('.modal-body').html(text);
+    $('#dataConfirmModal').modal({show:true});
+    return false;
+  });
+
   $(document).ready(function () {
     if (Modernizr.csstransforms3d === false){
       $('.modal').removeClass('fade');
@@ -111,7 +167,7 @@ $(function () {
         'pageLength': 10,
         'info': false,
         'renderer': 'bootstrap',
-        'stateSave': true,
+        'stateSave': false,
         'language': {
           'search': '<i class="icon-search"></i>',
           'emptyTable': 'You haven\'t added any hostgroup yet',
@@ -145,6 +201,12 @@ $(function () {
           'emptyTable': 'You haven\'t added any deploys yet'
         }
       });
+      $('#montable').dataTable({
+        'pageLength': 10,
+        'language': {
+          'emptyTable': 'You haven\'t added any monitors yet'
+        }
+      });
       $('#attable').dataTable({
         'lengthChange': false,
         'searching': false,
@@ -168,7 +230,13 @@ $(function () {
       $('#selectHostDeploy').select2( {
         'placeholder': 'Select host or hostgroup',
       });
+      $('#selectHostMonitor').select2( {
+        'placeholder': 'Select host or hostgroup',
+      });
       $('#selectHostInstall').select2( {
+        'placeholder': 'Select host or hostgroup',
+      });
+      $('#selectHostExecute').select2( {
         'placeholder': 'Select host or hostgroup',
       });
     }
@@ -219,6 +287,32 @@ var saveDeployFile = function () {
   });
 };
 
+var editMonitor = function (path)
+{
+  $('.CodeMirror').each(function (i, el) {
+    el.parentNode.removeChild(el);
+  });
+  $.ajax({url:"/monitors/get_file_contents/" + path, cache: false, async: false, success: function (result) {
+    $('#editBox').val(result);
+  }});
+  $('#filePath').html(path);
+  var editor = CodeMirror.fromTextArea(editBox, {
+    mode: "text/x-sh"
+  });
+  editor.on("change", function () {
+    editor.save();
+  });
+};
+
+var saveMonitorFile = function () {
+  $.post('/monitors/edit', {
+    path: $('#filePath').text(),
+    text: $('#editBox').val()
+  }, function () {
+    $("#saved").show().delay(2000).fadeOut();
+  });
+};
+
 var passDataToModal = function (data, modal_id) {
   $(".modal-body #dataInput").text(data);
   $(".modal-body #dataInput").val(data);
@@ -233,15 +327,45 @@ var editTeam = function (name) {
   });
 };
 
-var getTaskNotifications = function (task_id) {
+var getTaskNotifications = function (task_id, refreshing) {
+  if (typeof(refreshing)==='undefined') refreshing = false;
   $.get('/notifications/bytask/' + task_id, function (data) {
+    var accordions = [];
+    $( ".accordion-body" ).each( function( index ) {
+      if ($( this ).attr('id') !== "nocollapse"){
+        accordions[index] = $( this ).attr('class');
+      }
+    });
     $('#taskNotifications').html(data);
+    for (var index in accordions){
+      $( ".accordion-body" ).eq(index).attr('class', accordions[index]);
+    }
+    if ( document.getElementById("finished") !== null ){
+      if ( refreshing ){
+        location.reload();
+      }
+    } else {
+      var interval = setTimeout(function() { getTaskNotifications(task_id, true); }, 15000);
+    }
+  });
+};
+
+var reloadTasks = function (){
+  $.get('/task/list', function (data) {
+    var newDoc = $(data).contents();
+    currlength = $('#active tr').length;
+    if ( $('#active tr .dataTables_empty').length !== 0 ) {
+      currlength = 0;
+    }
+    if ( currlength !== newDoc.find("#active tr").length ){
+      location.reload();
+    }
   });
 };
 
 var delTask = function (id) {
   $.get('/task/del/' + id, function (data) {
-    $('#task' + id).remove();
+    location.reload();
   });
 };
 

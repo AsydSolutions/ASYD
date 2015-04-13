@@ -1,0 +1,26 @@
+<div class="row">
+  <div class="span6">
+    <div class="widget">
+      <div class="widget-header">
+        <i class="icon-info"></i><h3><%=t('dashboard.task.stats')%></h3>
+      </div>
+      <div class="widget-content">
+        <%= line_chart @render_task_stats[0].map{|map|
+          {name: map, data: @render_task_stats[(@render_task_stats[0].index map)+1]}
+        }, library: {legend: {position: 'top'}, chartArea: {width: '90%', height: '85%'}, hAxis: {gridlines: {count: 4}, format: "dd/MM/yy"}, vAxis: {gridlines: {count: 4}}}, colors: ["#34b0c9", "#468847","#b94a48"] %>
+      </div>
+    </div>
+  </div>
+  <div class="span6">
+    <div class="widget">
+      <div class="widget-header">
+        <i class="icon-info"></i><h3><%=t('dashboard.host.stats')%></h3>
+      </div>
+      <div class="widget-content">
+        <%= area_chart [1].map{|map|
+          {name: 'Total Hosts', data: @render_host_stats}
+        }, library: {legend: {position: 'top'}, chartArea: {width: '90%', height: '85%'}, hAxis: {gridlines: {count: 4}, format: "dd/MM/yy"}, vAxis: {gridlines: {count: 4}}}, colors: ["#34b0c9"] %>
+      </div>
+    </div>
+  </div>
+</div>

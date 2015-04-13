@@ -4,44 +4,51 @@
   <title>ASYD - Automated SYstem Deployment</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" type="image/png" href="/img/favicon.png">
-  <link rel="stylesheet" href="/css/bootstrap.min.css">
-  <link rel="stylesheet" href="/css/bootstrap-responsive.min.css">
-  <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,600italic,400,600">
-  <link rel="stylesheet" href="/css/font-awesome.min.css">
-  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css">
+  <link rel="stylesheet" type="text/css" href="/css/bootstrap-responsive.min.css">
+  <link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,600italic,400,600">
+  <link rel="stylesheet" type="text/css" href="/css/font-awesome.min.css">
+  <link rel="stylesheet" type="text/css" href="/css/style.css">
   <% if request.path_info.start_with?("/login") %>
-    <link rel="stylesheet" href="/css/pages/signin.css">
+    <link rel="stylesheet" type="text/css" href="/css/pages/signin.css">
   <% end %>
-  <script src="/js/jquery-1.7.2.min.js" type="text/javascript"></script>
-  <script src="/js/bootstrap.js"></script>
-  <script src="/js/base.js"></script>
-  <script src="/js/jqBootstrapValidation.min.js"></script>
-  <script src="/js/modernizr.min.js" type="text/javascript"></script>
-  <% if request.path_info.start_with?("/deploys/") %>
-  <script src="/js/codemirror.js" type="text/javascript"></script>
-  <link rel="stylesheet" href="/css/codemirror.css">
+  <script type="text/javascript" language="javascript" src="/js/jquery-1.7.2.min.js"></script>
+  <script type="text/javascript" language="javascript" src="/js/bootstrap.js"></script>
+  <script type="text/javascript" language="javascript" src="/js/base.js"></script>
+  <script type="text/javascript" language="javascript" src="/js/jqBootstrapValidation.min.js"></script>
+  <script type="text/javascript" language="javascript" src="/js/modernizr.min.js"></script>
+  <% if request.path_info == "/" %>
+    <script type="text/javascript" language="javascript" src="//www.google.com/jsapi"></script>
+    <script type="text/javascript" language="javascript" src="/js/chartkick.js"></script>
   <% end %>
-  <script src="/js/funcs.js" type="text/javascript"></script>
+  <% if request.path_info.start_with?("/deploys/") || request.path_info.start_with?("/monitors/") %>
+    <script type="text/javascript" language="javascript" src="/js/codemirror.js"></script>
+    <link rel="stylesheet" type="text/css" href="/css/codemirror.css">
+  <% end %>
+  <script type="text/javascript" language="javascript" src="/js/funcs.js?v=0.064"></script>
   <!-- DataTables -->
-  <% if request.path_info.start_with?("/host") || request.path_info.start_with?("/deploys/list") || request.path_info.start_with?("/task/list") || request.path_info.start_with?("/users") %>
-    <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.1/css/jquery.dataTables.css">
+  <% if request.path_info.start_with?("/host") || request.path_info.start_with?("/deploys/list") || request.path_info.start_with?("/monitors/list") || request.path_info.start_with?("/task/list") || request.path_info.start_with?("/users") %>
+    <link rel="stylesheet" type="text/css" href="/css/jquery.dataTables.css">
     <link rel="stylesheet" type="text/css" href="/css/datatables-bootstrap.css">
-    <script type="text/javascript" language="javascript" src="//cdn.datatables.net/1.10.1/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" language="javascript" src="/js/jquery.dataTables.min.js"></script>
     <script type="text/javascript" language="javascript" src="/js/datatables-bootstrap.js"></script>
   <% end %>
   <!-- DataTables -->
   <!-- Select2 -->
-  <% if request.path_info.start_with?("/host") || request.path_info.start_with?("/deploys/list") %>
+  <% if request.path_info.start_with?("/host") || request.path_info.start_with?("/deploys/list") || request.path_info.start_with?("/monitors/list") %>
     <link rel="stylesheet" type="text/css" href="/css/select2.css">
     <script type="text/javascript" language="javascript" src="/js/select2.min.js"></script>
   <% end %>
   <!-- Select2 -->
+  <% if request.path_info.start_with?("/deploys/") %>
+    <script type="text/javascript" src="/js/bootstrap-filestyle.min.js"> </script>
+  <% end %>
   <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
   <!--[if lt IE 9]>
-    <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <script type="text/javascript" language="javascript" src="/js/html5.js"></script>
   <![endif]-->
   <!--[if IE 7]>
-    <link rel="stylesheet" href="/css/font-awesome-ie7.min.css">
+    <link rel="stylesheet" type="text/css" href="/css/font-awesome-ie7.min.css">
   <![endif]-->
 </head>
 <body>
@@ -89,6 +96,7 @@
             <li <% if request.path_info == "/" %>class="active"<%end%>><a href="/"><i class="icon-dashboard"></i><span><%=t('menu.dashboard')%></span></a></li>
             <li <% if request.path_info.start_with?("/host") %>class="active"<%end%>><a href="/hosts/overview"><i class="icon-hdd"></i><span><%=t('menu.servers')%></span></a></li>
             <li <% if request.path_info.start_with?("/deploy") %>class="active"<%end%>><a href="/deploys/list"><i class="icon-code"></i><span><%=t('menu.deploys')%></span></a></li>
+            <li <% if request.path_info.start_with?("/monitor") %>class="active"<%end%>><a href="/monitors/list"><i class="icon-desktop"></i><span><%=t('menu.monitoring')%></span></a></li>
             <li <% if request.path_info.start_with?("/task") %>class="active"<%end%>><a href="/task/list"><i class="icon-tasks"></i><span><%=t('menu.tasks')%></span></a></li>
           </ul>
         </div>
@@ -98,9 +106,9 @@
     	<div class="main-inner">
         <div class="container">
           <% notifications = Notification.all(:dismiss => false) %>
-          <% notifications.each do |notification| %>
+          <% notifications.reverse.each do |notification| %>
             <% if notification.sticky == false %>
-              <% notification.update(:dismiss => true) %>
+              <% NOTEX.synchronize{ notification.update(:dismiss => true) } %>
               <% if notification.type == :info %>
                 <div class="alert alert-info">
               <% elsif notification.type == :error %>
@@ -160,7 +168,7 @@
             <div class="span2 offset6">
               <% file = open('http://www.asyd.eu/asyd.version') %>
               <% last_ver = file.read.strip %>
-              <% curr_ver = 0.05 %>
+              <% curr_ver = 0.065 %>
               <%= '<div class="text-error">' unless last_ver.to_f <= curr_ver %> v <%= curr_ver %> <%= "Update available</div>" unless last_ver.to_f <= curr_ver %>
             </div>
           </div>
