@@ -2,7 +2,7 @@
 
 ***
 
-**I. [ASYD installeren](installatie.md)**
+**I. [ASYD installeren](installing.md)**
 
 **1. [Basis](basics.md)**
 
