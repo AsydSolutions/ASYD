@@ -36,7 +36,7 @@ You can, however, use single line conditionals as described on the next point.*
 
     if <%DIST%> == debian and <%DIST_VER%> == 6 or <%DIST%> == centos and <%DIST_VER%> >= 5
     install: package
-    execute: some command
+    exec: some command
     endif
 
 **2. Single commands on "def" files**
@@ -46,7 +46,7 @@ and you can also define conditions for concrete commands even inside a condition
 
 *Syntax:*
 
-    execute if <%var%> == value [or|and condition2] [or|and ...]: some command
+    exec if <%var%> == value [or|and condition2] [or|and ...]: some command
 
 *Example:*
 
