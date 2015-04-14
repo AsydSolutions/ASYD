@@ -72,7 +72,7 @@ De alerts worden toegevoegd door de lijn te starten met `# alert:`
 *Syntax:* `# Alert: Bericht dat getoond moet worden voor de deploy
  uitgevoerd wordt`
 
-**1. installatie/uninstall**
+**1. install / uninstall**
 
 Het installatie commando kan gebruikt worden om een lijst van packages
  (gesplitst door een spatie) te definiëren die moeten geïnstalleerd
@@ -82,7 +82,7 @@ Het installatie commando kan gebruikt worden om een lijst van packages
  het onderdeel [Voorwaarden](conditionals.md) voor meer informatie.
 Op Solaris systemen accepteert het ook een extra argument om de package
  manager te specificeren. Lees [Solaris](solaris.md) voor een meer
- gedetailleerd overzicht. 
+ gedetailleerd overzicht.
 
 *Syntax:* `install [if <voorwaarde>]: package_a package_b package_c`
 
