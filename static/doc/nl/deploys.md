@@ -22,36 +22,36 @@ Deploy structuur:
 * Een "def" bestand (bvb `data/deploys/LAMP/def`) met de definitie die
  bepaalt wat de deploy zal doen - packages installeren, commando's
  uitvoeren, configuraties uploaden, voorwaarden, etc...
-* Optioneel, een "def.ouds" bestand (bvb `data/deploys/LAMP/def.ouds`)
+* Optioneel, een "def.sudo" bestand (bvb `data/deploys/LAMP/def.sudo`)
  in het geval we het willen uitvoeren als super user in plaats van de
  standaard "def", wanneer we een non-root gebruiken.
 * Optioneel, een "undeploy" bestand (bvb `data/deploys/LAMP/undeploy`)
  met de stappen nodig om een Deploy ongedaan te maken (undeploy).
-* Optioneel, een "undeploy.ouds" bestand (bvb
- `data/deploys/LAMP/undeploy.ouds`), zijnde het "undeploy" equivalent
- van "def.ouds"
+* Optioneel, een "undeploy.sudo" bestand (bvb
+ `data/deploys/LAMP/undeploy.sudo`), zijnde het "undeploy" equivalent
+ van "def.sudo"
 * Een "configs" map met de configuratie bestanden en mappen die
  geüpload moeten worden. (bvb
  `data/deploys/LAMP/configs/apache/apache.conf`).
 
-**Opmerking over "def.ouds":** dit definitie bestand zal enkel
+**Opmerking over "def.sudo":** dit definitie bestand zal enkel
  uitgevoerd worden in plaats van het normale "def" bestand wanneer de
  gebruiker die op het remote systeem uitvoert niet "root" is en het
  bestand bestaat. Dit is vooral nuttig op Ubuntu machines, die geen
  root gebruikers gebruiken. Voor de machines met de root gebruiker wordt
- het standaard "def" bestand uitgevoerd, ongeacht of het "def.ouds"
+ het standaard "def" bestand uitgevoerd, ongeacht of het "def.sudo"
  bestand bestaat of niet. Als het bestand niet bestaat zal het standaard
  "def" bestand uitgevoerd worden, ook voor niet-root gebruikers.
- Hetzelfde geld voor "undeploy.ouds"
+ Hetzelfde geld voor "undeploy.sudo"
 
 <br/>
 Het "def" bestand:
 ------------------
 <br/>
-Zowel het "def" als het "def.ouds" bestand, gebruikt voor het
+Zowel het "def" als het "def.sudo" bestand, gebruikt voor het
  definiëren van deploys, accepteren volgende commando's en parameters.
  Dezelfde regels zijn van toepassing op de "undeploy" en
- "undeploy.ouds" bestanden.
+ "undeploy.sudo" bestanden.
 
 *Let top de dubbelpunt - : - na de voorwaarden en voor de argumenten,
  aangezien deze nodig zijn om de deploy te doen werken.*
@@ -64,7 +64,7 @@ Iedere lijn die start met een hashtag (#) wordt geïnterpreteerd als
  van een deploy. Dit is nuttig wanneer je deploy aangepaste variabelen
  nodig heeft of wanneer je wil dat de gebruiker zaken controleert voor
  het uitvoeren van een deploy. Belangrijk om weten is dat deze alerts
- enkel werken op "def" bestanden, en niet op "def.ouds" bestanden.
+ enkel werken op "def" bestanden, en niet op "def.sudo" bestanden.
 De alerts worden toegevoegd door de lijn te starten met `# alert:`
 
 *Syntax:* `# Normale commentaar`
@@ -105,7 +105,7 @@ Dit commando laat toe om configuraties die opgeslagen zijn in de "configs"
 Lees ook de [Configuraties](configurations.md) documentatie.
 
 *Syntax:* `[noparse] config bestand [if <voorwaarde>]: bestand.conf,
- /doel/pad/bestand.conf
+ /doel/pad/bestand.conf`
 
 **3. config dir**`
 
@@ -114,7 +114,7 @@ Werkt hetzelfde als het "config file" commando, maar inspecteert
  configuratiebestand. Zoals bij "config file" aanvaard het ook extra
  voorwaarden en de "noparse" parameter (zie "config file")
 
-*Syntax:* `[noparse] config dir [if <voorwaarde>]: config map, doel/map`
+*Syntax:* `[noparse] config dir [if <voorwaarde>]: config_map, doel/map`
 
 **4. exec**
 
