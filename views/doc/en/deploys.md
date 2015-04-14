@@ -4,7 +4,7 @@ Deploys
 A "deploy" is group of executable definitions and configurations which allows you to
 automatically install or uninstall software, upload and parse configurations, execute
 commands on the target system or a third (defined) system, monitor services and, in general,
-set up your infrastructure and let it ready for production with a single click.
+set up your infrastructure and make it ready for production with a single click.
 
 The deploys can be found or uploaded to the "data/deploys/" directory in your ASYD installation.
 
@@ -18,7 +18,7 @@ be displayed on the ASYD web interface on the "Deploys" sections.
 * A "def" file (i.e. `data/deploys/LAMP/def`) with the definition of what the deploy will do -
 packages to install, commands to execute, configurations to upload, conditions, etc.
 * Optionally, a "def.sudo" file (i.e. `data/deploys/LAMP/def.sudo`) in case we want to
-execute it instead of the standard "def" when using a non-root user.
+execute it as super user instead of the standard "def" when using a non-root user.
 * Optionally, an "undeploy" file (i.e. `data/deploys/LAMP/undeploy`) with the steps required to
 revert (undeploy) a Deploy.
 * Optionally, an "undeploy.sudo" file (i.e. `data/deploys/LAMP/undeploy.sudo`) being the "undeploy"
@@ -27,8 +27,8 @@ equivalent of "def.sudo".
 (i.e. `data/deploys/LAMP/configs/apache/apache.conf`).
 
 **Note about "def.sudo":** this definition file will be executed instead of the normal "def" file only in case
-the user executing on the remote machine is not "root" and this file is present. This is specially useful on
-Ubuntu machines which doesn't use the root user. For the machines which user is "root", the standard
+the user executing on the remote machine is not "root" and this file is present. This is especially useful on
+Ubuntu machines which don't use the root user. For the machines where the user is "root", the standard
 "def" file will be executed regardless the existence of "def.sudo". If this file is not present,
 the standard "def" file will be executed also for non-root users. Same applies to "undeploy.sudo".
 
@@ -37,17 +37,17 @@ The "def" file:
 ------------------
 <br/>
 Both the "def" and "def.sudo" files, used for defining a deploy, accept the following
-commands and parameters. The same rules applies as well for the "undeploy" and "undeploy.sudo" files.
+commands and parameters. The same rules applies for the "undeploy" and "undeploy.sudo" files.
 
-*Please note the double dot - : - after the conditionals and before
+*Please note the colon - : - after the conditionals and before
 the arguments, as it's required for the deploy to work.*
 
 **0. comments**
 
 Any line starting with a hash (#) is interpreted as a comment and won't be executed.
-There's an special kind of comment, the alert, which displays an alert message before launching the deploy, this
+There's an special kind of comment, the alert, which displays an alert message before launching the deploy. This
 is useful in case your deploy require some custom variables or you want to warn the user to check
-something before executing a deploy. Please note the alerts only work on "def" files and not in "def.sudo".
+something before executing a deploy. Please note that the alerts only work on "def" files and not in "def.sudo".
 The alerts are done by starting a line with `# alert:`
 
 *Syntax:* `# Normal comment`
@@ -60,7 +60,7 @@ The install command can be used to define a (space separated) list of packages t
 on the target system. Internally, ASYD will check the kind of system on which is going to install
 the packages and will use the appropriate package manager for it. Optionally you can define
 conditionals - please read the [Conditionals](conditionals.md) section of the documentation for usage information.
-On Solaris systems it also accept an extra argument for defining the package manager, please check the
+On Solaris systems it also accept an extra argument for defining the package manager. Please check the
 [Solaris](solaris.md) section of the documentation for more detailed information.
 
 *Syntax:* `install [if <condition>]: package_a package_b package_c`
@@ -138,7 +138,7 @@ the normal `def` file.
 
 **9. reboot**
 
-It simply reboots a system. This command doesn't requires the double dot - : - and the only
+It simply reboots a system. This command doesn't requires the colon - : - and the only
 optional parameter allowed is a conditional. **Please note** that this command should always
 be used at the end of a deploy, else, the ASYD server will lose communication with the
 target host and the following commands won't be executed.
