@@ -43,7 +43,7 @@ Zowel de opening tag `if <voorwaarde>` en de eind tag `endif` moeten op
 
     if <%DIST%> == debian and <%DIST_VER%> == 6 or <%DIST%> == centos and <%DIST_VER%> >= 5
     install: package
-    execute: commando
+    exec: commando
     endif
 
 **2. Single-line commando's in "def" bestanden**
@@ -55,7 +55,7 @@ Voorwaarden kunnen gebruikt worden voor single-line commando's binnen
 
 *Syntax:*
 
-    execute if <%var%> == waarde [or|and voorwaarde2] [or|and ...]: commando
+    exec if <%var%> == waarde [or|and voorwaarde2] [or|and ...]: commando
 
 *Voorbeeld:*
 
@@ -75,7 +75,7 @@ Voorwaarden kunnen ook gebruikt worden binnen configuratiebestanden (zie
 
 *Syntax:*
 
-    <%if <%var% == waarde [or|and voorwaarde2] [or|and ...]>%>
+    <%if <%var%> == waarde [or|and voorwaarde2] [or|and ...]%>
     [...]
     <%endif%>
 

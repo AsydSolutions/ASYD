@@ -354,8 +354,14 @@ class Deploy
           line = parse(host, line[1].strip)
           if method == "GET"
             url = line.strip
-            uri = URI(url)
-            ret = Net::HTTP.get(uri)
+            uri = URI.parse(url)
+            http = Net::HTTP.new(uri.host, uri.port)
+            if url.start_with?("https")
+              http.use_ssl = true
+              http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+            end
+            request = Net::HTTP::Get.new(uri.request_uri)
+            response = http.request(request)
           elsif method == "POST"
             args = line.split(',')
             url = args.shift.strip
@@ -367,13 +373,16 @@ class Deploy
             uri = URI.parse(url)
             # Create the HTTP objects
             http = Net::HTTP.new(uri.host, uri.port)
+            if url.start_with?("https")
+              http.use_ssl = true
+              http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+            end
             request = Net::HTTP::Post.new(uri.request_uri)
             request.set_form_data(options)
             # Send the request
             response = http.request(request)
-            ret = response.body
           end
-          msg = "HTTP "+method+" "+url+": "+ret
+          msg = "HTTP "+method+" "+url+": "+response.body
           NOTEX.synchronize do
             notification = Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
           end
