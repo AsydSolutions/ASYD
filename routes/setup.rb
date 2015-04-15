@@ -5,7 +5,7 @@ class ASYD < Sinatra::Application
     if File.directory? 'data'
       redirect to home
     else
-      erb :setup, :layout => false
+      erb :'system/setup', :layout => false
     end
   end
 
@@ -17,14 +17,14 @@ class ASYD < Sinatra::Application
     else
       if params['password'].empty? || params['username'].empty? || params['email'].empty?
         @error = 'All fields required'
-        halt erb(:setup)
+        halt erb(:'system/setup')
       end
       if params['generate'] == '1'
         Setup.new()
       else
         if params[:priv_key].nil? || params[:pub_key].nil?
           @error = 'All files required'
-          halt erb(:setup)
+          halt erb(:'system/setup')
         end
         Setup.new(params[:priv_key], params[:pub_key])
       end

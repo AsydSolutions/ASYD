@@ -12,7 +12,7 @@ class MyFlavoredMarkdown < Redcarpet::Render::HTML
 end
 
 def flavored_markdown(path)
-  text = File.read("views/"+path)
+  text = File.read("static/"+path)
   renderer = MyFlavoredMarkdown.new()
   # These options might be helpful but are not required
   options = {

@@ -9,7 +9,7 @@ The `>=` and `<=` operators can only be used for numbers. The `==` and `!=` oper
 for strings (text comparison) and numbers.
 
 Several conditionals (as many as you want) can be concatenated using `and` and `or`. They will be
-evaluated following a sequencial and logical order (i.e. for `condition1 or condition1` if the first
+evaluated following a sequencial and logical order (i.e. for `condition1 or condition2`, if the first
 condition complies, the second one won't be evaluated).
 
 <br/>
@@ -34,9 +34,9 @@ You can, however, use single line conditionals as described on the next point.*
 
 *Example:*
 
-    if <%DIST%> == debian and <%DIST_VER%> == 6 or <%DIST%> == centos and <%DIST_ver%> >= 5
+    if <%DIST%> == debian and <%DIST_VER%> == 6 or <%DIST%> == centos and <%DIST_VER%> >= 5
     install: package
-    execute: some command
+    exec: some command
     endif
 
 **2. Single commands on "def" files**
@@ -46,11 +46,11 @@ and you can also define conditions for concrete commands even inside a condition
 
 *Syntax:*
 
-    execute if <%var%> == value [or|and condition2] [or|and ...]: some command
+    exec if <%var%> == value [or|and condition2] [or|and ...]: some command
 
 *Example:*
 
-    install if <%DIST%> == debian and <%DIST_VER%> == 6 or <%DIST%> == centos and <%DIST_ver%> >= 5: package
+    install if <%DIST%> == debian and <%DIST_VER%> == 6 or <%DIST%> == centos and <%DIST_VER%> >= 5: package
 
 **3. Conditional blocks on configuration files**
 

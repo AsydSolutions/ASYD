@@ -4,7 +4,7 @@ class ASYD < Sinatra::Application
     if !File.directory? 'data'
       redirect '/setup'
     end
-    erb :login, :layout => false
+    erb :'user/login', :layout => false
   end
 
   post '/login' do
@@ -15,7 +15,7 @@ class ASYD < Sinatra::Application
       redirect '/'
     else
       @error = "Failed login"
-      erb :login, :layout => false
+      erb :'user/login', :layout => false
     end
   end
 

@@ -6,7 +6,7 @@ class ASYD < Sinatra::Application
     @hostgroup.hosts.each do |host|
       @host_status[host.hostname] = host.is_ok?
     end
-    erb :hostgroup_detail
+    erb :'host/hostgroup_detail'
   end
 
   post '/hostgroup/add' do

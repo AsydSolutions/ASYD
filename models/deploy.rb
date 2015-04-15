@@ -179,9 +179,9 @@ class Deploy
         end
 
         # Set variables from a Deploy
-        if gdoit && m = line.match(/^var (.+) = (exec)/i)
+        if gdoit && m = line.match(/^var (.+) = (exec|http)/i)
           varname = m[1] #we create varname here
-          line = line.split(/ = /, 2)[1].strip #and remove the start of the line so we have only the exec part
+          line = line.split(/ = /, 2)[1].strip #and remove the start of the line so we have only the exec or http part
         end
 
         # IGNORE
@@ -300,7 +300,6 @@ class Deploy
         # /CONFIG DIR BLOCK
 
         # EXEC BLOCK
-        #
         elsif line.start_with?("exec")
           doit = true
           m = line.match(/^exec (.(var:|[^:])+)/i)
@@ -342,6 +341,52 @@ class Deploy
             end
           end
         # /EXEC BLOCK
+
+        # HTTP BLOCK
+        elsif line.match(/^http (get|post)/i)
+          doit = true
+          m = line.match(/if (.+)(?<!var):/i)
+          if !m.nil?
+            doit = check_condition(m, host)
+          end
+          method = line.match(/^http (get|post)/i)[1].upcase
+          line = line.split(/(?<!var):/i, 2)
+          line = parse(host, line[1].strip)
+          if method == "GET"
+            url = line.strip
+            uri = URI.parse(url)
+            http = Net::HTTP.new(uri.host, uri.port)
+            if url.start_with?("https")
+              http.use_ssl = true
+              http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+            end
+            request = Net::HTTP::Get.new(uri.request_uri)
+            response = http.request(request)
+          elsif method == "POST"
+            args = line.split(',')
+            url = args.shift.strip
+            options = {}
+            args.each do |arg|
+              arg = arg.split("=")
+              options[arg[0].strip] = arg[1].strip
+            end
+            uri = URI.parse(url)
+            # Create the HTTP objects
+            http = Net::HTTP.new(uri.host, uri.port)
+            if url.start_with?("https")
+              http.use_ssl = true
+              http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+            end
+            request = Net::HTTP::Post.new(uri.request_uri)
+            request.set_form_data(options)
+            # Send the request
+            response = http.request(request)
+          end
+          msg = "HTTP "+method+" "+url+": "+response.body
+          NOTEX.synchronize do
+            notification = Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
+          end
+        # /HTTP BLOCK
 
         # MONITOR BLOCK
         elsif line.start_with?("monitor")
@@ -385,7 +430,7 @@ class Deploy
               end
             end
           end
-        # /MONITOR BLOCK
+        # /UNMONITOR BLOCK
 
         # DEPLOY BLOCK
         elsif line.start_with?("deploy")
@@ -413,7 +458,7 @@ class Deploy
           end
         # /DEPLOY BLOCK
 
-        # DEPLOY BLOCK
+        # UNDEPLOY BLOCK
         elsif line.start_with?("undeploy")
           doit = true
           m = line.match(/^undeploy if (.+)(?<!var):/i)
@@ -437,7 +482,7 @@ class Deploy
               end
             end
           end
-        # /DEPLOY BLOCK
+        # /UNDEPLOY BLOCK
 
         # REBOOT BLOCK
         elsif line.start_with?("reboot")
@@ -720,14 +765,14 @@ class Deploy
       File.open(cfg, "r").each do |line|
         if !noparse
           if !condition
-            m = line.match(/^<%if (.+)%>$/)
+            m = line.strip.match(/^<% ?if (.+)%>$/)
             if !m.nil?
               doit = check_condition(m, host)
               condition = true
               skip = true
             end
           else
-            if line.match(/^<%endif%>$/)
+            if line.strip.match(/^<% ?endif ?%>$/)
               condition = false
               doit = true
               skip = true
@@ -735,12 +780,12 @@ class Deploy
           end
         end
         if !noparse
-          if line.match(/^<%noparse%>$/)
+          if line.strip.match(/^<% ?noparse ?%>$/)
             noparse = true
             skip = true
           end
         else
-          if line.match(/^<%\/noparse%>$/)
+          if line.strip.match(/^<% ?\/noparse ?%>$/)
             noparse = false
             skip = true
           end

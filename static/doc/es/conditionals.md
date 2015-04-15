@@ -36,7 +36,7 @@ Puedes, sin embargo, usar condicionales simples dentro de bloques condicionales,
 
     if <%DIST%> == debian and <%DIST_VER%> == 6 or <%DIST%> == centos and <%DIST_ver%> >= 5
     install: package
-    execute: some command
+    exec: some command
     endif
 
 **2. Comandos en los archivos "def"**
@@ -46,7 +46,7 @@ y también puedes definir condiciones para comandos concretos incluso dentro de 
 
 *Sintáxis:*
 
-    execute if <%var%> == value [or|and condition2] [or|and ...]: some command
+    exec if <%var%> == value [or|and condition2] [or|and ...]: some command
 
 *Ejemplo:*
 

@@ -104,5 +104,24 @@ HOSTEX = Awal::Mutex.new #mutex for hosts operations
 
 # check for checkpoints
 walcheck = Spork.spork do
-  Awal::should_checkpoint?
+  Process.setsid
+  Spork.spork do
+    STDIN.reopen '/dev/null'
+    STDOUT.reopen '/dev/null', 'a'
+    STDERR.reopen STDOUT
+    Awal::should_checkpoint?
+  end
+  exit
+end
+
+# monitoring on the background
+bgmonit = Spork.spork do
+  Process.setsid
+  Spork.spork do
+    STDIN.reopen '/dev/null'
+    STDOUT.reopen '/dev/null', 'a'
+    STDERR.reopen STDOUT
+    Monitoring.background
+  end
+  exit
 end

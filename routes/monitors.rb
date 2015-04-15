@@ -3,12 +3,12 @@ class ASYD < Sinatra::Application
     @monitors = Monitor.all
     @hosts = Host.all
     @hostgroups = Hostgroup.all
-    erb :monitors
+    erb :'monitor/monitors'
   end
 
   get '/monitors/:monitor' do
     @base = 'data/monitors/'+params[:monitor]
-    erb :monitor_detail
+    erb :'monitor/monitor_detail'
   end
 
   post '/monitors/monitor' do
@@ -51,32 +51,19 @@ class ASYD < Sinatra::Application
       NOTEX.synchronize do
         notification = Notification.create(:type => :info, :message => t('task.actions.'+task.action.to_s)+" "+mon+" on "+hostgroup.name, :task => task)
       end
+      success = ProcessShared::SharedMemory.new(:int) #shared with the forks
+      success.put_int(0, 1) #default to true
       inst = Spork.spork do
-        sleep 0.2
-        success = ProcessShared::SharedMemory.new(:int) #shared with the forks
-        success.put_int(0, 1)
-        if !hostgroup_hosts.nil? && !hostgroup_hosts.empty? #it's a valid hostgroup
-          max_forks = Misc::get_max_forks #we get the "forkability"
-          forks = [] #and initialize an empty array
-          hostgroup_hosts.each do |host| #for each host
-            if forks.count >= max_forks #if we reached the "forkability" limit
-              id = Process.wait #then we wait for some child to finish
-              forks.delete(id) #and we remove it from the forks array
+        hostgroup.group_launch { |host|
+          result = host.monitor_service(mon, task)
+          if result != 1
+            NOTEX.synchronize do
+              msg = "Error when monitoring "+mon+" on "+host.hostname
+              notification = Notification.create(:type => :error, :dismiss => true, :message => msg, :task => task)
             end
-            frk = Spork.spork do #so we can continue executing a new fork
-              result = host.monitor_service(mon, task)
-              if result != 1
-                NOTEX.synchronize do
-                  msg = "Error when monitoring "+mon+" on "+host.hostname
-                  notification = Notification.create(:type => :error, :dismiss => true, :message => msg, :task => task)
-                end
-                success.put_int(0, 0)
-              end
-            end
-            forks << frk #and store the fork id on the forks array
+            success.put_int(0, 0)
           end
-        end
-        Process.waitall
+        }
         if success.get_int(0) == 1
           NOTEX.synchronize do
             msg = "Service "+mon+" successfully monitored on "+target[0]+" "+target[1]
@@ -141,32 +128,19 @@ class ASYD < Sinatra::Application
       NOTEX.synchronize do
         notification = Notification.create(:type => :info, :message => t('task.actions.'+task.action.to_s)+" "+mon+" on "+hostgroup.name, :task => task)
       end
+      success = ProcessShared::SharedMemory.new(:int) #shared with the forks
+      success.put_int(0, 1) #default to true
       inst = Spork.spork do
-        sleep 0.2
-        success = ProcessShared::SharedMemory.new(:int) #shared with the forks
-        success.put_int(0, 1)
-        if !hostgroup_hosts.nil? && !hostgroup_hosts.empty? #it's a valid hostgroup
-          max_forks = Misc::get_max_forks #we get the "forkability"
-          forks = [] #and initialize an empty array
-          hostgroup_hosts.each do |host| #for each host
-            if forks.count >= max_forks #if we reached the "forkability" limit
-              id = Process.wait #then we wait for some child to finish
-              forks.delete(id) #and we remove it from the forks array
+        hostgroup.group_launch { |host|
+          result = host.unmonitor_service(mon, task)
+          if result != 1
+            NOTEX.synchronize do
+              msg = "Error when un-monitoring "+mon+" on "+host.hostname
+              notification = Notification.create(:type => :error, :dismiss => true, :message => msg, :task => task)
             end
-            frk = Spork.spork do #so we can continue executing a new fork
-              result = host.unmonitor_service(mon, task)
-              if result != 1
-                NOTEX.synchronize do
-                  msg = "Error when un-monitoring "+mon+" on "+host.hostname
-                  notification = Notification.create(:type => :error, :dismiss => true, :message => msg, :task => task)
-                end
-                success.put_int(0, 0)
-              end
-            end
-            forks << frk #and store the fork id on the forks array
+            success.put_int(0, 0)
           end
-        end
-        Process.waitall
+        }
         if success.get_int(0) == 1
           NOTEX.synchronize do
             msg = "Service "+mon+" is not longer being monitored on "+target[0]+" "+target[1]
