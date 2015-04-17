@@ -2,6 +2,7 @@ $UNICORN = 1
 $DBG = 0 #debug?
 
 listen 3000
+pid ".asyd.pid"
 worker_processes 1
 rewindable_input true
 
