@@ -34,7 +34,7 @@ Install ASYD and all the dependencies
 
 **3. Start ASYD**
 
-    passenger start
+    ./asyd.sh start
 
 Access your newly ASYD installation from the machine itself, or using the IP and
 the port 3000

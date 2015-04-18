@@ -18,7 +18,7 @@ Or read the full [installation](https://github.com/AsydSolutions/asyd/blob/maste
 
 Run ASYD:
 
-	passenger start
+	./asyd.sh start
 
 Then open [http://localhost:3000/](http://localhost:3000/)
 
