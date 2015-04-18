@@ -374,7 +374,7 @@ body, html {
 
 	position: relative;
 
-	height: 40px;
+	min-height: 40px;
 	line-height: 40px;
 
 	background: #e8e8e8;
