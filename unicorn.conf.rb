@@ -2,9 +2,10 @@ $UNICORN = 1
 $DBG = 0 #debug?
 
 listen 3000
-pid ".asyd.pid"
 worker_processes 1
-rewindable_input true
+pid ".asyd.pid"
+stderr_path "log/asyd.log"
+stdout_path "log/asyd.log"
 
 preload_app true
 GC.respond_to?(:copy_on_write_friendly=) and
