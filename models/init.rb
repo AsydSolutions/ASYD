@@ -84,20 +84,26 @@ if File.directory? 'data'
 
   # Kill daemons and checkpoint at exit to ensure database consistency
   at_exit {
-    Awal::checkpoint(:users_db)
-    Awal::checkpoint(:config_db)
-    Awal::checkpoint(:stats_db)
-    Awal::checkpoint(:status_db)
-    Awal::checkpoint(:monitoring_db)
-    Awal::checkpoint(:tasks_db)
-    Awal::checkpoint(:notifications_db)
-    Awal::checkpoint(:hosts_db)
-    
     wck = $WALCHECK.get_int(0)
     bgm = $BGMONIT.get_int(0)
 
-    Process.kill("KILL", wck) if wck > 0
-    Process.kill("TERM", bgm) if bgm > 0
+    begin
+      if Process.kill(0, wck) == 1
+        Awal::checkpoint(:users_db)
+        Awal::checkpoint(:config_db)
+        Awal::checkpoint(:stats_db)
+        Awal::checkpoint(:status_db)
+        Awal::checkpoint(:monitoring_db)
+        Awal::checkpoint(:tasks_db)
+        Awal::checkpoint(:notifications_db)
+        Awal::checkpoint(:hosts_db)
+
+        Process.kill("KILL", wck) if wck > 0
+        Process.kill("TERM", bgm) if bgm > 0
+      end
+    rescue Errno::ESRCH
+      false
+    end
   }
 
   if Email.all.first.nil?
