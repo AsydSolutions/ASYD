@@ -15,6 +15,7 @@ require 'redcarpet'
 require 'bcrypt'
 require 'mail'
 require 'htmlentities'
+require_relative "lib/monit"
 require_relative "lib/spork"
 require_relative "lib/flavored_markdown"
 require_relative "lib/errors"
