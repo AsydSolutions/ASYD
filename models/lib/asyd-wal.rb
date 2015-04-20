@@ -31,7 +31,7 @@ module Awal
   def self.checkpoint(database)
     begin
       ret = repository(database).adapter.select('PRAGMA wal_checkpoint(FULL)')
-      p "Checkpointed "+database.to_s+": "+ret.to_s if $DBG == 1
+      puts "Checkpointed "+database.to_s+": "+ret.to_s if $DBG == 1
       raise if ret[0].busy == 1
       return true
     rescue

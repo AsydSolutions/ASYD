@@ -51,6 +51,7 @@ class Status
           end
         end
       end
+      puts "Status for "+host.hostname+": "+self.inspect if $DBG == 1
       return self
     rescue
       return nil
