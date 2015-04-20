@@ -1,6 +1,8 @@
 $UNICORN = 1
 $DBG = 0 #debug?
 
+FileUtils.mkdir("log") unless File.directory?("log")
+
 listen 3000
 worker_processes 1
 pid ".asyd.pid"
