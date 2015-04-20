@@ -34,7 +34,7 @@ Installeer ASYD en  alle dependencies
 
 **3. Start ASYD**
 
-    passenger start
+    ./asyd.sh start
 
 Benarder je pas geïnstalleerde ASYD systeem vanop de machine zelf, of
  via het IP en op poort 3000

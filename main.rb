@@ -1,5 +1,3 @@
-PID = Process.pid
-
 require 'sinatra'
 require_relative 'routes/init'
 require_relative 'models/init'

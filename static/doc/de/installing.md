@@ -5,7 +5,7 @@ Installing ASYD
 **1. Install dependencies**
 
 Die meisten Abhängigkeiten werden via gems installiert, aber zur Grundinstallation werden ruby, git, make sowie einige Libraries
-benötigt. 
+benötigt.
 
 Auf Debian Systemen:
 
@@ -33,7 +33,7 @@ Installiere ASYD und die nötigen Abhängigkeiten:
 
 **3. Starte ASYD**
 
-    passenger start
+    ./asyd.sh start
 
 Greife via Port 3000 und Localhost bzw. der Server IP auf ASYD zu:
 ([http://localhost:3000/](http://localhost:3000/))

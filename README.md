@@ -18,9 +18,11 @@ Or read the full [installation](https://github.com/AsydSolutions/asyd/blob/maste
 
 Run ASYD:
 
-	passenger start
+	./asyd.sh start
 
 Then open [http://localhost:3000/](http://localhost:3000/)
+
+You can read the console output on `log/asyd.log`
 
 
 **Please read the documentation: [[English](https://github.com/AsydSolutions/asyd/blob/master/static/doc/en/README.md)] [[Spanish](https://github.com/AsydSolutions/asyd/blob/master/static/doc/es/README.md)] [[German](https://github.com/AsydSolutions/asyd/blob/master/static/doc/de/README.md)] [[Dutch](https://github.com/AsydSolutions/asyd/blob/master/static/doc/nl/README.md)]**
