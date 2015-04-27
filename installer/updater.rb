@@ -23,6 +23,8 @@ module Updater
       if action == "update_monit"
         FileUtils.mv("installer/monit/def", "data/deploys/monit/def")
         FileUtils.mv("installer/monit/def.sudo", "data/deploys/monit/def.sudo")
+      elsif action == "update_monit"
+        FileUtils.mv("installer/monit/configs/monitrc", "data/deploys/monit/configs/monitrc")
       elsif action == "update_monitored_status"
         hosts = Host.all(:monitored => true)
         hosts.each do |host|
@@ -91,6 +93,33 @@ module Updater
       end
       if old_version.nil? or old_version.to_f < new_version.to_f then
         actions << "update_monit"
+      end
+    end
+    #-#-#
+
+    #-#-#
+    # Check for monit config version
+    old_version = nil
+    path = "data/deploys/monit/configs/monitrc" # the old def file
+    f = File.open(path, "r").read
+    f.gsub!(/\r\n?/, "\n")
+    f.each_line do |line|
+      if !line.match(/^# ?version:/i).nil?
+        old_version = line.gsub!(/^# ?version:/i, "").strip
+      end
+    end
+    new_version = nil
+    path = "installer/monit/configs/monitrc" # the new def file
+    if File.file?(path)
+      f = File.open(path, "r").read
+      f.gsub!(/\r\n?/, "\n")
+      f.each_line do |line|
+        if !line.match(/^# ?version:/i).nil?
+          new_version = line.gsub!(/^# ?version:/i, "").strip
+        end
+      end
+      if old_version.nil? or old_version.to_f < new_version.to_f then
+        actions << "update_monit_config"
       end
     end
     #-#-#
