@@ -338,7 +338,7 @@ class ASYD < Sinatra::Application
   post '/deploys/new' do
     name = params['deploy_name']
     path = "data/deploys/"
-    unless name.include? "/" or name.include? "|" or name.include? "\\"
+    unless name.include? "/" or name.include? "|" or name.include? "\\" or File.directory? path+name
       FileUtils.mkdir path+name
       FileUtils.mkdir path+name+"/configs"
       text = "# Alert: Empty deploy, modify before launching"
