@@ -14,6 +14,7 @@ case ${cmd} in
   ;;
   restart)
   kill -3 $(<"$PIDFile")
+  sleep 2
   unicorn -c unicorn.conf.rb -D
   echo "ASYD Restarted"
   ;;
