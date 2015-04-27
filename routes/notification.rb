@@ -22,17 +22,19 @@ class ASYD < Sinatra::Application
 
   get '/notifications/bytask/:taskid' do
     task = Task.first(:id => params[:taskid])
-    @finished = true if task.status != :in_progress
-    @notifications = task.notifications.all(:order => [ :host.asc, :created_at.asc])
-    @hosts = Array.new
-    @errors = Array.new
-    @notifications.each do |notif|
-      @hosts << notif.host unless notif.host.nil?
-      @errors << notif.host unless notif.type != :error
-    end
-    @hosts.uniq!
-    @errors.uniq!
+    unless task.nil?
+      @finished = true if task.status != :in_progress
+      @notifications = task.notifications.all(:order => [ :host.asc, :created_at.asc])
+      @hosts = Array.new
+      @errors = Array.new
+      @notifications.each do |notif|
+        @hosts << notif.host unless notif.host.nil?
+        @errors << notif.host unless notif.type != :error
+      end
+      @hosts.uniq!
+      @errors.uniq!
 
-    erb :'task/notifications', :layout => false
+      erb :'task/notifications', :layout => false
+    end
   end
 end

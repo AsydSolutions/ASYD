@@ -16,14 +16,18 @@ class ASYD < Sinatra::Application
       redirect to home
     else
       if params['password'].empty? || params['username'].empty? || params['email'].empty?
-        @error = 'All fields required'
+        NOTEX.synchronize do
+          notification = Notification.create(:type => :error, :sticky => false, :message => 'All fields required')
+        end
         halt erb(:'system/setup')
       end
       if params['generate'] == '1'
         Setup.new()
       else
         if params[:priv_key].nil? || params[:pub_key].nil?
-          @error = 'All files required'
+          NOTEX.synchronize do
+            notification = Notification.create(:type => :error, :sticky => false, :message => 'All files required')
+          end
           halt erb(:'system/setup')
         end
         Setup.new(params[:priv_key], params[:pub_key])
