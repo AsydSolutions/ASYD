@@ -77,25 +77,33 @@ class ASYD < Sinatra::Application
   end
 
   post '/host/edit' do
-    HOSTEX.synchronize do
-      oldhost = Host.first(:hostname => params['old_hostname'])
-      newhost = Host.create(:hostname => params['hostname'],
-                            :ip => params['ip'],
-                            :ssh_port => params['ssh_port'],
-                            :user => oldhost.user,
-                            :dist => oldhost.dist,
-                            :dist_ver => oldhost.dist_ver,
-                            :arch => oldhost.arch,
-                            :pkg_mgr => oldhost.pkg_mgr,
-                            :monit_pw => oldhost.monit_pw,
-                            :opt_vars => oldhost.opt_vars,
-                            :created_at => oldhost.created_at)
-      oldhost.hostgroups.each do |group|
-        group.add_member(newhost)
+    begin
+      HOSTEX.synchronize do
+        oldhost = Host.first(:hostname => params['old_hostname'])
+        newhost = Host.create(:hostname => params['hostname'],
+                              :ip => params['ip'],
+                              :ssh_port => params['ssh_port'],
+                              :user => oldhost.user,
+                              :dist => oldhost.dist,
+                              :dist_ver => oldhost.dist_ver,
+                              :arch => oldhost.arch,
+                              :pkg_mgr => oldhost.pkg_mgr,
+                              :monit_pw => oldhost.monit_pw,
+                              :opt_vars => oldhost.opt_vars,
+                              :created_at => oldhost.created_at)
+        oldhost.hostgroups.each do |group|
+          group.add_member(newhost)
+        end
+        oldhost.delete(false)
       end
-      oldhost.delete(false)
+      redir = '/host/'+params['hostname']
+      redirect to redir
+    rescue => e
+      NOTEX.synchronize do
+        notification = Notification.create(:type => :error, :sticky => false, :message => e.message)
+      end
+      redir = '/host/'+params['old_hostname']
+      redirect to redir
     end
-    redir = '/host/'+params['hostname']
-    redirect to redir
   end
 end
