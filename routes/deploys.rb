@@ -12,7 +12,11 @@ class ASYD < Sinatra::Application
   get '/deploys/:dep' do
     @base = 'data/deploys/'+params[:dep]+'/'
     @deploy = params[:dep]
-    erb :'deploy/deploy_detail'
+    if File.directory? @base
+      erb :'deploy/deploy_detail'
+    else
+      not_found
+    end
   end
 
   # Install packages
@@ -363,7 +367,7 @@ class ASYD < Sinatra::Application
     deploy = params[:deploy]
     path = params['path']
     fullpath = "data/deploys/"+deploy+"/"+path
-    unless fullpath.include? "../" or fullpath.include? "|" or fullpath.include? "\\"
+    unless fullpath.include? "../" or fullpath.include? "|" or fullpath.include? "\\" or File.exists?(fullpath)
       FileUtils.mkdir_p File.dirname(fullpath)
       FileUtils.touch fullpath
     end
@@ -376,7 +380,7 @@ class ASYD < Sinatra::Application
     path = params[:path]
     file = params[:file][:tempfile]
     fullpath = "data/deploys/"+deploy+"/"+path
-    unless fullpath.include? "../" or fullpath.include? "|" or fullpath.include? "\\"
+    unless fullpath.include? "../" or fullpath.include? "|" or fullpath.include? "\\" or File.exists?(fullpath)
       FileUtils.mkdir_p File.dirname(fullpath)
       File.open(fullpath, "w") do |f|
         f.write(file.read)
