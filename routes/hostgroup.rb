@@ -2,16 +2,23 @@ class ASYD < Sinatra::Application
   get '/hostgroup/:hostgroup' do
     status 200
     @hostgroup = Hostgroup.first(:name => params[:hostgroup])
-    @host_status = {}
-    @hostgroup.hosts.each do |host|
-      @host_status[host.hostname] = host.is_ok?
+    if @hostgroup.nil?
+      not_found
+    else
+      @host_status = {}
+      @hostgroup.hosts.each do |host|
+        @host_status[host.hostname] = host.is_ok?
+      end
+      erb :'host/hostgroup_detail'
     end
-    erb :'host/hostgroup_detail'
   end
 
   post '/hostgroup/add' do
     status 200
-    Hostgroup.create(:name => params['hostgroup'])
+    hostgroup = Hostgroup.first(:name => params['hostgroup'])
+    if hostgroup.nil?
+      Hostgroup.create(:name => params['hostgroup'])
+    end
     redirect to '/hosts/overview'
   end
 
