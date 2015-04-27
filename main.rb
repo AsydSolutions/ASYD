@@ -36,7 +36,7 @@ class ASYD < Sinatra::Application
     if !File.directory? 'data'
       redirect '/setup'
     else
-      if !session[:username] then
+      if !session[:username] or User.first(:username => session[:username]).nil? then
         redirect '/login'
       else
         if File.directory? 'data' and File.directory? 'installer' then
@@ -51,5 +51,4 @@ class ASYD < Sinatra::Application
       end
     end
   end
-
 end
