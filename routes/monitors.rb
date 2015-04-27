@@ -8,7 +8,11 @@ class ASYD < Sinatra::Application
 
   get '/monitors/:monitor' do
     @base = 'data/monitors/'+params[:monitor]
-    erb :'monitor/monitor_detail'
+    if File.exists? @base
+      erb :'monitor/monitor_detail'
+    else
+      not_found
+    end
   end
 
   post '/monitors/monitor' do
