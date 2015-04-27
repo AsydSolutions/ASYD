@@ -66,17 +66,25 @@ class ASYD < Sinatra::Application
   end
 
   post '/hostgroup/edit' do
-    oldgroup = Hostgroup.first(:name => params['old_name'])
-    members = Array.new
-    oldgroup.hosts.each do |host|
-      members << host
+    begin
+      oldgroup = Hostgroup.first(:name => params['old_name'])
+      newgroup = Hostgroup.create(:name => params['name'])
+      members = Array.new
+      oldgroup.hosts.each do |host|
+        members << host
+      end
+      oldgroup.delete
+      members.each do |host|
+        newgroup.add_member(host)
+      end
+      redir = '/hostgroup/'+params['name']
+      redirect to redir
+    rescue => e
+      NOTEX.synchronize do
+        notification = Notification.create(:type => :error, :sticky => false, :message => e.message)
+      end
+      redir = '/hostgroup/'+params['old_name']
+      redirect to redir
     end
-    oldgroup.delete
-    newgroup = Hostgroup.create(:name => params['name'])
-    members.each do |host|
-      newgroup.add_member(host)
-    end
-    redir = '/hostgroup/'+params['name']
-    redirect to redir
   end
 end
