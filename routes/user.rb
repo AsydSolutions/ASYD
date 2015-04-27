@@ -40,7 +40,10 @@ class ASYD < Sinatra::Application
   end
 
   post '/team/add' do
-    Team.create(:name => params['name'])
+    team = Team.first(:name => params['name'])
+    if team.nil?
+      Team.create(:name => params['name'])
+    end
     userlist = '/users'
     redirect to userlist
   end
