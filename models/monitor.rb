@@ -146,93 +146,98 @@ module Monitoring
     end
 
     def perform_monitoring_operations
-      begin
-        if self.opt_vars["monitored"].to_i == 1 #do things
-          stat = self.get_status
-          if stat == 3 #the host is down
-            MNOTEX.synchronize do
-              last = Monitoring::Notification.last(:host_hostname => self.hostname)
-              if last.nil? #no previous notification
-                msg = "Unable to get monitoring status for host "+self.hostname
-                Monitoring::Notification.create(:type => :error, :message => msg, :host_hostname => self.hostname, :service => "system")
-              else
-                if last.acknowledge == false && last.dismiss == true #the last notification was already dismissed and is not acknowledged
+      Timeout::timeout(5) do   # If it takes more than 5 seconds just kill it
+        begin
+          if self.opt_vars["monitored"].to_i == 1 #do things
+            stat = self.get_status
+            if stat == 3 #the host is down
+              MNOTEX.synchronize do
+                last = Monitoring::Notification.last(:host_hostname => self.hostname)
+                if last.nil? #no previous notification
                   msg = "Unable to get monitoring status for host "+self.hostname
                   Monitoring::Notification.create(:type => :error, :message => msg, :host_hostname => self.hostname, :service => "system")
+                else
+                  if last.acknowledge == false && last.dismiss == true #the last notification was already dismissed and is not acknowledged
+                    msg = "Unable to get monitoring status for host "+self.hostname
+                    Monitoring::Notification.create(:type => :error, :message => msg, :host_hostname => self.hostname, :service => "system")
+                  end
+                end
+                if last.nil? || last.acknowledge == false
+                  errmail = $mem_mail.read_object
+                  if errmail[self.hostname].nil?
+                    errmail[self.hostname] = 1
+                  else
+                    if errmail[self.hostname] < -2
+                      errmail[self.hostname] = 0
+                    else
+                      errmail[self.hostname] = errmail[self.hostname]+1
+                    end
+                  end
+                  if errmail[self.hostname] == 2 #first email alert at second check (30 seconds since failure)
+                    errmail[self.hostname] = -2 #then we set the counter to -2 so we get an email every minute
+                    subject = "Critical: Host "+self.hostname+" Down"
+                    msg = "Unable to get monitoring status for host "+self.hostname
+                    Monitoring.notify_by_mail(subject, msg)
+                  end
+                  $mem_mail.write_object(errmail)
                 end
               end
-              if last.nil? || last.acknowledge == false
+            elsif stat == 2 #warning
+              MNOTEX.synchronize do
+                last = Monitoring::Notification.last(:host_hostname => self.hostname)
+                if !last.nil?
+                  last.update(:acknowledge => false, :dismiss => true)
+                end
                 errmail = $mem_mail.read_object
                 if errmail[self.hostname].nil?
                   errmail[self.hostname] = 1
                 else
-                  if errmail[self.hostname] < -2
-                    errmail[self.hostname] = 0
-                  else
-                    errmail[self.hostname] = errmail[self.hostname]+1
-                  end
+                  errmail[self.hostname] = errmail[self.hostname]+1
                 end
                 if errmail[self.hostname] == 2 #first email alert at second check (30 seconds since failure)
-                  errmail[self.hostname] = -2 #then we set the counter to -2 so we get an email every minute
-                  subject = "Critical: Host "+self.hostname+" Down"
-                  msg = "Unable to get monitoring status for host "+self.hostname
-                  Monitoring.notify_by_mail(subject, msg)
+                  errmail[self.hostname] = -18 #then we set the counter to -18 so the next email will arrive in 5 minutes
+                  subject = "Warning: Check failed on Host "+self.hostname
+                  msg = ""
+                  status = Status.new(self, true)
+                  unless status.system_status.nil? || status.system_status == 'down'
+                    if status.system_status != 'ok'
+                      msg = msg+"System: "+status.system_status+"\n\n"
+                    end
+                    status.services.each do |service|
+                      if service[1] != 'ok' and service[1] != 'not monitored'
+                        msg = msg+service[0]+": "+service[1]+"\n\n"
+                      end
+                    end unless status.services.nil?
+                  end
+                  Monitoring.notify_by_mail(subject, msg) unless msg.empty?
                 end
                 $mem_mail.write_object(errmail)
               end
-            end
-          elsif stat == 2 #warning
-            MNOTEX.synchronize do
-              last = Monitoring::Notification.last(:host_hostname => self.hostname)
-              if !last.nil?
-                last.update(:acknowledge => false, :dismiss => true)
-              end
+            elsif stat == 1 #the host recovered?
               errmail = $mem_mail.read_object
-              if errmail[self.hostname].nil?
-                errmail[self.hostname] = 1
-              else
-                errmail[self.hostname] = errmail[self.hostname]+1
+              unless errmail[self.hostname].nil?
+                errmail[self.hostname] = 0
+                $mem_mail.write_object(errmail)
               end
-              if errmail[self.hostname] == 2 #first email alert at second check (30 seconds since failure)
-                errmail[self.hostname] = -18 #then we set the counter to -18 so the next email will arrive in 5 minutes
-                subject = "Warning: Check failed on Host "+self.hostname
-                msg = ""
-                status = Status.new(self, true)
-                unless status.system_status.nil? || status.system_status == 'down'
-                  if status.system_status != 'ok'
-                    msg = msg+"System: "+status.system_status+"\n\n"
-                  end
-                  status.services.each do |service|
-                    if service[1] != 'ok' and service[1] != 'not monitored'
-                      msg = msg+service[0]+": "+service[1]+"\n\n"
-                    end
-                  end unless status.services.nil?
+              MNOTEX.synchronize do
+                last = Monitoring::Notification.last(:host_hostname => self.hostname, :dismiss => false)
+                if !last.nil?
+                  last.update(:acknowledge => false, :dismiss => true)
+                  subject = "Recovery: Host "+self.hostname+" Up"
+                  msg = "The host "+self.hostname+" recovered"
+                  Monitoring.notify_by_mail(subject, msg)
                 end
-                Monitoring.notify_by_mail(subject, msg) unless msg.empty?
-              end
-              $mem_mail.write_object(errmail)
-            end
-          elsif stat == 1 #the host recovered?
-            errmail = $mem_mail.read_object
-            unless errmail[self.hostname].nil?
-              errmail[self.hostname] = 0
-              $mem_mail.write_object(errmail)
-            end
-            MNOTEX.synchronize do
-              last = Monitoring::Notification.last(:host_hostname => self.hostname, :dismiss => false)
-              if !last.nil?
-                last.update(:acknowledge => false, :dismiss => true)
-                subject = "Recovery: Host "+self.hostname+" Up"
-                msg = "The host "+self.hostname+" recovered"
-                Monitoring.notify_by_mail(subject, msg)
               end
             end
           end
+          return true
+        rescue => e
+          return e.message
         end
       end
-      return true
-    rescue => e
-      return e.message
+    rescue Timeout::Error
+      p "wat"
+      exit
     end
   end
 
