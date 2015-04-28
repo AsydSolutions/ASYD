@@ -146,8 +146,8 @@ module Monitoring
     end
 
     def perform_monitoring_operations
-      Timeout::timeout(5) do   # If it takes more than 5 seconds just kill it
-        begin
+      begin
+        Timeout::timeout(5) do   # If it takes more than 5 seconds just kill it
           if self.opt_vars["monitored"].to_i == 1 #do things
             stat = self.get_status
             if stat == 3 #the host is down
@@ -231,12 +231,10 @@ module Monitoring
             end
           end
           return true
-        rescue => e
-          return e.message
         end
+      rescue => e
+        return e.message
       end
-    rescue Timeout::Error
-      exit
     end
   end
 
@@ -263,38 +261,40 @@ module Monitoring
 
   def self.background
     begin
-      max_forks = 15 #we hard limit the max checks to 15 at a time
-      forks = [] #and initialize an empty array
-      hosts = ::Host.all
-      hosts.each do |host|
-        if forks.count >= max_forks #if we reached the max forks
-          forks2 = forks      # Ensure there's no completed forks on the fork list
-          forks2.each do |pid|
-            forks.delete(pid) unless Misc::checkpid(pid)
+      Timeout::timeout(60+TTL) do # Wait for 1 minute plus TTL, kill if executing takes more time
+        max_forks = 15 #we hard limit the max checks to 15 at a time
+        forks = [] #and initialize an empty array
+        hosts = ::Host.all
+        hosts.each do |host|
+          if forks.count >= max_forks #if we reached the max forks
+            forks2 = forks      # Ensure there's no completed forks on the fork list
+            forks2.each do |pid|
+              forks.delete(pid) unless Misc::checkpid(pid)
+            end
+            if forks.count >= max_forks
+              id = Process.wait #then we wait for some child to finish
+              forks.delete(id) #and we remove it from the forks array
+            end
           end
-          if forks.count >= max_forks
-            id = Process.wait #then we wait for some child to finish
-            forks.delete(id) #and we remove it from the forks array
+          frk = Spork.spork do #so we can continue executing a new fork
+            ret = host.perform_monitoring_operations
+            puts "Error when monitoring "+host.hostname+" on the background: "+ret if ret != true and $DBG == 1
           end
+          forks << frk #and store the fork id on the forks array
         end
-        frk = Spork.spork do #so we can continue executing a new fork
-          ret = host.perform_monitoring_operations
-          puts "Error when monitoring "+host.hostname+" on the background: "+ret if ret != true and $DBG == 1
+        Process.waitall
+        sleep TTL
+        Spork.spork do
+          Process.setsid
+          bgm = Spork.spork do
+            # STDIN.reopen '/dev/null'
+            # STDOUT.reopen '/dev/null', 'a'
+            # STDERR.reopen STDOUT
+            Monitoring::background
+          end
+          $BGMONIT.put_int(0, bgm)
+          exit
         end
-        forks << frk #and store the fork id on the forks array
-      end
-      Process.waitall
-      sleep TTL
-      Spork.spork do
-        Process.setsid
-        bgm = Spork.spork do
-          # STDIN.reopen '/dev/null'
-          # STDOUT.reopen '/dev/null', 'a'
-          # STDERR.reopen STDOUT
-          Monitoring::background
-        end
-        $BGMONIT.put_int(0, bgm)
-        exit
       end
       exit
     rescue => e
