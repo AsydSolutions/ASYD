@@ -136,17 +136,20 @@ class Host
       NOTEX.synchronize do
         notification = Notification.create(:type => :error, :sticky => false, :message => I18n.t('error.host.auth'))
       end
+      host.delete(false)
       return false
     rescue Errno::EHOSTUNREACH
       NOTEX.synchronize do
         notification = Notification.create(:type => :error, :sticky => false, :message => I18n.t('error.host.unreach'))
       end
+      host.delete(false)
       return false
     rescue => e
       error = I18n.t('error.host.misc')+": "+e.message
       NOTEX.synchronize do
         notification = Notification.create(:type => :error, :sticky => false, :message => error)
       end
+      host.delete(false)
       return false
     end
   end
