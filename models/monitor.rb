@@ -236,7 +236,6 @@ module Monitoring
         end
       end
     rescue Timeout::Error
-      p "wat"
       exit
     end
   end
