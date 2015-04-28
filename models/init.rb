@@ -102,6 +102,9 @@ if File.directory? 'data'
         Process.kill("KILL", wck) if wck > 0
         Process.kill("TERM", bgm) if bgm > 0
       end
+      if Process.kill(0, bgm) == 1
+        Process.kill("KILL", bgm) if bgm > 0
+      end
     rescue Errno::ESRCH
       false
     end
