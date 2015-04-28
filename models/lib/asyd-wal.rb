@@ -89,7 +89,6 @@ module Awal
           end
         end
       end
-      exit unless Process.kill 0, $ASYD_PID
       sleep 20
     end
   end

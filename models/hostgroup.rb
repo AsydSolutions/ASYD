@@ -69,8 +69,14 @@ class Hostgroup
       forks = [] #and initialize an empty array
       self.hosts.each do |host| #for each host
         if forks.count >= max_forks #if we reached the "forkability" limit
-          id = Process.wait #then we wait for some child to finish
-          forks.delete(id) #and we remove it from the forks array
+          forks2 = forks      # Ensure there's no completed forks on the fork list
+          forks2.each do |pid|
+            forks.delete(pid) unless Misc::checkpid(pid)
+          end
+          if forks.count >= max_forks #if we reached the "forkability" limit
+            id = Process.wait #then we wait for some child to finish
+            forks.delete(id) #and we remove it from the forks array
+          end
         end
         frk = Spork.spork do #so we can continue executing a new fork
           yield host # the actual code

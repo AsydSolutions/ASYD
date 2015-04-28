@@ -89,7 +89,7 @@ if File.directory? 'data'
     bgm = $BGMONIT.get_int(0)
 
     begin
-      if Process.kill(0, wck) == 1
+      if Misc::checkpid(wck)
         Awal::checkpoint(:users_db)
         Awal::checkpoint(:config_db)
         Awal::checkpoint(:stats_db)
@@ -102,7 +102,7 @@ if File.directory? 'data'
         Process.kill("KILL", wck) if wck > 0
         Process.kill("TERM", bgm) if bgm > 0
       end
-      if Process.kill(0, bgm) == 1
+      if Misc::checkpid(bgm)
         Process.kill("KILL", bgm) if bgm > 0
       end
     rescue Errno::ESRCH

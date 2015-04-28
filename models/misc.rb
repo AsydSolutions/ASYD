@@ -72,6 +72,16 @@ module Misc
     return max_forks
   end
 
+  # Check pid existance
+  # return true if process pid exists
+  def self.checkpid(pid)
+    begin
+      return true if Process.kill 0, pid
+    rescue
+      return false
+    end
+  end
+
   # Round number
   def round
       return (self+0.5).floor if self > 0.0
