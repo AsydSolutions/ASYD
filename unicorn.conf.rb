@@ -1,4 +1,5 @@
 $UNICORN = 1
+$ASYD_PID = Process.pid
 $DBG = 0 #debug?
 
 FileUtils.mkdir("log") unless File.directory?("log")
