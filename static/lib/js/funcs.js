@@ -43,6 +43,7 @@ $(function () {
   });
 
   $('.hint').tooltip();
+  $('.update-asyd').tooltip('show');
 
   var flst = $('script[src="/js/bootstrap-filestyle.min.js"]').length;
   if (flst !== 0) {

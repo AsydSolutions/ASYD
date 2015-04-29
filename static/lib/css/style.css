@@ -48,6 +48,10 @@ input {
 	margin-right: 5px;
 }
 
+.update-asyd {
+	padding-left: 10px;
+}
+
 .table td {
 	vertical-align: middle;
 }
