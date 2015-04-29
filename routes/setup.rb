@@ -46,6 +46,6 @@ class ASYD < Sinatra::Application
 
   get '/confirm_upgrade' do
     Setup.one_click_update if Setup.update_available?
-    redirect to '/'
+    erb 'Reloading, please wait... <script> setTimeout(function () { window.location.href = "/"; }, 5000); </script>'
   end
 end
