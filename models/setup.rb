@@ -28,4 +28,25 @@ class Setup
       repository(:status_db).adapter.select('PRAGMA journal_mode = WAL')
       repository(:config_db).adapter.select('PRAGMA journal_mode = WAL')
   end
+
+  def self.one_click_update
+    Spork.spork do
+      system 'git pull origin master'
+      bundle = Gem.bin_path("bundler", "bundle")
+      system "#{bundle} install && #{bundle} update"
+      exec "./asyd.sh restart"
+    end
+    Process.waitall
+  end
+
+  def self.update_available?
+    begin
+      file = open('http://www.asyd.eu/asyd.version')
+      last_ver = file.read.strip
+      return true unless last_ver.to_f <= $ASYD_VERSION
+      return false
+    rescue
+      return false
+    end
+  end
 end

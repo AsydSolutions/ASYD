@@ -38,4 +38,14 @@ class ASYD < Sinatra::Application
     end
     redirect to home
   end
+
+  get '/upgrade' do
+    redirect to '/' unless Setup.update_available?
+    erb :'system/upgrade'
+  end
+
+  get '/confirm_upgrade' do
+    Setup.one_click_update if Setup.update_available?
+    redirect to '/'
+  end
 end
