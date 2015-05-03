@@ -8,7 +8,7 @@
   <link rel="stylesheet" type="text/css" href="/css/bootstrap-responsive.min.css">
   <link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,600italic,400,600">
   <link rel="stylesheet" type="text/css" href="/css/font-awesome.min.css">
-  <link rel="stylesheet" type="text/css" href="/css/style.css">
+  <link rel="stylesheet" type="text/css" href="/css/style.css?v=<%= $ASYD_VERSION %>">
   <% if request.path_info.start_with?("/login") %>
     <link rel="stylesheet" type="text/css" href="/css/pages/signin.css">
   <% end %>
@@ -25,7 +25,7 @@
     <script type="text/javascript" language="javascript" src="/js/codemirror.js"></script>
     <link rel="stylesheet" type="text/css" href="/css/codemirror.css">
   <% end %>
-  <script type="text/javascript" language="javascript" src="/js/funcs.js?v=0.064"></script>
+  <script type="text/javascript" language="javascript" src="/js/funcs.js?v=<%= $ASYD_VERSION %>"></script>
   <!-- DataTables -->
   <% if request.path_info.start_with?("/host") || request.path_info.start_with?("/deploys/list") || request.path_info.start_with?("/monitors/list") || request.path_info.start_with?("/task/list") || request.path_info.start_with?("/users") %>
     <link rel="stylesheet" type="text/css" href="/css/jquery.dataTables.css">
