@@ -568,6 +568,8 @@ class Deploy
       return [5, e.message+" (line #{line_nr})"] # 5 == format exeption
     rescue ExecutionError => e
       return [4, e.message+" (line #{line_nr})"] # 4 == execution error
+    rescue => e
+      return [4, e.message+" (line #{line_nr})"] # unknown errors are handled as execution error
     end
   end
 
