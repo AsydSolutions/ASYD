@@ -43,6 +43,9 @@ $(function () {
   });
 
   $('.hint').tooltip();
+  if (location.pathname == "/") {
+    $('.update-asyd').tooltip('show');
+  }
 
   var flst = $('script[src="/js/bootstrap-filestyle.min.js"]').length;
   if (flst !== 0) {
@@ -414,4 +417,8 @@ var acknowledgeMonitoringNotification = function (msg_id) {
   }, function () {
     $('#' + msg_id).remove();
   });
+};
+
+var load_spinner = function () {
+  $('body').append( '<div class="spinner-container"><div class="spinner"></div></div>' );
 };

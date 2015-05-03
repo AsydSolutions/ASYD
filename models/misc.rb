@@ -72,6 +72,16 @@ module Misc
     return max_forks
   end
 
+  # Check pid existance
+  # return true if process pid exists
+  def self.checkpid(pid)
+    begin
+      return true if Process.kill 0, pid
+    rescue
+      return false
+    end
+  end
+
   # Round number
   def round
       return (self+0.5).floor if self > 0.0
@@ -80,19 +90,19 @@ module Misc
   end
 
   # Checks if a port is open (so if the host is reachable)
-  def self.is_port_open?(ip, port, pingback=false, seconds=2)
-    Timeout::timeout(seconds) do
-      begin
+  def self.is_port_open?(ip, port, pingback=false, seconds=3)
+    begin
+      Timeout::timeout(seconds) do
         s = TCPSocket.new(ip, port)
         s.gets if pingback
         s.close
         true
-      rescue Errno::ECONNREFUSED, Errno::EHOSTUNREACH
-        false
       end
+    rescue Errno::ECONNREFUSED, Errno::EHOSTUNREACH
+      false
+    rescue Timeout::Error
+      false
     end
-  rescue Timeout::Error
-    false
   end
 
   # Executes a command on a remote host

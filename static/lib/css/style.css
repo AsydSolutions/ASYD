@@ -30,6 +30,16 @@ input {
 	margin-right: 0px;
 }
 
+input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button {
+	-webkit-appearance: none;
+	margin: 0;
+}
+
+input[type=number] {
+	-moz-appearance:textfield;
+}
+
 .dropdown .dropdown-menu {
 	-webkit-border-radius: 6px;
 	-moz-border-radius: 6px;
@@ -46,6 +56,10 @@ input {
 	padding-right: 12px !important;
 	padding-left: 0px !important;
 	margin-right: 5px;
+}
+
+.update-asyd {
+	padding-left: 10px;
 }
 
 .table td {
@@ -1208,6 +1222,51 @@ color: #333;
 
 .ML0 { margin-left:0}
 .MR0 { margin-right:0;}
+
+
+
+/* LOADING SPINNER */
+@keyframes spinner {
+	to {transform: rotate(360deg);}
+}
+@-webkit-keyframes spinner {
+	to {-webkit-transform: rotate(360deg);}
+}
+.spinner {
+	min-width: 24px;
+	min-height: 24px;
+	z-index: 5002 !important;
+}
+.spinner:before {
+	content: 'Loading...';
+	position: absolute;
+	top: 35%;
+	left: 50%;
+	width: 46px;
+	height: 46px;
+	margin-top: -10px;
+	margin-left: -10px;
+	z-index: 5002 !important;
+}
+.spinner:not(:required):before {
+	content: '';
+	border-radius: 50%;
+	border: 2px solid transparent;
+	border-top-color: #03ade0;
+	border-bottom-color: #03ade0;
+	animation: spinner .8s ease infinite;
+	-webkit-animation: spinner .8s ease infinite;
+	z-index: 5002 !important;
+}
+.spinner-container{
+	position: fixed;
+	top: 0px;
+	width: 100vw;
+	height: 100vh;
+	background: rgba(48, 48, 48, 0.15);
+	z-index: 5001 !important;
+}
+
 
 
 
