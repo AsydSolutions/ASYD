@@ -153,7 +153,8 @@ class Deploy
   #
   def self.deploy(host, path, cfg_root, task)
     begin
-      condition = false #indicates if you are inside a conditional block
+      level_if = 0
+      level_nodoit = 0
       gdoit = true #global doit, used for conditional blocks
       skip = false
 
@@ -163,19 +164,23 @@ class Deploy
         line = line.strip
 
         # Check for deploy global conditionals
-        if !condition
-          m = line.match(/^if (.+)$/i)
-          if !m.nil?
+        m = line.match(/^if (.+)$/i)
+        if !m.nil?
+          # ignore conditions if you are on a nodoit
+          if gdoit
             gdoit = check_condition(m, host)
-            condition = true
-            skip = true
+            level_nodoit = level_if unless gdoit
           end
-        else
-          if line.match(/^endif$/i)
-            condition = false
+          level_if = level_if + 1
+          skip = true
+        end
+        # check for endifs
+        if line.match(/^endif$/i)
+          level_if = level_if - 1
+          if level_nodoit == level_if
             gdoit = true
-            skip = true
           end
+          skip = true
         end
 
         # Set variables from a Deploy
