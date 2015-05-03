@@ -416,3 +416,7 @@ var acknowledgeMonitoringNotification = function (msg_id) {
     $('#' + msg_id).remove();
   });
 };
+
+var load_spinner = function () {
+  $('body').append( '<div class="spinner-container"><div class="spinner"></div></div>' );
+};
