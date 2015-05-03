@@ -157,10 +157,12 @@ class Deploy
       level_nodoit = 0
       gdoit = true #global doit, used for conditional blocks
       skip = false
+      line_nr = 0
 
       f = File.open(path, "r").read
       f.gsub!(/\r\n?/, "\n")
       f.each_line do |line|
+        line_nr = line_nr + 1
         line = line.strip
 
         # Check for deploy global conditionals
@@ -525,9 +527,9 @@ class Deploy
       end
       return 1
     rescue FormatException => e
-      return [5, e.message] # 5 == format exeption
+      return [5, e.message+" (line #{line_nr})"] # 5 == format exeption
     rescue ExecutionError => e
-      return [4, e.message] # 4 == execution error
+      return [4, e.message+" (line #{line_nr})"] # 4 == execution error
     end
   end
 
