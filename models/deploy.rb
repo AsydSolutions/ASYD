@@ -763,25 +763,30 @@ class Deploy
   def self.parse_config(host, cfg)
     begin
       noparse = false
-      condition = false
+      level_if = 0
+      level_nodoit = 0
       doit = true
       skip = false
       newconf = Tempfile.new('conf')
       File.open(cfg, "r").each do |line|
         if !noparse
-          if !condition
-            m = line.strip.match(/^<% ?if (.+)%>$/)
-            if !m.nil?
+          m = line.strip.match(/^<% ?if (.+)%>$/)
+          if !m.nil?
+            # ignore conditions if you are on a nodoit
+            if doit
               doit = check_condition(m, host)
-              condition = true
-              skip = true
+              level_nodoit = level_if unless doit
             end
-          else
-            if line.strip.match(/^<% ?endif ?%>$/)
-              condition = false
+            level_if = level_if + 1
+            skip = true
+          end
+          # check for endifs
+          if line.strip.match(/^<% ?endif ?%>$/)
+            level_if = level_if - 1
+            if level_nodoit == level_if
               doit = true
-              skip = true
             end
+            skip = true
           end
         end
         if !noparse
