@@ -77,6 +77,8 @@ class Host
             end
             ssh.loop
           end
+          ret = ssh.exec!("sudo cat /tmp/1")
+          raise StandardError, "User has no admin privileges, please add '#{user} ALL=NOPASSWD: ALL' to /etc/sudoers and try again" unless ret.strip == "1"
           ssh.exec!("rm /tmp/1")
         end
         #check for package manager and add distro
