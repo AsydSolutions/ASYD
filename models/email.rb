@@ -13,7 +13,7 @@ class Email
   end
 
   property :_id, Integer, :default => 1, :key => true  # we just store one object, but key property is needed
-  property :method, Enum[ :sendmail, :smtp ], :default => :sendmail
+  property :method, Enum[ :sendmail, :smtp, :exchange ], :default => :sendmail
   property :path, String, :default => "/usr/sbin/sendmail"
   property :host, String, :default => "localhost"
   property :port, String, :default => "587"
@@ -24,24 +24,35 @@ class Email
   def self.mail(_to, _subject, _body)
     begin
       cfg = Email.all.first
-      mail = Mail.new do
-        to _to
-        from cfg.user
-        subject _subject
-        text_part do
-          body _body
+      if cfg.method != :exchange
+        mail = Mail.new do
+          to _to
+          from cfg.user
+          subject _subject
+          text_part do
+            body _body
+          end
         end
-      end
-      if cfg.method == :smtp
-        mail.raise_delivery_errors = true
-        # setting open_ssl_verify_mode to true, makes mail to use the SSL, if it's valid or self-signed
-        # Maybe, in future we should verify it, but the info is a bit obscure: http://www.rubydoc.info/github/meskyanichi/backup/Backup/Notifier/Mail#openssl_verify_mode-instance_method
-        mail.delivery_method :smtp, address: cfg.host, port: cfg.port.to_i, user_name: cfg.user, password: cfg.password, authentication: 'plain', enable_starttls_auto: cfg.tls, return_response: true, openssl_verify_mode: "none"
-        response = mail.deliver!
+        if cfg.method == :smtp
+          mail.raise_delivery_errors = true
+          # setting open_ssl_verify_mode to true, makes mail to use the SSL, if it's valid or self-signed
+          # Maybe, in future we should verify it, but the info is a bit obscure: http://www.rubydoc.info/github/meskyanichi/backup/Backup/Notifier/Mail#openssl_verify_mode-instance_method
+          mail.delivery_method :smtp, address: cfg.host, port: cfg.port.to_i, user_name: cfg.user, password: cfg.password, authentication: 'plain', enable_starttls_auto: cfg.tls, return_response: true, openssl_verify_mode: "none"
+          response = mail.deliver!
 
-      elsif cfg.method == :sendmail
-        mail.delivery_method :sendmail, :location => cfg.path
-        mail.deliver!
+        elsif cfg.method == :sendmail
+          mail.delivery_method :sendmail, :location => cfg.path
+          mail.deliver!
+        end
+      elsif cfg.method == :exchange
+        if Gem::Specification::find_all_by_name('viewpoint').any?
+          require 'viewpoint'
+          endpoint = cfg.host
+          ews_user = cfg.user
+          ews_pass = cfg.password
+          ews_cli = Viewpoint::EWSClient.new endpoint, ews_user, ews_pass
+          ews_cli.send_message subject: _subject, body: _body, to_recipients: [ _to ]
+        end
       end
     rescue *SMTP_ERRORS => e
       NOTEX.synchronize do
