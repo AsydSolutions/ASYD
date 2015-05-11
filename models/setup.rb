@@ -45,6 +45,24 @@ class Setup
     end
   end
 
+  def self.one_click_install_exchange
+    pid = Spork.spork do
+      open('Gemfile', 'a') do |f|
+        f.puts 'gem "viewpoint"'
+      end
+      bundle = Gem.bin_path("bundler", "bundle")
+      system "#{bundle} install && #{bundle} update"
+    end
+    Process.waitall
+    Spork.spork do
+      Process.setsid
+      Spork.spork do
+        exec "./asyd.sh restart"
+      end
+      exit
+    end
+  end
+
   def self.update_available?
     begin
       file = open('http://www.asyd.eu/asyd.version')

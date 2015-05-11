@@ -9,6 +9,10 @@ class ASYD < Sinatra::Application
       @tls = cfg.tls
       @user = cfg.user ? cfg.user : ""
       @password = cfg.password ? cfg.password : ""
+      @disclaimer = false
+      if !Gem::Specification::find_all_by_name('viewpoint').any?
+        @disclaimer = true
+      end
       erb :'system/system_settings'
     else
       not_found
@@ -30,6 +34,11 @@ class ASYD < Sinatra::Application
         else
           cfg.tls = true
         end
+        cfg.user = params['user']
+        cfg.password = params['password']
+      elsif params['method'] == "exchange"
+        cfg.method = :exchange
+        cfg.host = params['host']
         cfg.user = params['user']
         cfg.password = params['password']
       end
