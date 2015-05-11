@@ -22,4 +22,4 @@ gem "htmlentities"
 gem "chartkick"
 gem "i18n"
 gem "activesupport"
-gem "rake"
+gem 'rubocop', require: false
