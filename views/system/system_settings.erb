@@ -39,7 +39,7 @@
     </form>
   </div>
   <div class="tab-pane <%= "active" if @method == :exchange %>" id="exchange">
-  <% if ! @disclaimer %>
+  <% if @disclaimer %>
     <span>
       This feature is not installed, do you want to install it?.<br/>
       <a href="/install/exchange">Click here</a>
