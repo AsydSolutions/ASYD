@@ -792,6 +792,7 @@ class Deploy
         line.gsub!(/<%ARCH%>/i, host.arch)
         line.gsub!(/<%HOSTNAME%>/i, host.hostname)
         line.gsub!(/<%PKG_MANAGER%>/i, host.pkg_mgr)
+        line.gsub!(/<%SSH_PORT%>/i, host.ssh_port.to_s)
       end
     end
     return line
