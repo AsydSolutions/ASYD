@@ -9,7 +9,7 @@ The `>=` and `<=` operators can only be used for numbers. The `==` and `!=` oper
 for strings (text comparison) and numbers.
 
 Several conditionals (as many as you want) can be concatenated using `and` and `or`. They will be
-evaluated following a sequencial and logical order (i.e. for `condition1 or condition2`, if the first
+evaluated following a sequential and logical order (i.e. for `condition1 or condition2`, if the first
 condition complies, the second one won't be evaluated).
 
 <br/>
@@ -23,8 +23,7 @@ condition complies. Both the opening tag `if <condition>` and the ending tag `en
 written on a single line with no extra characters but the accepted parameters. Between them you
 can write any commands that will be executed only if the condition validates.
 
-*Note: You cannot define conditional blocks inside conditional blocks, but only one at a time.
-You can, however, use single line conditionals as described on the next point.*
+*Note: Since v0.075 you can use nested conditionals.*
 
 *Syntax:*
 
@@ -59,7 +58,7 @@ for defining parts of the configuration file that should be only uploaded to the
 if the condition complies. The usage is the same as for Conditional blocks on "def" files (see above)
 but defined by the tags `<%if condition%>` `<%endif%>`.
 
-*Note: You cannot define conditional blocks inside conditional blocks, but only one at a time.*
+*Note: Since v0.075 you can use nested conditionals.*
 
 *Syntax:*
 

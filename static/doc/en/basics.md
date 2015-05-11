@@ -29,9 +29,9 @@ you can leave the password field empty. Then ASYD will try to auth against the h
 SSH key created or provided at the setup.
 
 Please note that if you are using a non-root user (like in the case of ubuntu or similar),
-you need to be sure that the user has admin privileges, the command "sudo" is installed,
-and the user won't be prompted for a sudo password, as ASYD deploying system is non-interactive.
-This can be achieved by adding `%sudo   ALL=(ALL:ALL) NOPASSWD:ALL` on the `/etc/sudoers` file.
+you need to be sure that the user has admin privileges and the command "sudo" is installed.
+ASYD deploying system is non-interactive, so it will add `<user> ALL=NOPASSWD:ALL` to the
+`/etc/sudoers` file for avoiding password prompts.
 
 After the new host it's added, it will start the monitoring deploy on the background. At this
 time the server will appear as "not monitored". When the monitoring setup has completed,
