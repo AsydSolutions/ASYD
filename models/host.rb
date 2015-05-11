@@ -35,6 +35,52 @@ class Host
       host.opt_vars = {} #initialize opt_vars as an empty hash
       #start connection to remote host
       Net::SSH.start(host.ip, host.user, :port => host.ssh_port, :keys => "data/ssh_key", :password => password, :timeout => 10) do |ssh|
+        #check for admin capabilities/nopasswd
+        if user != "root"
+          need_passwd = false
+          last = nil
+          ssh.exec!("echo 1 > /tmp/1")
+          ssh.open_channel do |channel|
+            channel.request_pty do |ch, success|
+              raise StandardError, "Could not obtain pty" unless success
+            end
+            channel.exec("sudo cat /tmp/1") do |ch, success|
+              raise unless success
+              channel.on_data do |ch, data|
+                if data =~ /^\[sudo\] password/
+                  need_passwd = true
+                  channel.send_data "#{password}\n"
+                else
+                  last = data.strip
+                end
+              end
+            end
+          end
+          ssh.loop
+          unless last == "1"
+            raise StandardError, "User has no admin privileges"
+          end
+          if need_passwd
+            cmd = "sudo cp /etc/sudoers /tmp/sudoers; sudo sh -c 'echo \"#{user} ALL=NOPASSWD: ALL\" >> /tmp/sudoers'; sudo sh -c 'uniq /tmp/sudoers > /etc/sudoers'; sudo rm /tmp/sudoers"
+            ssh.open_channel do |channel|
+              channel.request_pty do |ch, success|
+                raise StandardError, "Could not obtain pty" unless success
+              end
+              channel.exec(cmd) do |ch, success|
+                raise unless success
+                channel.on_data do |ch, data|
+                  if data =~ /^\[sudo\] password/
+                    channel.send_data "#{password}\n"
+                  end
+                end
+              end
+            end
+            ssh.loop
+          end
+          ret = ssh.exec!("sudo cat /tmp/1")
+          raise StandardError, "User has no admin privileges, please add '#{user} ALL=NOPASSWD: ALL' to /etc/sudoers and try again" unless ret.strip == "1"
+          ssh.exec!("rm /tmp/1")
+        end
         #check for package manager and add distro
         #1. debian-based
         if !(ssh.exec!("which apt-get") =~ /\/bin\/apt-get$/).nil?

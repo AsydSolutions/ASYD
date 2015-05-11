@@ -28,9 +28,8 @@ puedes dejar el campo de la contraseña vacío, en cuyo caso ASYD intentará aut
 host usando la clave SSH creada o provista durante el setup.
 
 Nota: si estás usando un usuario distinto a root (como en el caso de ubuntu o similar),
-necesitas asegurarte de que ese usuario tiene privilegios de administrador, el comando "sudo" está instalado,
-y el usuario no necesita proveer una contraseña para sudo, ya que el sistema de deploys de ASYD
-funciona en modo no-interactivo. Esto se puede conseguir añadiendo la linea `%sudo   ALL=(ALL:ALL) NOPASSWD:ALL`
+necesitas asegurarte de que ese usuario tiene privilegios de administrador, y el comando "sudo" está instalado.
+El sistema de deploys de ASYD funciona en modo no-interactivo, por lo que ASYD añadirá la linea `<usuario> ALL=NOPASSWD:ALL`
 al archivo `/etc/sudoers`.
 
 Después de que el nuevo host sea añadido, se iniciará el deploy de monitoring en segundo plano, en este

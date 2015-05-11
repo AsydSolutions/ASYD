@@ -77,7 +77,7 @@ class Deploy
 
   # Deploy a deploy on the defined host
   #
-  def self.launch(host, dep, task)
+  def self.launch(host, dep, task, dry_run = false, from_deploy = false)
     begin
       if host.nil?
         error = "Error: host not found"
@@ -97,16 +97,22 @@ class Deploy
         sudo = false
       end
 
-      # TODO
-      # ret = check_deploy(dep, sudo)
-      # if ret[0] == 5
-      #   raise FormatException, ret[1]
-      # end
+      # Check deploy (dry run)
+      unless from_deploy and !dry_run # check only once when calling from deploy
+        ret = Deploy.deploy(host, path, cfg_root, task, true)
+        if ret[0] == 5
+          raise FormatException, ret[1]
+        elsif ret[0] == 4
+          raise ExecutionError, ret[1]
+        end
+      end
 
-      ret = Deploy.deploy(host, path, cfg_root, task)
+      ret = Deploy.deploy(host, path, cfg_root, task, false) unless dry_run
       return ret
     rescue ExecutionError => e
       return [4, e.message] # 4 == execution error
+    rescue FormatException => e
+      return [5, e.message] # 5 == format exception
     rescue TargetUnreachable => e
       return [6, e.message] # 6 == host unreachable
     end
@@ -114,7 +120,7 @@ class Deploy
 
   # Undeploy a given deploy on the defined host
   #
-  def self.undeploy(host, dep, task)
+  def self.undeploy(host, dep, task, dry_run = false, from_deploy = false)
     begin
       if host.nil?
         error = "Error: host not found"
@@ -134,16 +140,22 @@ class Deploy
         sudo = false
       end
 
-      # TODO
-      # ret = check_deploy(dep, sudo)
-      # if ret[0] == 5
-      #   raise FormatException, ret[1]
-      # end
+      # Check deploy (dry run)
+      unless from_deploy and !dry_run # check only once when calling from deploy
+        ret = Deploy.deploy(host, path, cfg_root, task, true)
+        if ret[0] == 5
+          raise FormatException, ret[1]
+        elsif ret[0] == 4
+          raise ExecutionError, ret[1]
+        end
+      end
 
-      ret = Deploy.deploy(host, path, cfg_root, task)
+      ret = Deploy.deploy(host, path, cfg_root, task, false) unless dry_run
       return ret
     rescue ExecutionError => e
       return [4, e.message] # 4 == execution error
+    rescue FormatException => e
+      return [5, e.message] # 5 == format exception
     rescue TargetUnreachable => e
       return [6, e.message] # 6 == host unreachable
     end
@@ -151,31 +163,38 @@ class Deploy
 
   # Deploys the file in "path" (def, def.sudo, undeploy or undeploy.sudo)
   #
-  def self.deploy(host, path, cfg_root, task)
+  def self.deploy(host, path, cfg_root, task, dry_run)
     begin
-      condition = false #indicates if you are inside a conditional block
+      level_if = 0
+      level_nodoit = 0
       gdoit = true #global doit, used for conditional blocks
       skip = false
+      line_nr = 0
 
       f = File.open(path, "r").read
       f.gsub!(/\r\n?/, "\n")
       f.each_line do |line|
+        line_nr = line_nr + 1
         line = line.strip
 
         # Check for deploy global conditionals
-        if !condition
-          m = line.match(/^if (.+)$/i)
-          if !m.nil?
+        m = line.match(/^if (.+)$/i)
+        if !m.nil?
+          # ignore conditions if you are on a nodoit
+          if gdoit
             gdoit = check_condition(m, host)
-            condition = true
-            skip = true
+            level_nodoit = level_if unless gdoit
           end
-        else
-          if line.match(/^endif$/i)
-            condition = false
+          level_if = level_if + 1
+          skip = true
+        end
+        # check for endifs
+        if line.match(/^endif$/i)
+          level_if = level_if - 1
+          if level_nodoit == level_if
             gdoit = true
-            skip = true
           end
+          skip = true
         end
 
         # Set variables from a Deploy
@@ -201,7 +220,11 @@ class Deploy
           if doit
             line = line.split(/(?<!var):/i, 2)
             pkgs = line[1].strip
-            ret = Deploy.install(host, pkgs, pkg_mgr)
+            if pkgs.include? "&" or pkgs.include? "|" or pkgs.include? ">" or pkgs.include? "<" or pkgs.include? "`" or pkgs.include? "$"
+              error = "Invalid characters detected on package name: "+pkgs
+              raise FormatException, error
+            end
+            ret = dry_run ? 0 : Deploy.install(host, pkgs, pkg_mgr)
             if ret[0] == 1
               msg = "Installed "+pkgs+" on "+host.hostname+": "+ret[1]
               NOTEX.synchronize do
@@ -225,7 +248,11 @@ class Deploy
           if doit
             line = line.split(/(?<!var):/i, 2)
             pkgs = line[1].strip
-            ret = Deploy.uninstall(host, pkgs)
+            if pkgs.include? "&" or pkgs.include? "|" or pkgs.include? ">" or pkgs.include? "<" or pkgs.include? "`" or pkgs.include? "$"
+              error = "Invalid characters detected on package name: "+pkgs
+              raise FormatException, error
+            end
+            ret = dry_run ? 0 : Deploy.uninstall(host, pkgs)
             if ret[0] == 1
               msg = "Removed "+pkgs+" from "+host.hostname+": "+ret[1]
               NOTEX.synchronize do
@@ -256,15 +283,19 @@ class Deploy
             cfg_src = cfg_root+cfg[0].strip
             parsed_cfg = parse_config(host, cfg_src) unless noparse
             cfg_dst = cfg[1].strip
-            if noparse
-              host.upload_file(cfg_src, cfg_dst)
-            else
-              host.upload_file(parsed_cfg.path, cfg_dst)
+            unless dry_run
+              if noparse
+                host.upload_file(cfg_src, cfg_dst)
+              else
+                host.upload_file(parsed_cfg.path, cfg_dst)
+              end
             end
             parsed_cfg.unlink unless noparse
-            msg = "Uploaded "+cfg_src+" to "+cfg_dst+" on "+host.hostname
-            NOTEX.synchronize do
-              notification = Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
+            unless dry_run
+              msg = "Uploaded "+cfg_src+" to "+cfg_dst+" on "+host.hostname
+              NOTEX.synchronize do
+                notification = Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
+              end
             end
           end
         # /CONFIG FILE BLOCK
@@ -286,15 +317,19 @@ class Deploy
             cfg_src = cfg_root+cfg[0].strip
             cfg_dst = cfg[1].strip
             parsed_cfg = parse_config_dir(host, cfg_src, nil) unless noparse
-            if noparse
-              host.upload_dir(cfg_src, cfg_dst)
-            else
-              host.upload_dir(parsed_cfg, cfg_dst)
+            unless dry_run
+              if noparse
+                host.upload_dir(cfg_src, cfg_dst)
+              else
+                host.upload_dir(parsed_cfg, cfg_dst)
+              end
             end
             FileUtils.rm_r parsed_cfg, :secure=>true unless noparse
-            msg = "Uploaded "+cfg_src+" to "+cfg_dst+" on "+host.hostname
-            NOTEX.synchronize do
-              notification = Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
+            unless dry_run
+              msg = "Uploaded "+cfg_src+" to "+cfg_dst+" on "+host.hostname
+              NOTEX.synchronize do
+                notification = Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
+              end
             end
           end
         # /CONFIG DIR BLOCK
@@ -333,11 +368,13 @@ class Deploy
           if doit #we have doit and exec_host defined, so execute the command
             line = line.split(/(?<!var):/i, 2)
             cmd = parse(host, line[1].strip) #parse for vars
-            ret = exec_host.exec_cmd(cmd)
-            msg = "Executed '"+cmd+"' on "+exec_host.hostname
-            msg = msg+": "+ret unless ret.nil?
-            NOTEX.synchronize do
-              notification = Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
+            unless dry_run
+              ret = exec_host.exec_cmd(cmd)
+              msg = "Executed '"+cmd+"' on "+exec_host.hostname
+              msg = msg+": "+ret unless ret.nil?
+              NOTEX.synchronize do
+                notification = Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
+              end
             end
           end
         # /EXEC BLOCK
@@ -361,7 +398,9 @@ class Deploy
               http.verify_mode = OpenSSL::SSL::VERIFY_NONE
             end
             request = Net::HTTP::Get.new(uri.request_uri)
-            response = http.request(request)
+            unless dry_run
+              response = http.request(request)
+            end
           elsif method == "POST"
             args = line.split(',')
             url = args.shift.strip
@@ -380,11 +419,15 @@ class Deploy
             request = Net::HTTP::Post.new(uri.request_uri)
             request.set_form_data(options)
             # Send the request
-            response = http.request(request)
+            unless dry_run
+              response = http.request(request)
+            end
           end
-          msg = "HTTP "+method+" "+url+": "+response.body
-          NOTEX.synchronize do
-            notification = Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
+          unless dry_run
+            msg = "HTTP "+method+" "+url+": "+response.body
+            NOTEX.synchronize do
+              notification = Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
+            end
           end
         # /HTTP BLOCK
 
@@ -399,7 +442,7 @@ class Deploy
             line = line.split(/(?<!var):/i, 2)
             services = line[1].split(' ')
             services.each do |service|
-              ret = host.monitor_service(service, task)
+              ret = dry_run ? 0 : host.monitor_service(service, task)
               if ret == 1
                 NOTEX.synchronize do
                   msg = "Service "+service+" successfully monitored on "+host.hostname
@@ -421,7 +464,7 @@ class Deploy
             line = line.split(/(?<!var):/i, 2)
             services = line[1].split(' ')
             services.each do |service|
-              ret = host.unmonitor_service(service, task)
+              ret = dry_run ? 0 : host.unmonitor_service(service, task)
               if ret == 1
                 NOTEX.synchronize do
                   msg = "Service "+service+" now un-monitored on "+host.hostname
@@ -443,8 +486,8 @@ class Deploy
             line = line.split(/(?<!var):/i, 2)
             deploys = line[1].split(' ')
             deploys.each do |deploy|
-              ret = Deploy.launch(host, deploy, task)
-              if ret == 1
+              ret = Deploy.launch(host, deploy, task, dry_run, true)
+              if ret == 1 and !dry_run
                 msg = "Deploy "+deploy+" successfully deployed on "+host.hostname
                 NOTEX.synchronize do
                   notification = Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
@@ -469,8 +512,8 @@ class Deploy
             line = line.split(/(?<!var):/i, 2)
             deploys = line[1].split(' ')
             deploys.each do |deploy|
-              ret = Deploy.undeploy(host, deploy, task)
-              if ret == 1
+              ret = Deploy.undeploy(host, deploy, task, dry_run, true)
+              if ret == 1 and !dry_run
                 msg = "Deploy "+deploy+" undeployed from "+host.hostname
                 NOTEX.synchronize do
                   notification = Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
@@ -492,10 +535,12 @@ class Deploy
             doit = check_condition(m, host)
           end
           if doit
-            host.reboot
-            msg = "Reboot "+host.hostname
-            NOTEX.synchronize do
-              notification = Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
+            unless dry_run
+              host.reboot
+              msg = "Reboot "+host.hostname
+              NOTEX.synchronize do
+                notification = Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
+              end
             end
           end
         # /REBOOT BLOCK
@@ -507,7 +552,7 @@ class Deploy
         end
 
         # Here we set the value itself of the var if varname is defined
-        if !varname.nil?
+        if !varname.nil? and !dry_run
           value = ret.strip #the output of exec goes in ret
           HOSTEX.synchronize do
             host.add_var(varname, value) #and we save the variable as a host variable
@@ -520,9 +565,11 @@ class Deploy
       end
       return 1
     rescue FormatException => e
-      return [5, e.message] # 5 == format exeption
+      return [5, e.message+" (line #{line_nr})"] # 5 == format exeption
     rescue ExecutionError => e
-      return [4, e.message] # 4 == execution error
+      return [4, e.message+" (line #{line_nr})"] # 4 == execution error
+    rescue => e
+      return [4, e.message+" (line #{line_nr})"] # unknown errors are handled as execution error
     end
   end
 
@@ -745,6 +792,7 @@ class Deploy
         line.gsub!(/<%ARCH%>/i, host.arch)
         line.gsub!(/<%HOSTNAME%>/i, host.hostname)
         line.gsub!(/<%PKG_MANAGER%>/i, host.pkg_mgr)
+        line.gsub!(/<%SSH_PORT%>/i, host.ssh_port.to_s)
       end
     end
     return line
@@ -758,25 +806,30 @@ class Deploy
   def self.parse_config(host, cfg)
     begin
       noparse = false
-      condition = false
+      level_if = 0
+      level_nodoit = 0
       doit = true
       skip = false
       newconf = Tempfile.new('conf')
       File.open(cfg, "r").each do |line|
         if !noparse
-          if !condition
-            m = line.strip.match(/^<% ?if (.+)%>$/)
-            if !m.nil?
+          m = line.strip.match(/^<% ?if (.+)%>$/)
+          if !m.nil?
+            # ignore conditions if you are on a nodoit
+            if doit
               doit = check_condition(m, host)
-              condition = true
-              skip = true
+              level_nodoit = level_if unless doit
             end
-          else
-            if line.strip.match(/^<% ?endif ?%>$/)
-              condition = false
+            level_if = level_if + 1
+            skip = true
+          end
+          # check for endifs
+          if line.strip.match(/^<% ?endif ?%>$/)
+            level_if = level_if - 1
+            if level_nodoit == level_if
               doit = true
-              skip = true
             end
+            skip = true
           end
         end
         if !noparse
@@ -825,78 +878,6 @@ class Deploy
   end
 
   private
-
-  # Validate deploy file
-  # TODO: review and improve
-  #
-  def self.check_deploy(dep, sudo)
-    begin
-      error = nil
-      cfg_root = "data/deploys/"+dep+"/configs/"
-      if sudo
-        path = "data/deploys/"+dep+"/def.sudo"
-      else
-        path = "data/deploys/"+dep+"/def"
-      end
-      f = File.open(path, "r").read
-      f.gsub!(/\r\n?/, "\n")
-      f.each_line do |line|
-        if line.start_with?("#") || line.strip.empty?
-          # Ignore comments
-        elsif line.start_with?("install")
-          l = line.split(':', 2)
-          pkgs = l[1].strip
-          if pkgs.include? "&" or pkgs.include? "|" or pkgs.include? ">" or pkgs.include? "<" or pkgs.include? "`" or pkgs.include? "$"
-            error = "Invalid characters found: "+line.strip
-            exit
-          end
-        elsif line.match(/^(noparse )?config file/)
-          l = line.split(':', 2)
-          cfg = l[1].split(',')
-          cfg_src = cfg_root+cfg[0].strip
-          cfg_dst = cfg[1].strip
-          if cfg_src.nil? || cfg_dst.nil?
-            error = "Argument missing on line: "+line.strip
-            exit
-          end
-          unless File.exists?(cfg_src)
-            error = "Local config file not found: "+cfg_src
-            exit
-          end
-        elsif line.match(/^(noparse )?config dir/)
-          l = line.split(':', 2)
-          cfg = l[1].split(',')
-          cfg_src = cfg_root+cfg[0].strip
-          cfg_dst = cfg[1].strip
-          if cfg_src.nil? || cfg_dst.nil?
-            error = "Argument missing on line: "+line.strip
-            exit
-          end
-          unless File.directory?(cfg_src)
-            error = "Local config directory not found: "+cfg_src
-            exit
-          end
-        elsif line.start_with?("exec")
-          #just imply we actually WANT to execute the command
-        elsif line.start_with?("monitor")
-          line = line.split(':', 2)
-          services = line[1].split(' ')
-          services.each do |service|
-            unless File.exists?("data/monitors/"+service)
-              error = "Monitor file not found for service "+service
-              exit
-            end
-          end
-        else
-          error = "Invalid line: "+line.strip
-          exit
-        end
-      end
-      return [1, "pass"] # 1 == all ok
-    rescue SystemExit
-      return [5, error] # 5 == format exeption
-    end
-  end
 
   # Checks conditionals on dep file
   #

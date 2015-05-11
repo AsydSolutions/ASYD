@@ -21,6 +21,8 @@ Global variables:
 
     <%IP%> - Target host IP
 
+    <%SSH_PORT%> - Target host SSH port
+
     <%DIST%> - Target host Linux distribution
 
     <%DIST_VER%> - Target host distribution version

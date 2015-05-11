@@ -48,4 +48,10 @@ class ASYD < Sinatra::Application
     Setup.one_click_update if Setup.update_available?
     erb 'Reloading, please wait... <script> setTimeout(function () { window.location.href = "/"; }, 5000); </script>'
   end
+
+  get '/install/exchange' do
+    Setup.one_click_install_exchange if !Gem::Specification::find_all_by_name('viewpoint').any?
+    erb 'Reloading, please wait... <script> setTimeout(function () { window.location.href = "/settings"; }, 5000); </script>'
+  end
+
 end
