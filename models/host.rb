@@ -170,7 +170,7 @@ class Host
       if !host.save
         raise #couldn't save the object
       end
-      mon = Spork.spork do #we fork the monitoring setup for saving time
+      Spork.spork do #we fork the monitoring setup for saving time
         host.monitor()
       end
       NOTEX.synchronize do
@@ -180,20 +180,20 @@ class Host
       return host #return the object itself
     rescue Net::SSH::AuthenticationFailed
       NOTEX.synchronize do
-        notification = Notification.create(:type => :error, :sticky => false, :message => I18n.t('error.host.auth'))
+        Notification.create(:type => :error, :sticky => false, :message => I18n.t('error.host.auth'))
       end
       host.delete(false)
       return false
     rescue Errno::EHOSTUNREACH
       NOTEX.synchronize do
-        notification = Notification.create(:type => :error, :sticky => false, :message => I18n.t('error.host.unreach'))
+        Notification.create(:type => :error, :sticky => false, :message => I18n.t('error.host.unreach'))
       end
       host.delete(false)
       return false
     rescue => e
       error = I18n.t('error.host.misc')+": "+e.message
       NOTEX.synchronize do
-        notification = Notification.create(:type => :error, :sticky => false, :message => error)
+        Notification.create(:type => :error, :sticky => false, :message => error)
       end
       host.delete(false)
       return false

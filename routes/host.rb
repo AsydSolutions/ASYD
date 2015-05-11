@@ -100,7 +100,7 @@ class ASYD < Sinatra::Application
       redirect to redir
     rescue => e
       NOTEX.synchronize do
-        notification = Notification.create(:type => :error, :sticky => false, :message => e.message)
+        Notification.create(:type => :error, :sticky => false, :message => e.message)
       end
       redir = '/host/'+params['old_hostname']
       redirect to redir

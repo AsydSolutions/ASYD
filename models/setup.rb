@@ -30,7 +30,7 @@ class Setup
   end
 
   def self.one_click_update
-    pid = Spork.spork do
+    Spork.spork do
       system 'git pull origin master'
       bundle = Gem.bin_path("bundler", "bundle")
       system "#{bundle} install && #{bundle} update"
@@ -46,7 +46,7 @@ class Setup
   end
 
   def self.one_click_install_exchange
-    pid = Spork.spork do
+    Spork.spork do
       open('Gemfile', 'a') do |f|
         f.puts 'gem "viewpoint"'
       end

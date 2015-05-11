@@ -17,7 +17,7 @@ class ASYD < Sinatra::Application
     else
       if params['password'].empty? || params['username'].empty? || params['email'].empty?
         NOTEX.synchronize do
-          notification = Notification.create(:type => :error, :sticky => false, :message => 'All fields required')
+          Notification.create(:type => :error, :sticky => false, :message => 'All fields required')
         end
         halt erb(:'system/setup')
       end
@@ -26,7 +26,7 @@ class ASYD < Sinatra::Application
       else
         if params[:priv_key].nil? || params[:pub_key].nil?
           NOTEX.synchronize do
-            notification = Notification.create(:type => :error, :sticky => false, :message => 'All files required')
+            Notification.create(:type => :error, :sticky => false, :message => 'All files required')
           end
           halt erb(:'system/setup')
         end

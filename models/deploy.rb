@@ -61,7 +61,7 @@ class Deploy
   # Return true if it can be undeployed
   #
   def self.can_undeploy?(dep)
-    if File.exists?("data/deploys/"+dep+"/undeploy")
+    if File.exist?("data/deploys/"+dep+"/undeploy")
       return true
     else
       return false
@@ -89,12 +89,10 @@ class Deploy
       end
 
       cfg_root = "data/deploys/"+dep+"/configs/"
-      if host.user != "root" && File.exists?("data/deploys/"+dep+"/def.sudo")
+      if host.user != "root" && File.exist?("data/deploys/"+dep+"/def.sudo")
         path = "data/deploys/"+dep+"/def.sudo"
-        sudo = true
       else
         path = "data/deploys/"+dep+"/def"
-        sudo = false
       end
 
       # Check deploy (dry run)
@@ -132,12 +130,10 @@ class Deploy
       end
 
       cfg_root = "data/deploys/"+dep+"/configs/"
-      if host.user != "root" && File.exists?("data/deploys/"+dep+"/undeploy.sudo")
+      if host.user != "root" && File.exist?("data/deploys/"+dep+"/undeploy.sudo")
         path = "data/deploys/"+dep+"/undeploy.sudo"
-        sudo = true
       else
         path = "data/deploys/"+dep+"/undeploy"
-        sudo = false
       end
 
       # Check deploy (dry run)
@@ -228,7 +224,7 @@ class Deploy
             if ret[0] == 1
               msg = "Installed "+pkgs+" on "+host.hostname+": "+ret[1]
               NOTEX.synchronize do
-                notification = Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
+                Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
               end
             elsif ret[0] == 4
               raise ExecutionError, ret[1]
@@ -256,7 +252,7 @@ class Deploy
             if ret[0] == 1
               msg = "Removed "+pkgs+" from "+host.hostname+": "+ret[1]
               NOTEX.synchronize do
-                notification = Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
+                Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
               end
             elsif ret[0] == 4
               raise ExecutionError, ret[1]
@@ -294,7 +290,7 @@ class Deploy
             unless dry_run
               msg = "Uploaded "+cfg_src+" to "+cfg_dst+" on "+host.hostname
               NOTEX.synchronize do
-                notification = Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
+                Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
               end
             end
           end
@@ -328,7 +324,7 @@ class Deploy
             unless dry_run
               msg = "Uploaded "+cfg_src+" to "+cfg_dst+" on "+host.hostname
               NOTEX.synchronize do
-                notification = Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
+                Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
               end
             end
           end
@@ -373,7 +369,7 @@ class Deploy
               msg = "Executed '"+cmd+"' on "+exec_host.hostname
               msg = msg+": "+ret unless ret.nil?
               NOTEX.synchronize do
-                notification = Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
+                Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
               end
             end
           end
@@ -389,44 +385,46 @@ class Deploy
           method = line.match(/^http (get|post)/i)[1].upcase
           line = line.split(/(?<!var):/i, 2)
           line = parse(host, line[1].strip)
-          if method == "GET"
-            url = line.strip
-            uri = URI.parse(url)
-            http = Net::HTTP.new(uri.host, uri.port)
-            if url.start_with?("https")
-              http.use_ssl = true
-              http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+          if doit
+            if method == "GET"
+              url = line.strip
+              uri = URI.parse(url)
+              http = Net::HTTP.new(uri.host, uri.port)
+              if url.start_with?("https")
+                http.use_ssl = true
+                http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+              end
+              request = Net::HTTP::Get.new(uri.request_uri)
+              unless dry_run
+                response = http.request(request)
+              end
+            elsif method == "POST"
+              args = line.split(',')
+              url = args.shift.strip
+              options = {}
+              args.each do |arg|
+                arg = arg.split("=")
+                options[arg[0].strip] = arg[1].strip
+              end
+              uri = URI.parse(url)
+              # Create the HTTP objects
+              http = Net::HTTP.new(uri.host, uri.port)
+              if url.start_with?("https")
+                http.use_ssl = true
+                http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+              end
+              request = Net::HTTP::Post.new(uri.request_uri)
+              request.set_form_data(options)
+              # Send the request
+              unless dry_run
+                response = http.request(request)
+              end
             end
-            request = Net::HTTP::Get.new(uri.request_uri)
             unless dry_run
-              response = http.request(request)
-            end
-          elsif method == "POST"
-            args = line.split(',')
-            url = args.shift.strip
-            options = {}
-            args.each do |arg|
-              arg = arg.split("=")
-              options[arg[0].strip] = arg[1].strip
-            end
-            uri = URI.parse(url)
-            # Create the HTTP objects
-            http = Net::HTTP.new(uri.host, uri.port)
-            if url.start_with?("https")
-              http.use_ssl = true
-              http.verify_mode = OpenSSL::SSL::VERIFY_NONE
-            end
-            request = Net::HTTP::Post.new(uri.request_uri)
-            request.set_form_data(options)
-            # Send the request
-            unless dry_run
-              response = http.request(request)
-            end
-          end
-          unless dry_run
-            msg = "HTTP "+method+" "+url+": "+response.body
-            NOTEX.synchronize do
-              notification = Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
+              msg = "HTTP "+method+" "+url+": "+response.body
+              NOTEX.synchronize do
+                Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
+              end
             end
           end
         # /HTTP BLOCK
@@ -446,7 +444,7 @@ class Deploy
               if ret == 1
                 NOTEX.synchronize do
                   msg = "Service "+service+" successfully monitored on "+host.hostname
-                  notification = Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
+                  Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
                 end
               end
             end
@@ -468,7 +466,7 @@ class Deploy
               if ret == 1
                 NOTEX.synchronize do
                   msg = "Service "+service+" now un-monitored on "+host.hostname
-                  notification = Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
+                  Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
                 end
               end
             end
@@ -490,7 +488,7 @@ class Deploy
               if ret == 1 and !dry_run
                 msg = "Deploy "+deploy+" successfully deployed on "+host.hostname
                 NOTEX.synchronize do
-                  notification = Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
+                  Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
                 end
               elsif ret[0] == 5
                 raise FormatException, ret[1]
@@ -516,7 +514,7 @@ class Deploy
               if ret == 1 and !dry_run
                 msg = "Deploy "+deploy+" undeployed from "+host.hostname
                 NOTEX.synchronize do
-                  notification = Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
+                  Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
                 end
               elsif ret[0] == 5
                 raise FormatException, ret[1]
@@ -539,7 +537,7 @@ class Deploy
               host.reboot
               msg = "Reboot "+host.hostname
               NOTEX.synchronize do
-                notification = Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
+                Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
               end
             end
           end
@@ -559,7 +557,7 @@ class Deploy
           end
           NOTEX.synchronize do
             msg = "Setting variable "+varname+" with value "+value
-            notification = Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
+            Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
           end
         end
       end
@@ -876,8 +874,6 @@ class Deploy
     end
     return tempdir
   end
-
-  private
 
   # Checks conditionals on dep file
   #

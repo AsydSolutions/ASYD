@@ -43,7 +43,7 @@ module Monitoring
 
     def monitor_service(service, task = nil)
       begin
-        unless File.exists?("data/monitors/"+service)
+        unless File.exist?("data/monitors/"+service)
           raise
         end
         parsed_cfg = Deploy.parse_config(self, "data/monitors/"+service)
@@ -113,7 +113,7 @@ module Monitoring
       MOTEX.synchronize do
         hoststatus = HostStatus.first(:host_hostname => self.hostname)
         if hoststatus.nil?
-          hoststatus = HostStatus.create(:host_hostname => self.hostname, :status => status)
+          HostStatus.create(:host_hostname => self.hostname, :status => status)
         else
           hoststatus.update(:status => status)
         end

@@ -30,21 +30,21 @@ class ASYD < Sinatra::Application
         task = Task.create(:action => :installing, :object => params['package'], :target => host.hostname, :target_type => :host)
       end
       NOTEX.synchronize do
-        notification = Notification.create(:type => :info, :message => t('task.actions.'+task.action.to_s)+" "+params['package']+" on "+host.hostname, :task => task)
+        Notification.create(:type => :info, :message => t('task.actions.'+task.action.to_s)+" "+params['package']+" on "+host.hostname, :task => task)
       end
-      inst = Spork.spork do
+      Spork.spork do
         sleep 0.2
         result = Deploy.install(host, params['package'])
         if result[0] == 1
           NOTEX.synchronize do
-            notification = Notification.create(:type => :success, :sticky => true, :message => result[1], :task => task)
+            Notification.create(:type => :success, :sticky => true, :message => result[1], :task => task)
           end
           TATEX.synchronize do
             task.update(:status => :finished)
           end
         else
           NOTEX.synchronize do
-            notification = Notification.create(:type => :error, :sticky => true, :message => result[1], :task => task)
+            Notification.create(:type => :error, :sticky => true, :message => result[1], :task => task)
           end
           TATEX.synchronize do
             task.update(:status => :failed)
@@ -58,22 +58,22 @@ class ASYD < Sinatra::Application
         task = Task.create(:action => :installing, :object => params['package'], :target => hostgroup.name, :target_type => :hostgroup)
       end
       NOTEX.synchronize do
-        notification = Notification.create(:type => :info, :message => t('task.actions.'+task.action.to_s)+" "+params['package']+" on "+hostgroup.name, :task => task)
+        Notification.create(:type => :info, :message => t('task.actions.'+task.action.to_s)+" "+params['package']+" on "+hostgroup.name, :task => task)
       end
       success = ProcessShared::SharedMemory.new(:int) #shared with the forks
       success.put_int(0, 1) #default to true
-      inst = Spork.spork do
+      Spork.spork do
         hostgroup.group_launch { |host|
           result = Deploy.install(host, params['package'])
           if result[0] == 1
             NOTEX.synchronize do
               msg = "Installed "+params['package']+" on "+host.hostname+": "+result[1]
-              notification = Notification.create(:type => :success, :dismiss => true, :message => msg, :task => task)
+              Notification.create(:type => :success, :dismiss => true, :message => msg, :task => task)
             end
           else
             NOTEX.synchronize do
               msg = "Error installing "+params['package']+" on "+host.hostname+": "+result[1]
-              notification = Notification.create(:type => :error, :dismiss => true, :message => msg, :task => task)
+              Notification.create(:type => :error, :dismiss => true, :message => msg, :task => task)
             end
             success.put_int(0, 0)
           end
@@ -81,7 +81,7 @@ class ASYD < Sinatra::Application
         if success.get_int(0) == 1
           NOTEX.synchronize do
             msg = "Packages successfully installed on "+target[0]+" "+target[1]
-            notification = Notification.create(:type => :success, :sticky => true, :message => msg, :task => task)
+            Notification.create(:type => :success, :sticky => true, :message => msg, :task => task)
           end
           TATEX.synchronize do
             task.update(:status => :finished)
@@ -89,7 +89,7 @@ class ASYD < Sinatra::Application
         else
           NOTEX.synchronize do
             msg = "Error installing packages on "+target[0]+" "+target[1]
-            notification = Notification.create(:type => :error, :sticky => true, :message => msg, :task => task)
+            Notification.create(:type => :error, :sticky => true, :message => msg, :task => task)
           end
           TATEX.synchronize do
             task.update(:status => :failed)
@@ -113,14 +113,14 @@ class ASYD < Sinatra::Application
         task = Task.create(:action => :executing, :object => params['cmd'], :target => host.hostname, :target_type => :host)
       end
       NOTEX.synchronize do
-        notification = Notification.create(:type => :info, :message => t('task.actions.'+task.action.to_s)+" '"+params['cmd']+"' on "+host.hostname, :task => task)
+        Notification.create(:type => :info, :message => t('task.actions.'+task.action.to_s)+" '"+params['cmd']+"' on "+host.hostname, :task => task)
       end
-      inst = Spork.spork do
+      Spork.spork do
         sleep 0.2
         cmd = Deploy.parse(host, params['cmd'])
         result = host.exec_cmd(cmd)
         NOTEX.synchronize do
-          notification = Notification.create(:type => :success, :sticky => true, :message => "Result: "+result, :task => task)
+          Notification.create(:type => :success, :sticky => true, :message => "Result: "+result, :task => task)
         end
         TATEX.synchronize do
           task.update(:status => :finished)
@@ -133,20 +133,20 @@ class ASYD < Sinatra::Application
         task = Task.create(:action => :executing, :object => params['cmd'], :target => hostgroup.name, :target_type => :hostgroup)
       end
       NOTEX.synchronize do
-        notification = Notification.create(:type => :info, :message => t('task.actions.'+task.action.to_s)+" '"+params['cmd']+"' on "+hostgroup.name, :task => task)
+        Notification.create(:type => :info, :message => t('task.actions.'+task.action.to_s)+" '"+params['cmd']+"' on "+hostgroup.name, :task => task)
       end
-      inst = Spork.spork do
+      Spork.spork do
         hostgroup.group_launch { |host|
           cmd = Deploy.parse(host, params['cmd'])
           result = host.exec_cmd(cmd)
           NOTEX.synchronize do
             msg = "Executed "+cmd+" on "+host.hostname+": "+result
-            notification = Notification.create(:type => :success, :dismiss => true, :message => msg, :task => task)
+            Notification.create(:type => :success, :dismiss => true, :message => msg, :task => task)
           end
         }
         NOTEX.synchronize do
           msg = "Command successfully executed on "+target[0]+" "+target[1]
-          notification = Notification.create(:type => :success, :sticky => true, :message => msg, :task => task)
+          Notification.create(:type => :success, :sticky => true, :message => msg, :task => task)
         end
         TATEX.synchronize do
           task.update(:status => :finished)
@@ -170,22 +170,22 @@ class ASYD < Sinatra::Application
         task = Task.create(:action => :deploying, :object => params['deploy'], :target => host.hostname, :target_type => :host)
       end
       NOTEX.synchronize do
-        notification = Notification.create(:type => :info, :message => t('task.actions.'+task.action.to_s)+" "+params['deploy']+" on "+host.hostname, :task => task)
+        Notification.create(:type => :info, :message => t('task.actions.'+task.action.to_s)+" "+params['deploy']+" on "+host.hostname, :task => task)
       end
-      inst = Spork.spork do
+      Spork.spork do
         sleep 0.2
         result = Deploy.launch(host, dep, task)
         if result == 1
           NOTEX.synchronize do
             msg = "Deploy "+params['deploy']+" successfully deployed on "+target[0]+" "+target[1]
-            notification = Notification.create(:type => :success, :sticky => true, :message => msg, :task => task)
+            Notification.create(:type => :success, :sticky => true, :message => msg, :task => task)
           end
           TATEX.synchronize do
             task.update(:status => :finished)
           end
         else
           NOTEX.synchronize do
-            notification = Notification.create(:type => :error, :sticky => true, :message => result[1], :task => task)
+            Notification.create(:type => :error, :sticky => true, :message => result[1], :task => task)
           end
           TATEX.synchronize do
             task.update(:status => :failed)
@@ -199,17 +199,17 @@ class ASYD < Sinatra::Application
         task = Task.create(:action => :deploying, :object => params['deploy'], :target => hostgroup.name, :target_type => :hostgroup)
       end
       NOTEX.synchronize do
-        notification = Notification.create(:type => :info, :message => t('task.actions.'+task.action.to_s)+" "+params['deploy']+" on "+hostgroup.name, :task => task)
+        Notification.create(:type => :info, :message => t('task.actions.'+task.action.to_s)+" "+params['deploy']+" on "+hostgroup.name, :task => task)
       end
       success = ProcessShared::SharedMemory.new(:int) #shared with the forks
       success.put_int(0, 1) #default to true
-      inst = Spork.spork do
+      Spork.spork do
         hostgroup.group_launch { |host|
           result = Deploy.launch(host, dep, task)
           if result != 1
             NOTEX.synchronize do
               msg = "Error when deploying "+params['deploy']+" on "+host.hostname+": "+result[1]
-              notification = Notification.create(:type => :error, :dismiss => true, :message => msg, :task => task)
+              Notification.create(:type => :error, :dismiss => true, :message => msg, :task => task)
             end
             success.put_int(0, 0)
           end
@@ -217,7 +217,7 @@ class ASYD < Sinatra::Application
         if success.get_int(0) == 1
           NOTEX.synchronize do
             msg = "Deploy "+params['deploy']+" successfully deployed on "+target[0]+" "+target[1]
-            notification = Notification.create(:type => :success, :sticky => true, :message => msg, :task => task)
+            Notification.create(:type => :success, :sticky => true, :message => msg, :task => task)
           end
           TATEX.synchronize do
             task.update(:status => :finished)
@@ -225,7 +225,7 @@ class ASYD < Sinatra::Application
         else
           NOTEX.synchronize do
             msg = "Deploy "+params['deploy']+" had errors when deploying on "+target[0]+" "+target[1]
-            notification = Notification.create(:type => :error, :sticky => true, :message => msg, :task => task)
+            Notification.create(:type => :error, :sticky => true, :message => msg, :task => task)
           end
           TATEX.synchronize do
             task.update(:status => :failed)
@@ -251,22 +251,22 @@ class ASYD < Sinatra::Application
         task = Task.create(:action => :undeploying, :object => params['deploy'], :target => host.hostname, :target_type => :host)
       end
       NOTEX.synchronize do
-        notification = Notification.create(:type => :info, :message => t('task.actions.'+task.action.to_s)+" "+params['deploy']+" on "+host.hostname, :task => task)
+        Notification.create(:type => :info, :message => t('task.actions.'+task.action.to_s)+" "+params['deploy']+" on "+host.hostname, :task => task)
       end
-      inst = Spork.spork do
+      Spork.spork do
         sleep 0.2
         result = Deploy.undeploy(host, dep, task)
         if result == 1
           NOTEX.synchronize do
             msg = "Deploy "+params['deploy']+" successfully undeployed (reverted) on "+target[0]+" "+target[1]
-            notification = Notification.create(:type => :success, :sticky => true, :message => msg, :task => task)
+            Notification.create(:type => :success, :sticky => true, :message => msg, :task => task)
           end
           TATEX.synchronize do
             task.update(:status => :finished)
           end
         else
           NOTEX.synchronize do
-            notification = Notification.create(:type => :error, :sticky => true, :message => result[1], :task => task)
+            Notification.create(:type => :error, :sticky => true, :message => result[1], :task => task)
           end
           TATEX.synchronize do
             task.update(:status => :failed)
@@ -275,23 +275,22 @@ class ASYD < Sinatra::Application
       end
     elsif target[0] == "hostgroup"
       hostgroup = Hostgroup.first(:name => target[1])
-      hostgroup_hosts = hostgroup.hosts
       task = nil
       TATEX.synchronize do
         task = Task.create(:action => :undeploying, :object => params['deploy'], :target => hostgroup.name, :target_type => :hostgroup)
       end
       NOTEX.synchronize do
-        notification = Notification.create(:type => :info, :message => t('task.actions.'+task.action.to_s)+" "+params['deploy']+" on "+hostgroup.name, :task => task)
+        Notification.create(:type => :info, :message => t('task.actions.'+task.action.to_s)+" "+params['deploy']+" on "+hostgroup.name, :task => task)
       end
       success = ProcessShared::SharedMemory.new(:int) #shared with the forks
       success.put_int(0, 1) #default to true
-      inst = Spork.spork do
+      Spork.spork do
         hostgroup.group_launch { |host|
           result = Deploy.undeploy(host, dep, task)
           if result != 1
             NOTEX.synchronize do
               msg = "Error when undeploying (reverting) "+params['deploy']+" on "+host.hostname+": "+result[1]
-              notification = Notification.create(:type => :error, :dismiss => true, :message => result[1], :task => task)
+              Notification.create(:type => :error, :dismiss => true, :message => msg, :task => task)
             end
             success.put_int(0, 0)
           end
@@ -299,7 +298,7 @@ class ASYD < Sinatra::Application
         if success.get_int(0) == 1
           NOTEX.synchronize do
             msg = "Deploy "+params['deploy']+" successfully undeployed (reverted) on "+target[0]+" "+target[1]
-            notification = Notification.create(:type => :success, :sticky => true, :message => msg, :task => task)
+            Notification.create(:type => :success, :sticky => true, :message => msg, :task => task)
           end
           TATEX.synchronize do
             task.update(:status => :finished)
@@ -307,7 +306,7 @@ class ASYD < Sinatra::Application
         else
           NOTEX.synchronize do
             msg = "Deploy "+params['deploy']+" had errors when undeploying (reverting) on "+target[0]+" "+target[1]
-            notification = Notification.create(:type => :error, :sticky => true, :message => msg, :task => task)
+            Notification.create(:type => :error, :sticky => true, :message => msg, :task => task)
           end
           TATEX.synchronize do
             task.update(:status => :failed)
@@ -367,7 +366,7 @@ class ASYD < Sinatra::Application
     deploy = params[:deploy]
     path = params['path']
     fullpath = "data/deploys/"+deploy+"/"+path
-    unless fullpath.include? "../" or fullpath.include? "|" or fullpath.include? "\\" or File.exists?(fullpath)
+    unless fullpath.include? "../" or fullpath.include? "|" or fullpath.include? "\\" or File.exist?(fullpath)
       FileUtils.mkdir_p File.dirname(fullpath)
       FileUtils.touch fullpath
     end
@@ -380,7 +379,7 @@ class ASYD < Sinatra::Application
     path = params[:path]
     file = params[:file][:tempfile]
     fullpath = "data/deploys/"+deploy+"/"+path
-    unless fullpath.include? "../" or fullpath.include? "|" or fullpath.include? "\\" or File.exists?(fullpath)
+    unless fullpath.include? "../" or fullpath.include? "|" or fullpath.include? "\\" or File.exist?(fullpath)
       FileUtils.mkdir_p File.dirname(fullpath)
       File.open(fullpath, "w") do |f|
         f.write(file.read)
