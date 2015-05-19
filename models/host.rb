@@ -105,11 +105,17 @@ class Host
               ssh.exec!("yum install -y openssh-clients")
             end
           end
-          host.dist = ssh.exec!("cat /etc/issue |awk 'NR == 1 {print $1}'").strip
-          if host.dist == "Red"
-            host.dist = "RedHat"
+          os_string = ssh.exec!("grep \"^NAME=\" /etc/os-release").strip
+          if os_string.empty?
+            ssh.exec!("cat /etc/issue |awk 'NR == 1 {print $1}'").strip
+            if host.dist == "Red"
+              host.dist = "RedHat"
+            end
+            host.dist_ver = ssh.exec!("cat /etc/issue |awk -F\"release\" 'NR==1 {print $2}'|awk '{print $1}'").strip.to_f
+          else
+            host.dist = os_string.split('=')[1]
+            host.dist_ver = ssh.exec!("grep \"^VERSION_ID=\" /etc/os-release").strip.split('=')[1].to_f
           end
-          host.dist_ver = ssh.exec!("cat /etc/issue |awk -F\"release\" 'NR==1 {print $2}'|awk '{print $1}'").strip.to_f
           host.arch = ssh.exec!("uname -m").strip
         #3. arch-based
         elsif !(ssh.exec!("which pacman") =~ /\/bin\/pacman$/).nil?

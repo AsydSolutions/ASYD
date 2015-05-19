@@ -22,9 +22,9 @@ class Email
   property :password, String
 
   def self.mail(to_, subject_, body_)
-    begin
-      cfg = Email.all.first
-      if cfg.method != :exchange
+    cfg = Email.all.first
+    if cfg.method == :sendmail || cfg.method == :smtp
+      begin
         mail = Mail.new do
           to to_
           from cfg.user
@@ -44,7 +44,24 @@ class Email
           mail.delivery_method :sendmail, :location => cfg.path
           mail.deliver!
         end
-      elsif cfg.method == :exchange
+      rescue *SMTP_ERRORS => e
+        NOTEX.synchronize do
+          notification = Notification.create(:type => :error, :sticky => false, :message => "Email error: "+e.message)
+        end
+        return false
+      rescue *SSL_ERRORS => e
+        NOTEX.synchronize do
+          notification = Notification.create(:type => :error, :sticky => false, :message => "Email error: "+e.message)
+        end
+        return false
+      rescue => e
+        NOTEX.synchronize do
+          notification = Notification.create(:type => :error, :sticky => false, :message => "Email error: "+e.message)
+        end
+        return false
+      end
+    elsif cfg.method == :exchange
+      begin
         if Gem::Specification::find_all_by_name('viewpoint').any?
           require 'viewpoint'
           endpoint = cfg.host
@@ -53,22 +70,11 @@ class Email
           ews_cli = Viewpoint::EWSClient.new endpoint, ews_user, ews_pass
           ews_cli.send_message subject: subject_, body: body_, to_recipients: [ to_ ]
         end
+      rescue Exception => e
+        NOTEX.synchronize do
+          notification = Notification.create(:type => :error, :sticky => false, :message => "Email error: "+e.message)
+        end
       end
-    rescue *SMTP_ERRORS => e
-      NOTEX.synchronize do
-        Notification.create(:type => :error, :sticky => false, :message => "Email error: "+e.message)
-      end
-      return false
-    rescue *SSL_ERRORS => e
-      NOTEX.synchronize do
-        Notification.create(:type => :error, :sticky => false, :message => "Email error: "+e.message)
-      end
-      return false
-    rescue => e
-      NOTEX.synchronize do
-        Notification.create(:type => :error, :sticky => false, :message => "Email error: "+e.message)
-      end
-      return false
     end
   end
 end
