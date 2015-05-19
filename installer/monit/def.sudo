@@ -9,8 +9,8 @@ if <%PKG_MANAGER%> == apt or <%PKG_MANAGER%> == yum or <%PKG_MANAGER%> == pacman
   # install monit:
   install: wget tar gzip
   exec: sudo mkdir -p /etc/monit/conf.d
-  exec if <%ARCH%> == x86_64: wget http://github.com/AsydSolutions/monit/releases/download/release-5-12-asyd/monit-linux-x64 -O /tmp/monit
-  exec if <%ARCH%> == i686: wget http://github.com/AsydSolutions/monit/releases/download/release-5-12-asyd/monit-linux-x86 -O /tmp/monit
+  exec if <%ARCH%> == x86_64: wget http://github.com/AsydSolutions/monit/releases/download/release-5-13-asyd/monit-linux-x64 -O /tmp/monit
+  exec if <%ARCH%> == i686: wget http://github.com/AsydSolutions/monit/releases/download/release-5-13-asyd/monit-linux-x86 -O /tmp/monit
   exec: sudo mv /tmp/monit /usr/bin/
   exec: sudo chmod +x /usr/bin/monit
 
@@ -59,7 +59,7 @@ if <%DIST%> == Solaris and <%ARCH%> != sparc or <%DIST%> == OpenIndiana and <%AR
 
   # install monit
   exec: sudo mkdir -p /etc/monit/conf.d
-  exec if <%ARCH%> != sparc: wget http://github.com/AsydSolutions/monit/releases/download/release-5-12-asyd/monit-solaris-x86_64 -O /tmp/monit
+  exec if <%ARCH%> != sparc: wget http://github.com/AsydSolutions/monit/releases/download/release-5-13-asyd/monit-solaris-x86_64 -O /tmp/monit
   exec: sudo mv /tmp/monit /usr/bin/
   exec: sudo chmod +x /usr/bin/monit
 
@@ -82,8 +82,8 @@ if <%DIST%> == OpenBSD
 
   # install monit
   exec: sudo mkdir -p /etc/monit/conf.d
-  exec if <%ARCH%> == amd64: wget http://github.com/AsydSolutions/monit/releases/download/release-5-12-asyd/monit-openbsd-x64 -O /tmp/monit
-  exec if <%ARCH%> == i386: wget http://github.com/AsydSolutions/monit/releases/download/release-5-12-asyd/monit-openbsd-x86 -O /tmp/monit
+  exec if <%ARCH%> == amd64: wget http://github.com/AsydSolutions/monit/releases/download/release-5-13-asyd/monit-openbsd-x64 -O /tmp/monit
+  exec if <%ARCH%> == i386: wget http://github.com/AsydSolutions/monit/releases/download/release-5-13-asyd/monit-openbsd-x86 -O /tmp/monit
   exec: sudo mv /tmp/monit /usr/bin/
   exec: sudo chmod +x /usr/bin/monit
 

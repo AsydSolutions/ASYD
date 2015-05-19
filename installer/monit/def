@@ -2,7 +2,7 @@
 # Will be executed on every new system added to ASYD
 # Modify accordingly to your systems (i.e. firewall rules, etc)
 # Alert: This deploy is automatically executed when a host is added, are you sure you want to manually execute it?
-# Version: 0.054
+# Version: 0.076
 
 ###
 # For Linux:
@@ -11,8 +11,8 @@ if <%PKG_MANAGER%> == apt or <%PKG_MANAGER%> == yum or <%PKG_MANAGER%> == pacman
   # install monit:
   install: wget tar gzip
   exec: mkdir -p /etc/monit/conf.d
-  exec if <%ARCH%> == x86_64: wget http://github.com/AsydSolutions/monit/releases/download/release-5-12-asyd/monit-linux-x64 -O /tmp/monit
-  exec if <%ARCH%> == i686: wget http://github.com/AsydSolutions/monit/releases/download/release-5-12-asyd/monit-linux-x86 -O /tmp/monit
+  exec if <%ARCH%> == x86_64: wget http://github.com/AsydSolutions/monit/releases/download/release-5-13-asyd/monit-linux-x64 -O /tmp/monit
+  exec if <%ARCH%> == i686: wget http://github.com/AsydSolutions/monit/releases/download/release-5-13-asyd/monit-linux-x86 -O /tmp/monit
   exec: mv /tmp/monit /usr/bin/
   exec: chmod +x /usr/bin/monit
 
@@ -56,7 +56,7 @@ if <%DIST%> == Solaris and <%ARCH%> != sparc or <%DIST%> == OpenIndiana and <%AR
 
   # install monit
   exec: mkdir -p /etc/monit/conf.d
-  exec if <%ARCH%> != sparc: wget http://github.com/AsydSolutions/monit/releases/download/release-5-12-asyd/monit-solaris-x86_64 -O /tmp/monit
+  exec if <%ARCH%> != sparc: wget http://github.com/AsydSolutions/monit/releases/download/release-5-13-asyd/monit-solaris-x86_64 -O /tmp/monit
   exec: mv /tmp/monit /usr/bin/
   exec: chmod +x /usr/bin/monit
 
@@ -80,8 +80,8 @@ if <%DIST%> == OpenBSD
 
   # install monit
   exec: mkdir -p /etc/monit/conf.d
-  exec if <%ARCH%> == amd64: wget http://github.com/AsydSolutions/monit/releases/download/release-5-12-asyd/monit-openbsd-x64 -O /tmp/monit
-  exec if <%ARCH%> == i386: wget http://github.com/AsydSolutions/monit/releases/download/release-5-12-asyd/monit-openbsd-x86 -O /tmp/monit
+  exec if <%ARCH%> == amd64: wget http://github.com/AsydSolutions/monit/releases/download/release-5-13-asyd/monit-openbsd-x64 -O /tmp/monit
+  exec if <%ARCH%> == i386: wget http://github.com/AsydSolutions/monit/releases/download/release-5-13-asyd/monit-openbsd-x86 -O /tmp/monit
   exec: mv /tmp/monit /usr/bin/
   exec: chmod +x /usr/bin/monit
 
