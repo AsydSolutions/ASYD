@@ -23,7 +23,7 @@ module Updater
       if action == "update_monit"
         FileUtils.mv("installer/monit/def", "data/deploys/monit/def")
         FileUtils.mv("installer/monit/def.sudo", "data/deploys/monit/def.sudo")
-      elsif action == "update_monit"
+      elsif action == "update_monit_config"
         FileUtils.mv("installer/monit/configs/monitrc", "data/deploys/monit/configs/monitrc")
       elsif action == "update_monitored_status"
         hosts = Host.all(:monitored => true)
