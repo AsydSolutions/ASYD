@@ -85,50 +85,58 @@ class Host
         #1. debian-based
         if !(ssh.exec!("which apt-get") =~ /\/bin\/apt-get$/).nil?
           host.pkg_mgr = "apt"
-          if (ssh.exec!("which lsb_release") =~ /\/bin\/lsb_release$/).nil?
+          if (ssh.exec!("which wget") =~ /\/bin\/wget$/).nil?
             if user != "root"
-              ssh.exec!("sudo apt-get -y -q install lsb-release")
+              ssh.exec!("sudo apt-get -y -q install wget")
             else
-              ssh.exec!("apt-get -y -q install lsb-release")
+              ssh.exec!("apt-get -y -q install wget")
             end
           end
-          host.dist = ssh.exec!("lsb_release -s -i").strip
-          host.dist_ver = ssh.exec!("lsb_release -s -r").strip.to_f
+          ssh.exec!("wget https://raw.githubusercontent.com/AsydSolutions/lsb_release/master/lsb_release -O /tmp/lsb_release && chmod +x /tmp/lsb_release")
+          host.dist = ssh.exec!("/tmp/lsb_release -s -i").strip
+          host.dist_ver = ssh.exec!("/tmp/lsb_release -s -r").strip.to_f
           host.arch = ssh.exec!("uname -m").strip
         #2. redhat-based
         elsif !(ssh.exec!("which yum") =~ /\/bin\/yum$/).nil?
           host.pkg_mgr = "yum"
-          if (ssh.exec!("which scp") =~ /\/bin\/scp$/).nil?
+          if (ssh.exec!("which scp") =~ /\/bin\/scp$/).nil? || (ssh.exec!("which wget") =~ /\/bin\/wget$/).nil?
             if user != "root"
-              ssh.exec!("sudo yum install -y openssh-clients")
+              ssh.exec!("sudo yum install -y openssh-clients wget")
             else
-              ssh.exec!("yum install -y openssh-clients")
+              ssh.exec!("yum install -y openssh-clients wget")
             end
           end
-          host.dist = ssh.exec!("cat /etc/issue |awk 'NR == 1 {print $1}'").strip
-          if host.dist == "Red"
-            host.dist = "RedHat"
-          end
-          host.dist_ver = ssh.exec!("cat /etc/issue |awk -F\"release\" 'NR==1 {print $2}'|awk '{print $1}'").strip.to_f
+          ssh.exec!("wget https://raw.githubusercontent.com/AsydSolutions/lsb_release/master/lsb_release -O /tmp/lsb_release && chmod +x /tmp/lsb_release")
+          host.dist = ssh.exec!("/tmp/lsb_release -s -i").strip
+          host.dist_ver = ssh.exec!("/tmp/lsb_release -s -r").strip.to_f
           host.arch = ssh.exec!("uname -m").strip
         #3. arch-based
         elsif !(ssh.exec!("which pacman") =~ /\/bin\/pacman$/).nil?
           host.pkg_mgr = "pacman"
-          if (ssh.exec!("which lsb_release") =~ /\/bin\/lsb_release$/).nil?
+          if (ssh.exec!("which wget") =~ /\/bin\/wget$/).nil?
             if user != "root"
-              ssh.exec!("sudo pacman -S --noconfirm --noprogressbar lsb-release")
+              ssh.exec!("sudo pacman -S --noconfirm --noprogressbar wget")
             else
-              ssh.exec!("pacman -S --noconfirm --noprogressbar lsb-release")
+              ssh.exec!("pacman -S --noconfirm --noprogressbar wget")
             end
           end
-          host.dist = ssh.exec!("lsb_release -s -i").strip
+          ssh.exec!("wget https://raw.githubusercontent.com/AsydSolutions/lsb_release/master/lsb_release -O /tmp/lsb_release && chmod +x /tmp/lsb_release")
+          host.dist = ssh.exec!("/tmp/lsb_release -s -i").strip
           host.dist_ver = 0
           host.arch = ssh.exec!("uname -m").strip
         #4. opensuse
         elsif !(ssh.exec!("which zypper") =~ /\/bin\/zypper$/).nil?
           host.pkg_mgr = "zypper"
-          host.dist = ssh.exec!("cat /etc/issue |awk 'NR == 1 {print $3}'").strip
-          host.dist_ver = ssh.exec!("cat /etc/issue |awk 'NR == 1 {print $4}'").strip.to_f
+          if (ssh.exec!("which wget") =~ /\/bin\/wget$/).nil?
+            if user != "root"
+              ssh.exec!("sudo zypper -q -n in wget")
+            else
+              ssh.exec!("zypper -q -n in wget")
+            end
+          end
+          ssh.exec!("wget https://raw.githubusercontent.com/AsydSolutions/lsb_release/master/lsb_release -O /tmp/lsb_release && chmod +x /tmp/lsb_release")
+          host.dist = ssh.exec!("/tmp/lsb_release -s -i").strip
+          host.dist_ver = ssh.exec!("/tmp/lsb_release -s -r").strip.to_f
           host.arch = ssh.exec!("uname -m").strip
         #5. solaris
         elsif !(ssh.exec!("export PATH=$PATH:/sbin:/usr/sbin/ && which pkgadd") =~ /\/sbin\/pkgadd$/).nil?
