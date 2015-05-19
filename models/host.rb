@@ -77,7 +77,23 @@ class Host
             end
             ssh.loop
           end
-          ret = ssh.exec!("sudo cat /tmp/1")
+          ret = ssh.exec!("sudo cat /tmp/1") # first check
+          unless ret.strip == "1"            # if this fails likely there's a requiretty on sudoers
+            cmd = "sudo sed -i '/requiretty/d' /etc/sudoers"
+            ssh.open_channel do |channel|
+              channel.request_pty do |ch, success|
+                raise StandardError, "Could not obtain pty" unless success
+              end
+              channel.exec(cmd) do |ch, success|
+                raise unless success
+                channel.on_data do |ch, data|
+                  # NOPASSWD already in sudoers file
+                end
+              end
+            end
+            ssh.loop
+          end
+          ret = ssh.exec!("sudo cat /tmp/1") # second check
           raise StandardError, "User has no admin privileges, please add '#{user} ALL=NOPASSWD: ALL' to /etc/sudoers and try again" unless ret.strip == "1"
           ssh.exec!("rm /tmp/1")
         end
