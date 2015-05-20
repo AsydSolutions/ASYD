@@ -220,7 +220,7 @@ class Deploy
               error = "Invalid characters detected on package name: "+pkgs
               raise FormatException, error
             end
-            ret = dry_run ? 0 : Deploy.install(host, pkgs, pkg_mgr)
+            ret = Deploy.install(host, pkgs, dry_run, pkg_mgr)
             if ret[0] == 1
               msg = "Installed "+pkgs+" on "+host.hostname+": "+ret[1]
               NOTEX.synchronize do
@@ -237,6 +237,7 @@ class Deploy
         # UNINSTALL BLOCK
         elsif line.start_with?("uninstall")
           doit = true
+          pkg_mgr = line.match(/^install (pkgutil|pkg|pkgadd)?(?: if .+)?(?<!var):/i) ? line.match(/^install (pkgutil|pkg|pkgadd)?(?: if .+)?(?<!var):/i) : nil
           m = line.match(/^uninstall if (.+)(?<!var):/i)
           if !m.nil?
             doit = check_condition(m, host)
@@ -248,7 +249,7 @@ class Deploy
               error = "Invalid characters detected on package name: "+pkgs
               raise FormatException, error
             end
-            ret = dry_run ? 0 : Deploy.uninstall(host, pkgs)
+            ret = Deploy.uninstall(host, pkgs, dry_run, pkg_mgr)
             if ret[0] == 1
               msg = "Removed "+pkgs+" from "+host.hostname+": "+ret[1]
               NOTEX.synchronize do
@@ -429,6 +430,31 @@ class Deploy
           end
         # /HTTP BLOCK
 
+        # SERVICE BLOCK
+        elsif line.match(/^(enable|disable|start|stop|restart) service/i)
+          doit = true
+          m = line.match(/if (.+)(?<!var):/i)
+          if !m.nil?
+            doit = check_condition(m, host)
+          end
+          if doit
+            action = line.match(/^(enable|disable|start|stop|restart) service/i)[1].downcase
+            line = line.split(/(?<!var):/i, 2)
+            services = line[1].strip
+            ret = Deploy.manage_service(host, action, services, dry_run)
+            if ret[0] == 1
+              msg = action+"'d services "+services+" on "+host.hostname+": "+ret[1]
+              NOTEX.synchronize do
+                Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
+              end
+            elsif ret[0] == 4
+              raise ExecutionError, ret[1]
+            elsif ret[0] == 5
+              raise FormatException, ret[1]
+            end
+          end
+        # /SERVICE BLOCK
+
         # MONITOR BLOCK
         elsif line.start_with?("monitor")
           doit = true
@@ -573,7 +599,7 @@ class Deploy
 
   # Install package or packages on defined host
   #
-  def self.install(host, pkg, pkg_mgr = nil)
+  def self.install(host, pkg, dry_run, pkg_mgr = nil)
     begin
       if pkg.include? "&" or pkg.include? "|" or pkg.include? ">" or pkg.include? "<" or pkg.include? "`" or pkg.include? "$"
         raise FormatException
@@ -641,16 +667,20 @@ class Deploy
         pkg_path = 'export PKG_PATH="http://ftp.openbsd.org/pub/OpenBSD/'+host.dist_ver.to_s+'/packages/'+host.arch+'/"'
         cmd = pkg_path+" && "+cmd+" -U -I -x "+pkg    ## NOT FULLY TESTED, DEVELOPMENT IN PROGRESS
       end
-      result = host.exec_cmd(cmd)
-      unless result.nil?
-        if result.include? "\nE: "
-          raise ExecutionError, result
+      unless dry_run
+        result = host.exec_cmd(cmd)
+        unless result.nil?
+          if result.include? "\nE: "
+            raise ExecutionError, result
+          else
+            result = result.split("\n").last
+            return [1, result]
+          end
         else
-          result = result.split("\n").last
-          return [1, result]
+          return [1, "--"]
         end
       else
-        return [1, "--"]
+        return [0, ""]
       end
     rescue FormatException
       error = "Invalid characters detected on package name: "+pkg
@@ -667,7 +697,7 @@ class Deploy
 
   # Uninstall package or packages on defined host
   #
-  def self.uninstall(host, pkg, pkg_mgr = nil)
+  def self.uninstall(host, pkg, dry_run, pkg_mgr = nil)
     begin
       if pkg.include? "&" or pkg.include? "|" or pkg.include? ">" or pkg.include? "<" or pkg.include? "`" or pkg.include? "$"
         raise FormatException
@@ -735,12 +765,16 @@ class Deploy
         end
         cmd = cmd+" -I -x "+pkg    ## NOT FULLY TESTED, DEVELOPMENT IN PROGRESS
       end
-      result = host.exec_cmd(cmd)
-      if result.include? "\nE: "
-        raise ExecutionError, result
+      unless dry_run
+        result = host.exec_cmd(cmd)
+        if result.include? "\nE: "
+          raise ExecutionError, result
+        else
+          result = result.split("\n").last
+          return [1, result]
+        end
       else
-        result = result.split("\n").last
-        return [1, result]
+        return [0, ""]
       end
     rescue FormatException
       error = "Invalid characters detected on package name: "+pkg
@@ -751,6 +785,171 @@ class Deploy
       return [4, error]
     rescue => e
       error = "Something really bad happened when uninstalling "+pkg+" on "+host.hostname+": "+e.message
+      return [4, error]
+    end
+  end
+
+  # Install package or packages on defined host
+  #
+  def self.manage_service(host, action, services, dry_run)
+    begin
+      svc_mgr = host.svc_mgr
+      services = services.split(' ')
+      result = ''
+      services.each do |service|
+        if svc_mgr == "systemctl"
+          case action
+          when "enable"
+            cmd = svc_mgr
+            if host.user != "root"
+              cmd = "sudo "+cmd
+            end
+            cmd = cmd+" enable "+service
+          when "disable"
+            cmd = svc_mgr
+            if host.user != "root"
+              cmd = "sudo "+cmd
+            end
+            cmd = cmd+" disable "+service
+          when "start"
+            cmd = svc_mgr
+            if host.user != "root"
+              cmd = "sudo "+cmd
+            end
+            cmd = cmd+" start "+service
+          when "stop"
+            cmd = svc_mgr
+            if host.user != "root"
+              cmd = "sudo "+cmd
+            end
+            cmd = cmd+" stop "+service
+          when "restart"
+            cmd = svc_mgr
+            if host.user != "root"
+              cmd = "sudo "+cmd
+            end
+            cmd = cmd+" restart "+service
+          else
+            raise FormatException, "Action "+action+" not valid"
+          end
+        elsif svc_mgr == "update-rc.d"
+          case action
+          when "enable"
+            cmd = svc_mgr
+            if host.user != "root"
+              cmd = "sudo "+cmd
+            end
+            cmd = cmd+" "+service+" enable"
+          when "disable"
+            cmd = svc_mgr
+            if host.user != "root"
+              cmd = "sudo "+cmd
+            end
+            cmd = cmd+" "+service+" disable"
+          when "start"
+            cmd = "service"
+            if host.user != "root"
+              cmd = "sudo "+cmd
+            end
+            cmd = cmd+" "+service+" start"
+          when "stop"
+            cmd = "service"
+            if host.user != "root"
+              cmd = "sudo "+cmd
+            end
+            cmd = cmd+" "+service+" stop"
+          when "restart"
+            cmd = "service"
+            if host.user != "root"
+              cmd = "sudo "+cmd
+            end
+            cmd = cmd+" "+service+" restart"
+          else
+            raise FormatException, "Action "+action+" not valid"
+          end
+        elsif svc_mgr == "chkconfig"
+          case action
+          when "enable"
+            cmd = svc_mgr
+            if host.user != "root"
+              cmd = "sudo "+cmd
+            end
+            cmd = cmd+" "+service+" on"
+          when "disable"
+            cmd = svc_mgr
+            if host.user != "root"
+              cmd = "sudo "+cmd
+            end
+            cmd = cmd+" "+service+" off"
+          when "start"
+            cmd = "service"
+            if host.user != "root"
+              cmd = "sudo "+cmd
+            end
+            cmd = cmd+" "+service+" start"
+          when "stop"
+            cmd = "service"
+            if host.user != "root"
+              cmd = "sudo "+cmd
+            end
+            cmd = cmd+" "+service+" stop"
+          when "restart"
+            cmd = "service"
+            if host.user != "root"
+              cmd = "sudo "+cmd
+            end
+            cmd = cmd+" "+service+" restart"
+          else
+            raise FormatException, "Action "+action+" not valid"
+          end
+        elsif svc_mgr == "rc.d"
+          case action
+          when "enable"
+            cmd = "mv /etc/rc.conf.local /tmp/rc.conf.local; echo 'pkg_scripts=\"$pkg_scripts "+service+"\"' >> /tmp/rc.conf.local; uniq /tmp/rc.conf.local > /etc/rc.conf.local"
+            if host.user != "root"
+              cmd = "sudo mv /etc/rc.conf.local /tmp/rc.conf.local; sudo echo 'pkg_scripts=\"$pkg_scripts "+service+"\"' >> /tmp/rc.conf.local; sudo uniq /tmp/rc.conf.local > /etc/rc.conf.local"
+            end
+          when "disable"
+            cmd = "sed -i '/"+service+"/d' /etc/rc.conf.local"
+            if host.user != "root"
+              cmd = "sudo sed -i '/"+service+"/d' /etc/rc.conf.local"
+            end
+          when "start"
+            cmd = "/etc/rc.d/"
+            if host.user != "root"
+              cmd = "sudo "+cmd
+            end
+            cmd = cmd+service+" start"
+          when "stop"
+            cmd = "/etc/rc.d/"
+            if host.user != "root"
+              cmd = "sudo "+cmd
+            end
+            cmd = cmd+service+" stop"
+          when "restart"
+            cmd = "/etc/rc.d/"
+            if host.user != "root"
+              cmd = "sudo "+cmd
+            end
+            cmd = cmd+service+" restart"
+          else
+            raise FormatException, "Action "+action+" not valid"
+          end
+        else
+          raise FormatException, "Host "+host.hostname+" doesn't support the 'service' command"
+        end
+        ret = host.exec_cmd(cmd) unless dry_run
+        result = result+ret+";;\n" unless ret.nil?
+      end
+      unless dry_run
+        return [1, result]
+      else
+        return [0, ""]
+      end
+    rescue FormatException => e
+      return [5, e.message]
+    rescue => e
+      error = "Something really bad happened when "+action+"'ing "+services.join(" ").to_s+" on "+host.hostname+": "+e.message
       return [4, error]
     end
   end
@@ -790,6 +989,7 @@ class Deploy
         line.gsub!(/<%ARCH%>/i, host.arch)
         line.gsub!(/<%HOSTNAME%>/i, host.hostname)
         line.gsub!(/<%PKG_MANAGER%>/i, host.pkg_mgr)
+        line.gsub!(/<%SVC_MANAGER%>/i, host.svc_mgr)
         line.gsub!(/<%SSH_PORT%>/i, host.ssh_port.to_s)
       end
     end
