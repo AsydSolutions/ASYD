@@ -65,7 +65,7 @@ class Setup
 
   def self.update_available?
     begin
-      file = open('http://www.asyd.eu/asyd.version')
+      file = open('https://www.asyd.eu/asyd.version')
       last_ver = file.read.strip
       return true unless last_ver.to_f <= $ASYD_VERSION
       return false
