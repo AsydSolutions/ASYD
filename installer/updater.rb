@@ -142,6 +142,14 @@ module Updater
     end
     #-#-#
 
+    #-#-#
+    # Populate HostStats and TaskStats database
+    hosts = Host.all(:svc_mgr => nil)
+    if hosts.length > 0
+      actions << "service_manager_feature"
+    end
+    #-#-#
+
     return actions
   end
 
