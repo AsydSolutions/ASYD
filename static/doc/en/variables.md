@@ -31,6 +31,8 @@ Global variables:
 
     <%PKG_MANAGER%> - Target host package manager
 
+    <%SVC_MANAGER%> - Target host services manager
+
     <%MONITOR:service%> - Not really a variable, monitors the service 'service'
 
 <br/>

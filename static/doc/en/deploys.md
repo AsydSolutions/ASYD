@@ -112,7 +112,14 @@ as you can also use "http" from the "var" command to store it's return (see next
 
 *Syntax:* `http post [if <condition>]: url[, key1=val1, key2=val2, ...]`
 
-**6. var**
+**6. service**
+
+This command allows you to manage the services on a host. The command is transparent to the user and will work on
+sysvinit, systemd and OpenBSD init scripts. You can specify a list of services separated by spaces.
+
+*syntax:* `<enable|disable|start|stop|restart> service [if <condition>]: <service>`
+
+**7. var**
 
 This command allows you to set a host variable from a "def" or "undeploy" file, which can be called
 later as a normal variable (<%VAR:varname%> - see [Variables](variables.md)). The variable can be
@@ -123,7 +130,7 @@ If a variable with the same name exists, it will be overwritten to the new value
 
 *Syntax:* `var <varname> = http <get|post> [if <condition>]: url[, key1=val1, key2=val2, ...]`
 
-**7. monitor / unmonitor**
+**8. monitor / unmonitor**
 
 This command allows you to monitor (or stop monitoring if "unmonitor" is used) a service. The service parameter must have the same name
 as the "monitor" file inside the `data/monitors` directory, which must exist. You can
@@ -133,7 +140,7 @@ also specify several services separated by spaces. It also accepts optionally co
 
 *Syntax:* `unmonitor [if <condition>]: service`
 
-**8. deploy / undeploy**
+**9. deploy / undeploy**
 
 With this command you can also launch other deploys from a deploy, even allowing you to create
 a meta-deploy defining the deploys that should be launched depending on conditionals. The
@@ -146,7 +153,7 @@ the normal `def` file.
 
 *Syntax:* `undeploy [if <condition>]: another_deploy`
 
-**9. reboot**
+**10. reboot**
 
 It simply reboots a system. This command doesn't requires the colon - : - and the only
 optional parameter allowed is a conditional. **Please note** that this command should always
