@@ -99,6 +99,10 @@
           <td><strong><%=t('host.info.arch')%></strong></td>
           <td><%=@host.arch%></td>
         </tr>
+        <tr>
+          <td></td>
+          <td><a class="btn btn-mini" href="/host/<%=@host.hostname%>/check-sysinfo" role="button" data-toggle="modal">Re-check system info</a></td>
+        </tr>
       </tbody>
       </table>
     </div>

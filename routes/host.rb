@@ -106,4 +106,11 @@ class ASYD < Sinatra::Application
       redirect to redir
     end
   end
+
+  get '/host/:host/check-sysinfo' do
+    host = Host.first(:hostname => params[:host])
+    Host.detect(host, true)
+    hostlist = '/host/'+params[:host]
+    redirect to hostlist
+  end
 end
