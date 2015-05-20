@@ -105,10 +105,11 @@ class Host
         ssh.exec "mkdir -p $HOME/.ssh && touch $HOME/.ssh/authorized_keys && mv $HOME/.ssh/authorized_keys /tmp/authorized_keys && cat /tmp/ssh_key.pub >> /tmp/authorized_keys && uniq /tmp/authorized_keys > $HOME/.ssh/authorized_keys && chmod 700 $HOME/.ssh/authorized_keys && rm /tmp/ssh_key.pub && rm /tmp/authorized_keys"
       end
 
-      Host.detect(host)
+      ret = Host.detect(host)
+      raise StandardError, ret[1] if ret[0] == 5
 
       if !host.save
-        raise #couldn't save the object
+        raise StandardError, "Couldn't save the host" #couldn't save the object
       end
       Spork.spork do #we fork the monitoring setup for saving time
         host.monitor()
