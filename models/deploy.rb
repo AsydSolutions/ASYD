@@ -797,141 +797,81 @@ class Deploy
       services = services.split(' ')
       result = ''
       services.each do |service|
+        sudo = ""
+        sudo = "sudo " if host.user != "root"
         if svc_mgr == "systemctl"
           case action
           when "enable"
-            cmd = svc_mgr
-            if host.user != "root"
-              cmd = "sudo "+cmd
-            end
-            cmd = cmd+" enable "+service
+            cmd = sudo+svc_mgr+" enable "+service
           when "disable"
-            cmd = svc_mgr
-            if host.user != "root"
-              cmd = "sudo "+cmd
-            end
-            cmd = cmd+" disable "+service
+            cmd = sudo+svc_mgr+" disable "+service
           when "start"
-            cmd = svc_mgr
-            if host.user != "root"
-              cmd = "sudo "+cmd
-            end
-            cmd = cmd+" start "+service
+            cmd = sudo+svc_mgr+" start "+service
           when "stop"
-            cmd = svc_mgr
-            if host.user != "root"
-              cmd = "sudo "+cmd
-            end
-            cmd = cmd+" stop "+service
+            cmd = sudo+svc_mgr+" stop "+service
           when "restart"
-            cmd = svc_mgr
-            if host.user != "root"
-              cmd = "sudo "+cmd
-            end
-            cmd = cmd+" restart "+service
+            cmd = sudo+svc_mgr+" restart "+service
           else
             raise FormatException, "Action "+action+" not valid"
           end
         elsif svc_mgr == "update-rc.d"
           case action
           when "enable"
-            cmd = svc_mgr
-            if host.user != "root"
-              cmd = "sudo "+cmd
-            end
-            cmd = cmd+" "+service+" enable"
+            cmd = sudo+svc_mgr+" "+service+" enable"
           when "disable"
-            cmd = svc_mgr
-            if host.user != "root"
-              cmd = "sudo "+cmd
-            end
-            cmd = cmd+" "+service+" disable"
+            cmd = sudo+svc_mgr+" "+service+" disable"
           when "start"
-            cmd = "service"
-            if host.user != "root"
-              cmd = "sudo "+cmd
-            end
-            cmd = cmd+" "+service+" start"
+            svc_mgr = "service"
+            cmd = sudo+svc_mgr+" "+service+" start"
           when "stop"
-            cmd = "service"
-            if host.user != "root"
-              cmd = "sudo "+cmd
-            end
-            cmd = cmd+" "+service+" stop"
+            svc_mgr = "service"
+            cmd = sudo+svc_mgr+" "+service+" stop"
           when "restart"
-            cmd = "service"
-            if host.user != "root"
-              cmd = "sudo "+cmd
-            end
-            cmd = cmd+" "+service+" restart"
+            svc_mgr = "service"
+            cmd = sudo+svc_mgr+" "+service+" restart"
           else
             raise FormatException, "Action "+action+" not valid"
           end
         elsif svc_mgr == "chkconfig"
           case action
           when "enable"
-            cmd = svc_mgr
-            if host.user != "root"
-              cmd = "sudo "+cmd
-            end
-            cmd = cmd+" "+service+" on"
+            cmd = sudo+svc_mgr+" "+service+" on"
           when "disable"
-            cmd = svc_mgr
-            if host.user != "root"
-              cmd = "sudo "+cmd
-            end
-            cmd = cmd+" "+service+" off"
+            cmd = sudo+svc_mgr+" "+service+" off"
           when "start"
-            cmd = "service"
-            if host.user != "root"
-              cmd = "sudo "+cmd
-            end
-            cmd = cmd+" "+service+" start"
+            svc_mgr = "service"
+            cmd = sudo+svc_mgr+" "+service+" start"
           when "stop"
-            cmd = "service"
-            if host.user != "root"
-              cmd = "sudo "+cmd
-            end
-            cmd = cmd+" "+service+" stop"
+            svc_mgr = "service"
+            cmd = sudo+svc_mgr+" "+service+" stop"
           when "restart"
-            cmd = "service"
-            if host.user != "root"
-              cmd = "sudo "+cmd
-            end
-            cmd = cmd+" "+service+" restart"
+            svc_mgr = "service"
+            cmd = sudo+svc_mgr+" "+service+" restart"
           else
             raise FormatException, "Action "+action+" not valid"
           end
         elsif svc_mgr == "rc.d"
           case action
           when "enable"
-            cmd = "mv /etc/rc.conf.local /tmp/rc.conf.local; echo 'pkg_scripts=\"$pkg_scripts "+service+"\"' >> /tmp/rc.conf.local; uniq /tmp/rc.conf.local > /etc/rc.conf.local"
-            if host.user != "root"
-              cmd = "sudo mv /etc/rc.conf.local /tmp/rc.conf.local; sudo echo 'pkg_scripts=\"$pkg_scripts "+service+"\"' >> /tmp/rc.conf.local; sudo uniq /tmp/rc.conf.local > /etc/rc.conf.local"
-            end
+            cmd = [sudo+"mv /etc/rc.conf.local /tmp/rc.conf.local",
+                    sudo+"chmod 777 /tmp/rc.conf.local",
+                    "echo 'pkg_scripts=\"$pkg_scripts "+service+"\"' >> /tmp/rc.conf.local",
+                    sudo+"chmod 644 /tmp/rc.conf.local",
+                    sudo+"sh -c 'uniq /tmp/rc.conf.local > /etc/rc.conf.local'"]
+            cmd = cmd.join("; ")
           when "disable"
-            cmd = "sed -i '/"+service+"/d' /etc/rc.conf.local"
-            if host.user != "root"
-              cmd = "sudo sed -i '/"+service+"/d' /etc/rc.conf.local"
-            end
+            cmd = [sudo+"sh -c \"sed '/"+service+"/d' /etc/rc.conf.local > /tmp/rc.conf.local\"",
+                    sudo+"mv /tmp/rc.conf.local /etc/rc.conf.local"]
+            cmd = cmd.join("; ")
           when "start"
             cmd = "/etc/rc.d/"
-            if host.user != "root"
-              cmd = "sudo "+cmd
-            end
-            cmd = cmd+service+" start"
+            cmd = sudo+cmd+service+" start"
           when "stop"
             cmd = "/etc/rc.d/"
-            if host.user != "root"
-              cmd = "sudo "+cmd
-            end
-            cmd = cmd+service+" stop"
+            cmd = sudo+cmd+service+" stop"
           when "restart"
             cmd = "/etc/rc.d/"
-            if host.user != "root"
-              cmd = "sudo "+cmd
-            end
-            cmd = cmd+service+" restart"
+            cmd = sudo+cmd+service+" restart"
           else
             raise FormatException, "Action "+action+" not valid"
           end
