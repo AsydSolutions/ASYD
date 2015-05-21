@@ -39,7 +39,7 @@ class ASYD < Sinatra::Application
       if !session[:username] or User.first(:username => session[:username]).nil? then
         redirect '/login'
       else
-        if File.directory? 'data' and File.directory? 'installer' then
+        if File.directory? 'data' and File.exist? 'installer/updater.rb' then
           require_relative 'installer/updater'
           actions = Updater.update_actions
           if actions.length > 0
