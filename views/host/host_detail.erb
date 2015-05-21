@@ -100,8 +100,8 @@
           <td><%=@host.arch%></td>
         </tr>
         <tr>
-          <td></td>
-          <td><a class="btn btn-mini" href="/host/<%=@host.hostname%>/check-sysinfo" role="button" data-toggle="modal">Re-check system info</a></td>
+          <td><a class="btn btn-mini" href="#allvars" role="button" data-toggle="modal"><%=t('dialog.allvars.seeall')%></a></td>
+          <td><a class="btn btn-mini" href="/host/<%=@host.hostname%>/check-sysinfo" role="button"><%=t('dialog.checksystem')%></a></td>
         </tr>
       </tbody>
       </table>
@@ -133,4 +133,31 @@
       <button type="submit" class="btn btn-primary"><%=t('action.save')%></button>
     </div>
   </form>
+</div>
+
+<div id="allvars" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="All Vars" aria-hidden="true">
+  <div class="modal-header">
+    <a type="button" class="close" data-dismiss="modal" aria-hidden="true">×</a>
+    <h3 id="allvarsLabel"><%=t('dialog.allvars.title')%></h3>
+  </div>
+  <div class="modal-body">
+    <dl class="dl-horizontal">
+      <dt style="margin-left: 25px">Variable</dt><dd style="margin-left: 175px">Value</dd><br>
+      <dt style="margin-left: 25px"><%%ASYD%></dt><dd style="margin-left: 175px"><%=@host.get_asyd_ip%></dd>
+      <dt style="margin-left: 25px"><%%HOSTNAME%></dt><dd style="margin-left: 175px"><%=@host.hostname%></dd>
+      <dt style="margin-left: 25px"><%%IP%></dt><dd style="margin-left: 175px"><%=@host.ip%></dd>
+      <dt style="margin-left: 25px"><%%SSH_PORT%></dt><dd style="margin-left: 175px"><%=@host.ssh_port%></dd>
+      <dt style="margin-left: 25px"><%%DIST%></dt><dd style="margin-left: 175px"><%=@host.dist%></dd>
+      <dt style="margin-left: 25px"><%%DIST_VER%></dt><dd style="margin-left: 175px"><%=@host.dist_ver%></dd>
+      <dt style="margin-left: 25px"><%%ARCH%></dt><dd style="margin-left: 175px"><%=@host.arch%></dd>
+      <dt style="margin-left: 15px"><%%PGK_MANAGER%></dt><dd style="margin-left: 175px"><%=@host.pkg_mgr%></dd>
+      <dt style="margin-left: 15px"><%%SVC_MANAGER%></dt><dd style="margin-left: 175px"><%= @host.svc_mgr ? @host.svc_mgr : "not set - recheck system info" %></dd><br>
+      <%@host.opt_vars.each do |var|%>
+        <dt style="margin-left: 15px"><%%VAR:<%=var[0]%>%></dt><dd style="margin-left: 175px"><%=var[1]%></dd>
+      <%end%>
+    </dl>
+  </div>
+  <div class="modal-footer">
+    <a class="btn" data-dismiss="modal" aria-hidden="true"><%=t('action.close')%></a>
+  </div>
 </div>
