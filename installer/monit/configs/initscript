@@ -74,7 +74,7 @@ case "$1" in
   stop)
     /bin/echo -n "Stopping $DESC: $NAME"
     if start-stop-daemon --retry TERM/5/KILL/5 --oknodo --stop --quiet \
-                         --pidfile $PID --exec $DAEMON
+                         --pidfile $PID
     then
       log_end_msg 0
     else
