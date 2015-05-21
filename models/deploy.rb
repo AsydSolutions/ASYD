@@ -571,7 +571,7 @@ class Deploy
 
         # undefined command
         else
-          error = "Bad formatting, check your deploy file"
+          error = "Bad formatting, check your deploy file: "+line
           raise FormatException, error
         end
 
@@ -981,16 +981,16 @@ class Deploy
           end
         end
       else
-        line.gsub!(/<%ASYD%>/i, asyd)
-        line.gsub!(/<%MONIT_PW%>/i, host.monit_pw)
-        line.gsub!(/<%IP%>/i, host.ip)
-        line.gsub!(/<%DIST%>/i, host.dist)
-        line.gsub!(/<%DIST_VER%>/i, host.dist_ver.to_s)
-        line.gsub!(/<%ARCH%>/i, host.arch)
-        line.gsub!(/<%HOSTNAME%>/i, host.hostname)
-        line.gsub!(/<%PKG_MANAGER%>/i, host.pkg_mgr)
-        line.gsub!(/<%SVC_MANAGER%>/i, host.svc_mgr)
-        line.gsub!(/<%SSH_PORT%>/i, host.ssh_port.to_s)
+        line.gsub!(/<%ASYD%>/i, asyd) unless asyd.nil?
+        line.gsub!(/<%MONIT_PW%>/i, host.monit_pw) unless host.monit_pw.nil?
+        line.gsub!(/<%IP%>/i, host.ip) unless host.ip.nil?
+        line.gsub!(/<%DIST%>/i, host.dist) unless host.dist.nil?
+        line.gsub!(/<%DIST_VER%>/i, host.dist_ver.to_s) unless host.dist_ver.nil?
+        line.gsub!(/<%ARCH%>/i, host.arch) unless host.arch.nil?
+        line.gsub!(/<%HOSTNAME%>/i, host.hostname) unless host.hostname.nil?
+        line.gsub!(/<%PKG_MANAGER%>/i, host.pkg_mgr) unless host.pkg_mgr.nil?
+        line.gsub!(/<%SVC_MANAGER%>/i, host.svc_mgr) unless host.svc_mgr.nil?
+        line.gsub!(/<%SSH_PORT%>/i, host.ssh_port.to_s) unless host.ssh_port.nil?
       end
     end
     return line
