@@ -189,7 +189,8 @@ $(function () {
       $('#htable').dataTable({
         'sDom': '<\'row-fluid\'<\'span12\'f>r>t<\'row-fluid\'<\'span6\'l><\'span6\'p>>',
         'language': {
-          'emptyTable': 'You haven\'t added any host yet'
+          'emptyTable': 'You haven\'t added any host yet',
+          'stateSave': true
         }
       });
       $('#hgmtable').dataTable({
