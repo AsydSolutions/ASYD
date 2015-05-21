@@ -277,7 +277,7 @@ class Host
           host.pkg_mgr = "pkg_add"
           host.dist = ssh.exec!("uname -s").strip
           host.dist_ver = ssh.exec!("uname -r").strip.to_f
-          host.arch = ssh.exec!("uname -p").strip
+          host.arch = ssh.exec!("uname -m").strip
         else
           raise StandardError, "The OS of the machine is not yet supported" #OS not supported yet
         end
