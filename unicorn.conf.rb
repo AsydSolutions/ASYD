@@ -1,7 +1,7 @@
 $UNICORN = 1
 $ASYD_PID = Process.pid
 $ASYD_VERSION = 0.078
-$DBG = 1 #debug?
+$DBG = 0 #debug?
 
 FileUtils.mkdir("log") unless File.directory?("log")
 

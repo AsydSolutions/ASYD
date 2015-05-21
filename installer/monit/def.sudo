@@ -4,7 +4,7 @@
 
 ###
 # Check first if the system has a service manager
-if <%SVC_MANAGER%> != update-rc.d or <%SVC_MANAGER%> != chkconfig or <%SVC_MANAGER%> != systemctl or <%SVC_MANAGER%> != none
+if <%SVC_MANAGER%> != update-rc.d and <%SVC_MANAGER%> != chkconfig and <%SVC_MANAGER%> != systemctl and <%SVC_MANAGER%> != none
   Error: There is no service manager defined, please go to the host detail view and recheck system information
 endif
 ###
