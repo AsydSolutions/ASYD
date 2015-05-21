@@ -2,11 +2,11 @@
 # Will be executed on every new system added to ASYD
 # Modify accordingly to your systems (i.e. firewall rules, etc)
 # Alert: This deploy is automatically executed when a host is added, are you sure you want to manually execute it?
-# Version: 0.078
+# Version: 0.079
 
 ###
 # Check first if the system has a service manager
-if <%SVC_MANAGER%> != update-rc.d and <%SVC_MANAGER%> != chkconfig and <%SVC_MANAGER%> != systemctl and <%SVC_MANAGER%> != none
+if <%SVC_MANAGER%> != update-rc.d and <%SVC_MANAGER%> != chkconfig and <%SVC_MANAGER%> != systemctl and <%SVC_MANAGER%> != rc.d and <%SVC_MANAGER%> != none
   There is no service manager defined, please go to the host detail view and recheck system information
 endif
 ###
