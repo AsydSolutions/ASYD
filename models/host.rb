@@ -205,63 +205,49 @@ class Host
 
   def self.detect(host, save = false)
     begin
+      sudo = ""
+      sudo = "sudo " if user != "root"
       Net::SSH.start(host.ip, host.user, :port => host.ssh_port, :keys => "data/ssh_key", :timeout => 10) do |ssh|
         #check for package manager and add distro
         #1. debian-based
         if !(ssh.exec!("which apt-get") =~ /\/bin\/apt-get$/).nil?
           host.pkg_mgr = "apt"
           if (ssh.exec!("which wget") =~ /\/bin\/wget$/).nil?
-            if user != "root"
-              ssh.exec!("sudo apt-get -y -q install wget")
-            else
-              ssh.exec!("apt-get -y -q install wget")
-            end
+            ssh.exec!(sudo+"apt-get -y -q install wget")
           end
-          ssh.exec!("wget https://raw.githubusercontent.com/AsydSolutions/lsb_release/master/lsb_release -O /tmp/lsb_release && chmod +x /tmp/lsb_release")
-          host.dist = ssh.exec!("/tmp/lsb_release -s -i").strip
-          host.dist_ver = ssh.exec!("/tmp/lsb_release -s -r").strip.to_f
+          ssh.exec!("wget --no-check-certificate https://raw.githubusercontent.com/AsydSolutions/lsb_release/master/lsb_release -O /tmp/lsb_release && chmod +x /tmp/lsb_release")
+          host.dist = ssh.exec!(sudo+"/tmp/lsb_release -s -i").strip
+          host.dist_ver = ssh.exec!(sudo+"/tmp/lsb_release -s -r").strip.to_f
           host.arch = ssh.exec!("uname -m").strip
         #2. redhat-based
         elsif !(ssh.exec!("which yum") =~ /\/bin\/yum$/).nil?
           host.pkg_mgr = "yum"
           if (ssh.exec!("which scp") =~ /\/bin\/scp$/).nil? || (ssh.exec!("which wget") =~ /\/bin\/wget$/).nil?
-            if user != "root"
-              ssh.exec!("sudo yum install -y openssh-clients wget")
-            else
-              ssh.exec!("yum install -y openssh-clients wget")
-            end
+            ssh.exec!(sudo+"yum install -y openssh-clients wget")
           end
-          ssh.exec!("wget https://raw.githubusercontent.com/AsydSolutions/lsb_release/master/lsb_release -O /tmp/lsb_release && chmod +x /tmp/lsb_release")
-          host.dist = ssh.exec!("/tmp/lsb_release -s -i").strip
-          host.dist_ver = ssh.exec!("/tmp/lsb_release -s -r").strip.to_f
+          ssh.exec!("wget --no-check-certificate https://raw.githubusercontent.com/AsydSolutions/lsb_release/master/lsb_release -O /tmp/lsb_release && chmod +x /tmp/lsb_release")
+          host.dist = ssh.exec!(sudo+"/tmp/lsb_release -s -i").strip
+          host.dist_ver = ssh.exec!(sudo+"/tmp/lsb_release -s -r").strip.to_f
           host.arch = ssh.exec!("uname -m").strip
         #3. arch-based
         elsif !(ssh.exec!("which pacman") =~ /\/bin\/pacman$/).nil?
           host.pkg_mgr = "pacman"
           if (ssh.exec!("which wget") =~ /\/bin\/wget$/).nil?
-            if user != "root"
-              ssh.exec!("sudo pacman -S --noconfirm --noprogressbar wget")
-            else
-              ssh.exec!("pacman -S --noconfirm --noprogressbar wget")
-            end
+            ssh.exec!(sudo+"pacman -S --noconfirm --noprogressbar wget")
           end
-          ssh.exec!("wget https://raw.githubusercontent.com/AsydSolutions/lsb_release/master/lsb_release -O /tmp/lsb_release && chmod +x /tmp/lsb_release")
-          host.dist = ssh.exec!("/tmp/lsb_release -s -i").strip
+          ssh.exec!("wget --no-check-certificate https://raw.githubusercontent.com/AsydSolutions/lsb_release/master/lsb_release -O /tmp/lsb_release && chmod +x /tmp/lsb_release")
+          host.dist = ssh.exec!(sudo+"/tmp/lsb_release -s -i").strip
           host.dist_ver = 0
           host.arch = ssh.exec!("uname -m").strip
         #4. opensuse
         elsif !(ssh.exec!("which zypper") =~ /\/bin\/zypper$/).nil?
           host.pkg_mgr = "zypper"
           if (ssh.exec!("which wget") =~ /\/bin\/wget$/).nil?
-            if user != "root"
-              ssh.exec!("sudo zypper -q -n in wget")
-            else
-              ssh.exec!("zypper -q -n in wget")
-            end
+            ssh.exec!(sudo+"zypper -q -n in wget")
           end
-          ssh.exec!("wget https://raw.githubusercontent.com/AsydSolutions/lsb_release/master/lsb_release -O /tmp/lsb_release && chmod +x /tmp/lsb_release")
-          host.dist = ssh.exec!("/tmp/lsb_release -s -i").strip
-          host.dist_ver = ssh.exec!("/tmp/lsb_release -s -r").strip.to_f
+          ssh.exec!("wget --no-check-certificate https://raw.githubusercontent.com/AsydSolutions/lsb_release/master/lsb_release -O /tmp/lsb_release && chmod +x /tmp/lsb_release")
+          host.dist = ssh.exec!(sudo+"/tmp/lsb_release -s -i").strip
+          host.dist_ver = ssh.exec!(sudo+"/tmp/lsb_release -s -r").strip.to_f
           host.arch = ssh.exec!("uname -m").strip
         #5. solaris
         elsif !(ssh.exec!("export PATH=$PATH:/sbin:/usr/sbin/ && which pkgadd") =~ /\/sbin\/pkgadd$/).nil?
@@ -297,8 +283,6 @@ class Host
         end
 
         #check for services (initscript) manager
-        sudo = ""
-        sudo = "sudo " if user != "root"
         if !(ssh.exec!(sudo+"which systemctl") =~ /\/bin\/systemctl$/).nil?
           ssh.exec!(sudo+"mkdir -p /usr/lib/systemd/system/")
           host.svc_mgr = "systemctl"    # most newer distros
