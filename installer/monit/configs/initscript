@@ -1,4 +1,4 @@
-# Version: 0.078
+# Version: 0.079
 <%if <%SVC_MANAGER%> == update-rc.d %>
 #!/bin/sh
 
@@ -27,7 +27,7 @@ CONFIG="/etc/monit/monitrc"
 NAME=monit
 DESC="daemon monitor"
 MONIT_OPTS=
-PID="/var/run/$NAME.pid"
+PID="/var/.$NAME.pid"
 
 # Check if DAEMON binary exist
 [ -f $DAEMON ] || exit 0
@@ -90,7 +90,7 @@ case "$1" in
       log_end_msg 0
     else
       log_end_msg 1
-	fi
+  fi
     ;;
   restart|force-reload)
     $0 stop
@@ -151,7 +151,7 @@ rc_cmd $1
 
 prog="monit"
 option="-c /etc/monit/monitrc"
-pidfile=""
+pidfile="/var/.monit.pid"
 lockfile=""
 
 
