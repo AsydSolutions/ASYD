@@ -3,14 +3,21 @@
 # Modify accordingly to your systems (i.e. firewall rules, etc)
 
 ###
+# Check first if the system has a service manager
+if <%SVC_MANAGER%> != update-rc.d and <%SVC_MANAGER%> != chkconfig and <%SVC_MANAGER%> != systemctl and <%SVC_MANAGER%> != rc.d and <%SVC_MANAGER%> != none
+  There is no service manager defined, please go to the host detail view and recheck system information
+endif
+###
+
+###
 # For Linux:
 if <%PKG_MANAGER%> == apt or <%PKG_MANAGER%> == yum or <%PKG_MANAGER%> == pacman or <%PKG_MANAGER%> == zypper
 
   # install monit:
   install: wget tar gzip
   exec: sudo mkdir -p /etc/monit/conf.d
-  exec if <%ARCH%> == x86_64: wget http://github.com/AsydSolutions/monit/releases/download/release-5-12-asyd/monit-linux-x64 -O /tmp/monit
-  exec if <%ARCH%> == i686: wget http://github.com/AsydSolutions/monit/releases/download/release-5-12-asyd/monit-linux-x86 -O /tmp/monit
+  exec if <%ARCH%> == x86_64: wget http://github.com/AsydSolutions/monit/releases/download/release-5-13-asyd/monit-linux-x64 -O /tmp/monit
+  exec if <%ARCH%> == i686: wget http://github.com/AsydSolutions/monit/releases/download/release-5-13-asyd/monit-linux-x86 -O /tmp/monit
   exec: sudo mv /tmp/monit /usr/bin/
   exec: sudo chmod +x /usr/bin/monit
 
@@ -18,23 +25,22 @@ if <%PKG_MANAGER%> == apt or <%PKG_MANAGER%> == yum or <%PKG_MANAGER%> == pacman
   exec: sudo mv /tmp/monitrc /etc/monit/monitrc
   exec: sudo chown -R root:root /etc/monit
 
-  # if it's debian-based, opensuse or redhat-old:
-  config file if <%PKG_MANAGER%> == apt or <%PKG_MANAGER%> == zypper or <%DIST%> == CentOS and <%DIST_VER%> <= 6.6 or <%DIST%> == RedHat and <%DIST_VER%> <= 6.6 or <%DIST%> == Fedora and <%DIST_VER%> <= 17: initscript, /tmp/monit
-  exec if <%PKG_MANAGER%> == apt or <%PKG_MANAGER%> == zypper or <%DIST%> == CentOS and <%DIST_VER%> <= 6.6 or <%DIST%> == RedHat and <%DIST_VER%> <= 6.6 or <%DIST%> == Fedora and <%DIST_VER%> <= 17: sudo mv /tmp/monit /etc/init.d/monit
-  exec if <%PKG_MANAGER%> == apt or <%PKG_MANAGER%> == zypper or <%DIST%> == CentOS and <%DIST_VER%> <= 6.6 or <%DIST%> == RedHat and <%DIST_VER%> <= 6.6 or <%DIST%> == Fedora and <%DIST_VER%> <= 17: sudo chmod +x /etc/init.d/monit
-  exec if <%PKG_MANAGER%> == apt: sudo update-rc.d monit defaults
-  exec if <%PKG_MANAGER%> == zypper: sudo insserv /etc/init.d/monit
-  exec if <%DIST%> == CentOS and <%DIST_VER%> <= 6.6 or <%DIST%> == RedHat and <%DIST_VER%> <= 6.6 or <%DIST%> == Fedora and <%DIST_VER%> <= 17: sudo chkconfig --level 2345 monit on
+  # sysvinit:
+  if <%SVC_MANAGER%> == update-rc.d or <%SVC_MANAGER%> == chkconfig
+    config file: initscript, /tmp/monit
+    exec: sudo mv /tmp/monit /etc/init.d/monit
+    exec: sudo chmod +x /etc/init.d/monit
+  endif
 
-  # if it's redhat-new or arch based:
-  config file if <%PKG_MANAGER%> == pacman or <%DIST%> == CentOS and <%DIST_VER%> >= 7 or <%DIST%> == RedHat and <%DIST_VER%> >= 7 or <%DIST%> == Fedora and <%DIST_VER%> >= 18: initscript, /tmp/monit.service
-  exec if <%PKG_MANAGER%> == pacman or <%DIST%> == CentOS and <%DIST_VER%> >= 7 or <%DIST%> == RedHat and <%DIST_VER%> >= 7 or <%DIST%> == Fedora and <%DIST_VER%> >= 18: sudo mv /tmp/monit.service /usr/lib/systemd/system/monit.service
-  exec if <%PKG_MANAGER%> == pacman or <%DIST%> == CentOS and <%DIST_VER%> >= 7 or <%DIST%> == RedHat and <%DIST_VER%> >= 7 or <%DIST%> == Fedora and <%DIST_VER%> >= 18: sudo chmod +x /usr/lib/systemd/system/monit.service
-  exec if <%PKG_MANAGER%> == pacman or <%DIST%> == CentOS and <%DIST_VER%> >= 7 or <%DIST%> == RedHat and <%DIST_VER%> >= 7 or <%DIST%> == Fedora and <%DIST_VER%> >= 18: sudo systemctl enable monit
+  # systemd:
+  if <%SVC_MANAGER%> == systemctl
+    config file: initscript, /tmp/monit.service
+    exec: sudo mv /tmp/monit.service /usr/lib/systemd/system/monit.service
+    exec: sudo chmod +x /usr/lib/systemd/system/monit.service
+  endif
 
-  exec: sudo /usr/bin/monit -c /etc/monit/monitrc quit
-  exec: sleep 1
-  exec: sudo /usr/bin/monit -c /etc/monit/monitrc
+  enable service: monit
+  restart service: monit
 
 endif
 ###
@@ -51,15 +57,17 @@ if <%DIST%> == Solaris and <%ARCH%> != sparc or <%DIST%> == OpenIndiana and <%AR
 
   # install OpenCSW
   install pkgadd if <%DIST_VER%> >= 10: http://get.opencsw.org/now
-  exec if <%DIST_VER%> <= 9: wget http://mirror.opencsw.org/opencsw/pkgutil.pkg -O /tmp/pkgutil.pkg
-  install pkgadd if <%DIST_VER%> <= 9: /tmp/pkgutil.pkg
+  if <%DIST_VER%> <= 9
+    exec: wget http://mirror.opencsw.org/opencsw/pkgutil.pkg -O /tmp/pkgutil.pkg
+    install pkgadd: /tmp/pkgutil.pkg
+  endif
 
   # install wget and gzip in case they are not there using pkgutil
   install pkgutil: wget gzip
 
   # install monit
   exec: sudo mkdir -p /etc/monit/conf.d
-  exec if <%ARCH%> != sparc: wget http://github.com/AsydSolutions/monit/releases/download/release-5-12-asyd/monit-solaris-x86_64 -O /tmp/monit
+  exec if <%ARCH%> != sparc: wget http://github.com/AsydSolutions/monit/releases/download/release-5-13-asyd/monit-solaris-x86_64 -O /tmp/monit
   exec: sudo mv /tmp/monit /usr/bin/
   exec: sudo chmod +x /usr/bin/monit
 
@@ -82,8 +90,8 @@ if <%DIST%> == OpenBSD
 
   # install monit
   exec: sudo mkdir -p /etc/monit/conf.d
-  exec if <%ARCH%> == amd64: wget http://github.com/AsydSolutions/monit/releases/download/release-5-12-asyd/monit-openbsd-x64 -O /tmp/monit
-  exec if <%ARCH%> == i386: wget http://github.com/AsydSolutions/monit/releases/download/release-5-12-asyd/monit-openbsd-x86 -O /tmp/monit
+  exec if <%ARCH%> == amd64: wget http://github.com/AsydSolutions/monit/releases/download/release-5-13-asyd/monit-openbsd-x64 -O /tmp/monit
+  exec if <%ARCH%> == i386: wget http://github.com/AsydSolutions/monit/releases/download/release-5-13-asyd/monit-openbsd-x86 -O /tmp/monit
   exec: sudo mv /tmp/monit /usr/bin/
   exec: sudo chmod +x /usr/bin/monit
 
@@ -93,13 +101,9 @@ if <%DIST%> == OpenBSD
   config file: initscript, /tmp/monit
   exec: sudo mv /tmp/monit /etc/rc.d/monit
   exec: sudo chmod +x /etc/rc.d/monit
-  exec: cp /etc/rc.conf.local /tmp/rc.conf.local
-  exec: echo 'pkg_scripts="$pkg_scripts monit"' >> /tmp/rc.conf.local
-  exec: sudo uniq /tmp/rc.conf.local > /etc/rc.conf.local
 
-  exec: sudo /usr/bin/monit -c /etc/monit/monitrc quit
-  exec: sleep 1
-  exec: sudo /usr/bin/monit -c /etc/monit/monitrc
+  enable service: monit
+  restart service: monit
 
 endif
 ###

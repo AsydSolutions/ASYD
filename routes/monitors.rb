@@ -8,7 +8,7 @@ class ASYD < Sinatra::Application
 
   get '/monitors/:monitor' do
     @base = 'data/monitors/'+params[:monitor]
-    if File.exists? @base
+    if File.exist? @base
       erb :'monitor/monitor_detail'
     else
       not_found
@@ -26,15 +26,15 @@ class ASYD < Sinatra::Application
         task = Task.create(:action => :monitoring, :object => mon, :target => host.hostname, :target_type => :host)
       end
       NOTEX.synchronize do
-        notification = Notification.create(:type => :info, :message => t('task.actions.'+task.action.to_s)+" "+mon+" on "+host.hostname, :task => task)
+        Notification.create(:type => :info, :message => t('task.actions.'+task.action.to_s)+" "+mon+" on "+host.hostname, :task => task)
       end
-      inst = Spork.spork do
+      Spork.spork do
         sleep 0.2
         result = host.monitor_service(mon, task)
         if result == 1
           NOTEX.synchronize do
             msg = "Service "+mon+" successfully monitored on "+target[0]+" "+target[1]
-            notification = Notification.create(:type => :success, :sticky => true, :message => msg, :task => task)
+            Notification.create(:type => :success, :sticky => true, :message => msg, :task => task)
           end
           TATEX.synchronize do
             task.update(:status => :finished)
@@ -47,23 +47,22 @@ class ASYD < Sinatra::Application
       end
     elsif target[0] == "hostgroup"
       hostgroup = Hostgroup.first(:name => target[1])
-      hostgroup_hosts = hostgroup.hosts
       task = nil
       TATEX.synchronize do
         task = Task.create(:action => :monitoring, :object => mon, :target => hostgroup.name, :target_type => :hostgroup)
       end
       NOTEX.synchronize do
-        notification = Notification.create(:type => :info, :message => t('task.actions.'+task.action.to_s)+" "+mon+" on "+hostgroup.name, :task => task)
+        Notification.create(:type => :info, :message => t('task.actions.'+task.action.to_s)+" "+mon+" on "+hostgroup.name, :task => task)
       end
       success = ProcessShared::SharedMemory.new(:int) #shared with the forks
       success.put_int(0, 1) #default to true
-      inst = Spork.spork do
+      Spork.spork do
         hostgroup.group_launch { |host|
           result = host.monitor_service(mon, task)
           if result != 1
             NOTEX.synchronize do
               msg = "Error when monitoring "+mon+" on "+host.hostname
-              notification = Notification.create(:type => :error, :dismiss => true, :message => msg, :task => task)
+              Notification.create(:type => :error, :dismiss => true, :message => msg, :task => task)
             end
             success.put_int(0, 0)
           end
@@ -71,7 +70,7 @@ class ASYD < Sinatra::Application
         if success.get_int(0) == 1
           NOTEX.synchronize do
             msg = "Service "+mon+" successfully monitored on "+target[0]+" "+target[1]
-            notification = Notification.create(:type => :success, :sticky => true, :message => msg, :task => task)
+            Notification.create(:type => :success, :sticky => true, :message => msg, :task => task)
           end
           TATEX.synchronize do
             task.update(:status => :finished)
@@ -79,7 +78,7 @@ class ASYD < Sinatra::Application
         else
           NOTEX.synchronize do
             msg = "Error when monitoring service "+mon+" on "+target[0]+" "+target[1]
-            notification = Notification.create(:type => :error, :sticky => true, :message => msg, :task => task)
+            Notification.create(:type => :error, :sticky => true, :message => msg, :task => task)
           end
           TATEX.synchronize do
             task.update(:status => :failed)
@@ -103,15 +102,15 @@ class ASYD < Sinatra::Application
         task = Task.create(:action => :unmonitoring, :object => mon, :target => host.hostname, :target_type => :host)
       end
       NOTEX.synchronize do
-        notification = Notification.create(:type => :info, :message => t('task.actions.'+task.action.to_s)+" "+mon+" on "+host.hostname, :task => task)
+        Notification.create(:type => :info, :message => t('task.actions.'+task.action.to_s)+" "+mon+" on "+host.hostname, :task => task)
       end
-      inst = Spork.spork do
+      Spork.spork do
         sleep 0.2
         result = host.unmonitor_service(mon, task)
         if result == 1
           NOTEX.synchronize do
             msg = "Service "+mon+" is not longer being monitored on "+target[0]+" "+target[1]
-            notification = Notification.create(:type => :success, :sticky => true, :message => msg, :task => task)
+            Notification.create(:type => :success, :sticky => true, :message => msg, :task => task)
           end
           TATEX.synchronize do
             task.update(:status => :finished)
@@ -124,23 +123,22 @@ class ASYD < Sinatra::Application
       end
     elsif target[0] == "hostgroup"
       hostgroup = Hostgroup.first(:name => target[1])
-      hostgroup_hosts = hostgroup.hosts
       task = nil
       TATEX.synchronize do
         task = Task.create(:action => :monitoring, :object => mon, :target => hostgroup.name, :target_type => :hostgroup)
       end
       NOTEX.synchronize do
-        notification = Notification.create(:type => :info, :message => t('task.actions.'+task.action.to_s)+" "+mon+" on "+hostgroup.name, :task => task)
+        Notification.create(:type => :info, :message => t('task.actions.'+task.action.to_s)+" "+mon+" on "+hostgroup.name, :task => task)
       end
       success = ProcessShared::SharedMemory.new(:int) #shared with the forks
       success.put_int(0, 1) #default to true
-      inst = Spork.spork do
+      Spork.spork do
         hostgroup.group_launch { |host|
           result = host.unmonitor_service(mon, task)
           if result != 1
             NOTEX.synchronize do
               msg = "Error when un-monitoring "+mon+" on "+host.hostname
-              notification = Notification.create(:type => :error, :dismiss => true, :message => msg, :task => task)
+              Notification.create(:type => :error, :dismiss => true, :message => msg, :task => task)
             end
             success.put_int(0, 0)
           end
@@ -148,7 +146,7 @@ class ASYD < Sinatra::Application
         if success.get_int(0) == 1
           NOTEX.synchronize do
             msg = "Service "+mon+" is not longer being monitored on "+target[0]+" "+target[1]
-            notification = Notification.create(:type => :success, :sticky => true, :message => msg, :task => task)
+            Notification.create(:type => :success, :sticky => true, :message => msg, :task => task)
           end
           TATEX.synchronize do
             task.update(:status => :finished)
@@ -156,7 +154,7 @@ class ASYD < Sinatra::Application
         else
           NOTEX.synchronize do
             msg = "Error when un-monitoring service "+mon+" on "+target[0]+" "+target[1]
-            notification = Notification.create(:type => :error, :sticky => true, :message => msg, :task => task)
+            Notification.create(:type => :error, :sticky => true, :message => msg, :task => task)
           end
           TATEX.synchronize do
             task.update(:status => :failed)

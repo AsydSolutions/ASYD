@@ -14,6 +14,7 @@ class Host
   property :dist_ver, Float
   property :arch, String
   property :pkg_mgr, String
+  property :svc_mgr, String
   property :monit_pw, String
   property :monitored, Boolean, :default => false # <-- DEPRECATED, keep for compatibility, will be removed in 2 releases
   property :opt_vars, Object
@@ -35,6 +36,7 @@ class Host
       host.opt_vars = {} #initialize opt_vars as an empty hash
       #start connection to remote host
       Net::SSH.start(host.ip, host.user, :port => host.ssh_port, :keys => "data/ssh_key", :password => password, :timeout => 10) do |ssh|
+
         #check for admin capabilities/nopasswd
         if user != "root"
           need_passwd = false
@@ -77,100 +79,39 @@ class Host
             end
             ssh.loop
           end
-          ret = ssh.exec!("sudo cat /tmp/1")
+          ret = ssh.exec!("sudo cat /tmp/1") # first check
+          unless ret.strip == "1"            # if this fails likely there's a requiretty on sudoers
+            cmd = "sudo sed -i '/requiretty/d' /etc/sudoers"
+            ssh.open_channel do |channel|
+              channel.request_pty do |ch, success|
+                raise StandardError, "Could not obtain pty" unless success
+              end
+              channel.exec(cmd) do |ch, success|
+                raise unless success
+                channel.on_data do |ch, data|
+                  # NOPASSWD already in sudoers file
+                end
+              end
+            end
+            ssh.loop
+          end
+          ret = ssh.exec!("sudo cat /tmp/1") # second check
           raise StandardError, "User has no admin privileges, please add '#{user} ALL=NOPASSWD: ALL' to /etc/sudoers and try again" unless ret.strip == "1"
           ssh.exec!("rm /tmp/1")
         end
-        #check for package manager and add distro
-        #1. debian-based
-        if !(ssh.exec!("which apt-get") =~ /\/bin\/apt-get$/).nil?
-          host.pkg_mgr = "apt"
-          if (ssh.exec!("which lsb_release") =~ /\/bin\/lsb_release$/).nil?
-            if user != "root"
-              ssh.exec!("sudo apt-get -y -q install lsb-release")
-            else
-              ssh.exec!("apt-get -y -q install lsb-release")
-            end
-          end
-          host.dist = ssh.exec!("lsb_release -s -i").strip
-          host.dist_ver = ssh.exec!("lsb_release -s -r").strip.to_f
-          host.arch = ssh.exec!("uname -m").strip
-        #2. redhat-based
-        elsif !(ssh.exec!("which yum") =~ /\/bin\/yum$/).nil?
-          host.pkg_mgr = "yum"
-          if (ssh.exec!("which scp") =~ /\/bin\/scp$/).nil?
-            if user != "root"
-              ssh.exec!("sudo yum install -y openssh-clients")
-            else
-              ssh.exec!("yum install -y openssh-clients")
-            end
-          end
-          host.dist = ssh.exec!("cat /etc/issue |awk 'NR == 1 {print $1}'").strip
-          if host.dist == "Red"
-            host.dist = "RedHat"
-          end
-          host.dist_ver = ssh.exec!("cat /etc/issue |awk -F\"release\" 'NR==1 {print $2}'|awk '{print $1}'").strip.to_f
-          host.arch = ssh.exec!("uname -m").strip
-        #3. arch-based
-        elsif !(ssh.exec!("which pacman") =~ /\/bin\/pacman$/).nil?
-          host.pkg_mgr = "pacman"
-          if (ssh.exec!("which lsb_release") =~ /\/bin\/lsb_release$/).nil?
-            if user != "root"
-              ssh.exec!("sudo pacman -S --noconfirm --noprogressbar lsb-release")
-            else
-              ssh.exec!("pacman -S --noconfirm --noprogressbar lsb-release")
-            end
-          end
-          host.dist = ssh.exec!("lsb_release -s -i").strip
-          host.dist_ver = 0
-          host.arch = ssh.exec!("uname -m").strip
-        #4. opensuse
-        elsif !(ssh.exec!("which zypper") =~ /\/bin\/zypper$/).nil?
-          host.pkg_mgr = "zypper"
-          host.dist = ssh.exec!("cat /etc/issue |awk 'NR == 1 {print $3}'").strip
-          host.dist_ver = ssh.exec!("cat /etc/issue |awk 'NR == 1 {print $4}'").strip.to_f
-          host.arch = ssh.exec!("uname -m").strip
-        #5. solaris
-        elsif !(ssh.exec!("export PATH=$PATH:/sbin:/usr/sbin/ && which pkgadd") =~ /\/sbin\/pkgadd$/).nil?
-          host.pkg_mgr = "pkgadd"
-          if !(ssh.exec!("which pkg") =~ /\/bin\/pkg$/).nil?
-            host.pkg_mgr = "pkg"
-          end
-          ret = ssh.exec!("cat /etc/release").lines.first.strip
-          if ret.include? "OpenIndiana"
-            host.dist = "OpenIndiana"
-            ret = ret.split(" ")
-            ret.each do |item|
-              if item =~ /oi_/
-                dv = item.gsub(/oi_/, '')
-                host.dist_ver = dv.to_f
-              end
-            end
-          else
-            host.dist = "Solaris"
-            ret = ret.split("Solaris ")
-            dv = ret[1].split(" ")
-            host.dist_ver = dv[0].to_f
-          end
-          host.arch = ssh.exec!("uname -p").strip
-        #6. openbsd
-        elsif !(ssh.exec!("which pkg_add") =~ /\/sbin\/pkg_add$/).nil?
-          host.pkg_mgr = "pkg_add"
-          host.dist = ssh.exec!("uname -s").strip
-          host.dist_ver = ssh.exec!("uname -r").strip.to_f
-          host.arch = ssh.exec!("uname -p").strip
-        else
-          raise #OS not supported yet
-        end
+
         #upload the ssh key
         ssh.scp.upload!("data/ssh_key.pub", "/tmp/ssh_key.pub")
         ssh.exec "mkdir -p $HOME/.ssh && touch $HOME/.ssh/authorized_keys && mv $HOME/.ssh/authorized_keys /tmp/authorized_keys && cat /tmp/ssh_key.pub >> /tmp/authorized_keys && uniq /tmp/authorized_keys > $HOME/.ssh/authorized_keys && chmod 700 $HOME/.ssh/authorized_keys && rm /tmp/ssh_key.pub && rm /tmp/authorized_keys"
       end
 
+      ret = Host.detect(host)
+      raise StandardError, ret[1] if ret[0] == 5
+
       if !host.save
-        raise #couldn't save the object
+        raise StandardError, "Couldn't save the host" #couldn't save the object
       end
-      mon = Spork.spork do #we fork the monitoring setup for saving time
+      Spork.spork do #we fork the monitoring setup for saving time
         host.monitor()
       end
       NOTEX.synchronize do
@@ -180,20 +121,20 @@ class Host
       return host #return the object itself
     rescue Net::SSH::AuthenticationFailed
       NOTEX.synchronize do
-        notification = Notification.create(:type => :error, :sticky => false, :message => I18n.t('error.host.auth'))
+        Notification.create(:type => :error, :sticky => false, :message => I18n.t('error.host.auth'))
       end
       host.delete(false)
       return false
     rescue Errno::EHOSTUNREACH
       NOTEX.synchronize do
-        notification = Notification.create(:type => :error, :sticky => false, :message => I18n.t('error.host.unreach'))
+        Notification.create(:type => :error, :sticky => false, :message => I18n.t('error.host.unreach'))
       end
       host.delete(false)
       return false
     rescue => e
       error = I18n.t('error.host.misc')+": "+e.message
       NOTEX.synchronize do
-        notification = Notification.create(:type => :error, :sticky => false, :message => error)
+        Notification.create(:type => :error, :sticky => false, :message => error)
       end
       host.delete(false)
       return false
@@ -260,5 +201,107 @@ class Host
     end
 
     return self.destroy
+  end
+
+  def self.detect(host, save = false)
+    begin
+      sudo = ""
+      sudo = "sudo " if user != "root"
+      Net::SSH.start(host.ip, host.user, :port => host.ssh_port, :keys => "data/ssh_key", :timeout => 10) do |ssh|
+        #check for package manager and add distro
+        #1. debian-based
+        if !(ssh.exec!("which apt-get") =~ /\/bin\/apt-get$/).nil?
+          host.pkg_mgr = "apt"
+          if (ssh.exec!("which wget") =~ /\/bin\/wget$/).nil?
+            ssh.exec!(sudo+"apt-get -y -q install wget")
+          end
+          ssh.exec!("wget --no-check-certificate https://raw.githubusercontent.com/AsydSolutions/lsb_release/master/lsb_release -O /tmp/lsb_release && chmod +x /tmp/lsb_release")
+          host.dist = ssh.exec!(sudo+"/tmp/lsb_release -s -i").strip
+          host.dist_ver = ssh.exec!(sudo+"/tmp/lsb_release -s -r").strip.to_f
+          host.arch = ssh.exec!("uname -m").strip
+        #2. redhat-based
+        elsif !(ssh.exec!("which yum") =~ /\/bin\/yum$/).nil?
+          host.pkg_mgr = "yum"
+          if (ssh.exec!("which scp") =~ /\/bin\/scp$/).nil? || (ssh.exec!("which wget") =~ /\/bin\/wget$/).nil?
+            ssh.exec!(sudo+"yum install -y openssh-clients wget")
+          end
+          ssh.exec!("wget --no-check-certificate https://raw.githubusercontent.com/AsydSolutions/lsb_release/master/lsb_release -O /tmp/lsb_release && chmod +x /tmp/lsb_release")
+          host.dist = ssh.exec!(sudo+"/tmp/lsb_release -s -i").strip
+          host.dist_ver = ssh.exec!(sudo+"/tmp/lsb_release -s -r").strip.to_f
+          host.arch = ssh.exec!("uname -m").strip
+        #3. arch-based
+        elsif !(ssh.exec!("which pacman") =~ /\/bin\/pacman$/).nil?
+          host.pkg_mgr = "pacman"
+          if (ssh.exec!("which wget") =~ /\/bin\/wget$/).nil?
+            ssh.exec!(sudo+"pacman -S --noconfirm --noprogressbar wget")
+          end
+          ssh.exec!("wget --no-check-certificate https://raw.githubusercontent.com/AsydSolutions/lsb_release/master/lsb_release -O /tmp/lsb_release && chmod +x /tmp/lsb_release")
+          host.dist = ssh.exec!(sudo+"/tmp/lsb_release -s -i").strip
+          host.dist_ver = 0
+          host.arch = ssh.exec!("uname -m").strip
+        #4. opensuse
+        elsif !(ssh.exec!("which zypper") =~ /\/bin\/zypper$/).nil?
+          host.pkg_mgr = "zypper"
+          if (ssh.exec!("which wget") =~ /\/bin\/wget$/).nil?
+            ssh.exec!(sudo+"zypper -q -n in wget")
+          end
+          ssh.exec!("wget --no-check-certificate https://raw.githubusercontent.com/AsydSolutions/lsb_release/master/lsb_release -O /tmp/lsb_release && chmod +x /tmp/lsb_release")
+          host.dist = ssh.exec!(sudo+"/tmp/lsb_release -s -i").strip
+          host.dist_ver = ssh.exec!(sudo+"/tmp/lsb_release -s -r").strip.to_f
+          host.arch = ssh.exec!("uname -m").strip
+        #5. solaris
+        elsif !(ssh.exec!("export PATH=$PATH:/sbin:/usr/sbin/ && which pkgadd") =~ /\/sbin\/pkgadd$/).nil?
+          host.pkg_mgr = "pkgadd"
+          if !(ssh.exec!("which pkg") =~ /\/bin\/pkg$/).nil?
+            host.pkg_mgr = "pkg"
+          end
+          ret = ssh.exec!("cat /etc/release").lines.first.strip
+          if ret.include? "OpenIndiana"
+            host.dist = "OpenIndiana"
+            ret = ret.split(" ")
+            ret.each do |item|
+              if item =~ /oi_/
+                dv = item.gsub(/oi_/, '')
+                host.dist_ver = dv.to_f
+              end
+            end
+          else
+            host.dist = "Solaris"
+            ret = ret.split("Solaris ")
+            dv = ret[1].split(" ")
+            host.dist_ver = dv[0].to_f
+          end
+          host.arch = ssh.exec!("uname -p").strip
+        #6. openbsd
+        elsif !(ssh.exec!("which pkg_add") =~ /\/sbin\/pkg_add$/).nil?
+          host.pkg_mgr = "pkg_add"
+          host.dist = ssh.exec!("uname -s").strip
+          host.dist_ver = ssh.exec!("uname -r").strip.to_f
+          host.arch = ssh.exec!("uname -m").strip
+        else
+          raise StandardError, "The OS of the machine is not yet supported" #OS not supported yet
+        end
+
+        #check for services (initscript) manager
+        if !(ssh.exec!(sudo+"which systemctl") =~ /\/bin\/systemctl$/).nil?
+          ssh.exec!(sudo+"mkdir -p /usr/lib/systemd/system/")
+          host.svc_mgr = "systemctl"    # most newer distros
+        elsif !(ssh.exec!(sudo+"which update-rc.d") =~ /\/sbin\/update-rc.d$/).nil?
+          host.svc_mgr = "update-rc.d"  # old debian
+        elsif !(ssh.exec!(sudo+"which chkconfig") =~ /\/sbin\/chkconfig$/).nil?
+          host.svc_mgr = "chkconfig"    # old rhel
+        elsif host.pkg_mgr == "pkg_add"
+          host.svc_mgr = "rc.d"         # openbsd
+        else
+          host.svc_mgr = "none"         # else (i.e. solaris)
+        end
+
+        host.save if save
+        return [1, ""]
+
+      end
+    rescue => e
+      return [5, e.message]
+    end
   end
 end

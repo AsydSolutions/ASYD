@@ -61,7 +61,7 @@ class Deploy
   # Return true if it can be undeployed
   #
   def self.can_undeploy?(dep)
-    if File.exists?("data/deploys/"+dep+"/undeploy")
+    if File.exist?("data/deploys/"+dep+"/undeploy")
       return true
     else
       return false
@@ -89,12 +89,10 @@ class Deploy
       end
 
       cfg_root = "data/deploys/"+dep+"/configs/"
-      if host.user != "root" && File.exists?("data/deploys/"+dep+"/def.sudo")
+      if host.user != "root" && File.exist?("data/deploys/"+dep+"/def.sudo")
         path = "data/deploys/"+dep+"/def.sudo"
-        sudo = true
       else
         path = "data/deploys/"+dep+"/def"
-        sudo = false
       end
 
       # Check deploy (dry run)
@@ -132,12 +130,10 @@ class Deploy
       end
 
       cfg_root = "data/deploys/"+dep+"/configs/"
-      if host.user != "root" && File.exists?("data/deploys/"+dep+"/undeploy.sudo")
+      if host.user != "root" && File.exist?("data/deploys/"+dep+"/undeploy.sudo")
         path = "data/deploys/"+dep+"/undeploy.sudo"
-        sudo = true
       else
         path = "data/deploys/"+dep+"/undeploy"
-        sudo = false
       end
 
       # Check deploy (dry run)
@@ -224,11 +220,11 @@ class Deploy
               error = "Invalid characters detected on package name: "+pkgs
               raise FormatException, error
             end
-            ret = dry_run ? 0 : Deploy.install(host, pkgs, pkg_mgr)
+            ret = Deploy.install(host, pkgs, dry_run, pkg_mgr)
             if ret[0] == 1
               msg = "Installed "+pkgs+" on "+host.hostname+": "+ret[1]
               NOTEX.synchronize do
-                notification = Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
+                Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
               end
             elsif ret[0] == 4
               raise ExecutionError, ret[1]
@@ -241,6 +237,7 @@ class Deploy
         # UNINSTALL BLOCK
         elsif line.start_with?("uninstall")
           doit = true
+          pkg_mgr = line.match(/^install (pkgutil|pkg|pkgadd)?(?: if .+)?(?<!var):/i) ? line.match(/^install (pkgutil|pkg|pkgadd)?(?: if .+)?(?<!var):/i) : nil
           m = line.match(/^uninstall if (.+)(?<!var):/i)
           if !m.nil?
             doit = check_condition(m, host)
@@ -252,11 +249,11 @@ class Deploy
               error = "Invalid characters detected on package name: "+pkgs
               raise FormatException, error
             end
-            ret = dry_run ? 0 : Deploy.uninstall(host, pkgs)
+            ret = Deploy.uninstall(host, pkgs, dry_run, pkg_mgr)
             if ret[0] == 1
               msg = "Removed "+pkgs+" from "+host.hostname+": "+ret[1]
               NOTEX.synchronize do
-                notification = Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
+                Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
               end
             elsif ret[0] == 4
               raise ExecutionError, ret[1]
@@ -294,7 +291,7 @@ class Deploy
             unless dry_run
               msg = "Uploaded "+cfg_src+" to "+cfg_dst+" on "+host.hostname
               NOTEX.synchronize do
-                notification = Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
+                Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
               end
             end
           end
@@ -328,7 +325,7 @@ class Deploy
             unless dry_run
               msg = "Uploaded "+cfg_src+" to "+cfg_dst+" on "+host.hostname
               NOTEX.synchronize do
-                notification = Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
+                Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
               end
             end
           end
@@ -373,7 +370,7 @@ class Deploy
               msg = "Executed '"+cmd+"' on "+exec_host.hostname
               msg = msg+": "+ret unless ret.nil?
               NOTEX.synchronize do
-                notification = Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
+                Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
               end
             end
           end
@@ -389,47 +386,74 @@ class Deploy
           method = line.match(/^http (get|post)/i)[1].upcase
           line = line.split(/(?<!var):/i, 2)
           line = parse(host, line[1].strip)
-          if method == "GET"
-            url = line.strip
-            uri = URI.parse(url)
-            http = Net::HTTP.new(uri.host, uri.port)
-            if url.start_with?("https")
-              http.use_ssl = true
-              http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+          if doit
+            if method == "GET"
+              url = line.strip
+              uri = URI.parse(url)
+              http = Net::HTTP.new(uri.host, uri.port)
+              if url.start_with?("https")
+                http.use_ssl = true
+                http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+              end
+              request = Net::HTTP::Get.new(uri.request_uri)
+              unless dry_run
+                response = http.request(request)
+              end
+            elsif method == "POST"
+              args = line.split(',')
+              url = args.shift.strip
+              options = {}
+              args.each do |arg|
+                arg = arg.split("=")
+                options[arg[0].strip] = arg[1].strip
+              end
+              uri = URI.parse(url)
+              # Create the HTTP objects
+              http = Net::HTTP.new(uri.host, uri.port)
+              if url.start_with?("https")
+                http.use_ssl = true
+                http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+              end
+              request = Net::HTTP::Post.new(uri.request_uri)
+              request.set_form_data(options)
+              # Send the request
+              unless dry_run
+                response = http.request(request)
+              end
             end
-            request = Net::HTTP::Get.new(uri.request_uri)
             unless dry_run
-              response = http.request(request)
-            end
-          elsif method == "POST"
-            args = line.split(',')
-            url = args.shift.strip
-            options = {}
-            args.each do |arg|
-              arg = arg.split("=")
-              options[arg[0].strip] = arg[1].strip
-            end
-            uri = URI.parse(url)
-            # Create the HTTP objects
-            http = Net::HTTP.new(uri.host, uri.port)
-            if url.start_with?("https")
-              http.use_ssl = true
-              http.verify_mode = OpenSSL::SSL::VERIFY_NONE
-            end
-            request = Net::HTTP::Post.new(uri.request_uri)
-            request.set_form_data(options)
-            # Send the request
-            unless dry_run
-              response = http.request(request)
-            end
-          end
-          unless dry_run
-            msg = "HTTP "+method+" "+url+": "+response.body
-            NOTEX.synchronize do
-              notification = Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
+              msg = "HTTP "+method+" "+url+": "+response.body
+              NOTEX.synchronize do
+                Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
+              end
             end
           end
         # /HTTP BLOCK
+
+        # SERVICE BLOCK
+        elsif line.match(/^(enable|disable|start|stop|restart) service/i)
+          doit = true
+          m = line.match(/if (.+)(?<!var):/i)
+          if !m.nil?
+            doit = check_condition(m, host)
+          end
+          if doit
+            action = line.match(/^(enable|disable|start|stop|restart) service/i)[1].downcase
+            line = line.split(/(?<!var):/i, 2)
+            services = line[1].strip
+            ret = Deploy.manage_service(host, action, services, dry_run)
+            if ret[0] == 1
+              msg = action+"'d services "+services+" on "+host.hostname+": "+ret[1]
+              NOTEX.synchronize do
+                Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
+              end
+            elsif ret[0] == 4
+              raise ExecutionError, ret[1]
+            elsif ret[0] == 5
+              raise FormatException, ret[1]
+            end
+          end
+        # /SERVICE BLOCK
 
         # MONITOR BLOCK
         elsif line.start_with?("monitor")
@@ -446,7 +470,7 @@ class Deploy
               if ret == 1
                 NOTEX.synchronize do
                   msg = "Service "+service+" successfully monitored on "+host.hostname
-                  notification = Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
+                  Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
                 end
               end
             end
@@ -468,7 +492,7 @@ class Deploy
               if ret == 1
                 NOTEX.synchronize do
                   msg = "Service "+service+" now un-monitored on "+host.hostname
-                  notification = Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
+                  Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
                 end
               end
             end
@@ -490,7 +514,7 @@ class Deploy
               if ret == 1 and !dry_run
                 msg = "Deploy "+deploy+" successfully deployed on "+host.hostname
                 NOTEX.synchronize do
-                  notification = Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
+                  Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
                 end
               elsif ret[0] == 5
                 raise FormatException, ret[1]
@@ -516,7 +540,7 @@ class Deploy
               if ret == 1 and !dry_run
                 msg = "Deploy "+deploy+" undeployed from "+host.hostname
                 NOTEX.synchronize do
-                  notification = Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
+                  Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
                 end
               elsif ret[0] == 5
                 raise FormatException, ret[1]
@@ -539,7 +563,7 @@ class Deploy
               host.reboot
               msg = "Reboot "+host.hostname
               NOTEX.synchronize do
-                notification = Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
+                Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
               end
             end
           end
@@ -547,7 +571,7 @@ class Deploy
 
         # undefined command
         else
-          error = "Bad formatting, check your deploy file"
+          error = "Bad formatting, check your deploy file: "+line
           raise FormatException, error
         end
 
@@ -559,7 +583,7 @@ class Deploy
           end
           NOTEX.synchronize do
             msg = "Setting variable "+varname+" with value "+value
-            notification = Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
+            Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
           end
         end
       end
@@ -575,7 +599,7 @@ class Deploy
 
   # Install package or packages on defined host
   #
-  def self.install(host, pkg, pkg_mgr = nil)
+  def self.install(host, pkg, dry_run, pkg_mgr = nil)
     begin
       if pkg.include? "&" or pkg.include? "|" or pkg.include? ">" or pkg.include? "<" or pkg.include? "`" or pkg.include? "$"
         raise FormatException
@@ -643,16 +667,20 @@ class Deploy
         pkg_path = 'export PKG_PATH="http://ftp.openbsd.org/pub/OpenBSD/'+host.dist_ver.to_s+'/packages/'+host.arch+'/"'
         cmd = pkg_path+" && "+cmd+" -U -I -x "+pkg    ## NOT FULLY TESTED, DEVELOPMENT IN PROGRESS
       end
-      result = host.exec_cmd(cmd)
-      unless result.nil?
-        if result.include? "\nE: "
-          raise ExecutionError, result
+      unless dry_run
+        result = host.exec_cmd(cmd)
+        unless result.nil?
+          if result.include? "\nE: "
+            raise ExecutionError, result
+          else
+            result = result.split("\n").last
+            return [1, result]
+          end
         else
-          result = result.split("\n").last
-          return [1, result]
+          return [1, "--"]
         end
       else
-        return [1, "--"]
+        return [0, ""]
       end
     rescue FormatException
       error = "Invalid characters detected on package name: "+pkg
@@ -669,7 +697,7 @@ class Deploy
 
   # Uninstall package or packages on defined host
   #
-  def self.uninstall(host, pkg, pkg_mgr = nil)
+  def self.uninstall(host, pkg, dry_run, pkg_mgr = nil)
     begin
       if pkg.include? "&" or pkg.include? "|" or pkg.include? ">" or pkg.include? "<" or pkg.include? "`" or pkg.include? "$"
         raise FormatException
@@ -737,12 +765,16 @@ class Deploy
         end
         cmd = cmd+" -I -x "+pkg    ## NOT FULLY TESTED, DEVELOPMENT IN PROGRESS
       end
-      result = host.exec_cmd(cmd)
-      if result.include? "\nE: "
-        raise ExecutionError, result
+      unless dry_run
+        result = host.exec_cmd(cmd)
+        if result.include? "\nE: "
+          raise ExecutionError, result
+        else
+          result = result.split("\n").last
+          return [1, result]
+        end
       else
-        result = result.split("\n").last
-        return [1, result]
+        return [0, ""]
       end
     rescue FormatException
       error = "Invalid characters detected on package name: "+pkg
@@ -753,6 +785,111 @@ class Deploy
       return [4, error]
     rescue => e
       error = "Something really bad happened when uninstalling "+pkg+" on "+host.hostname+": "+e.message
+      return [4, error]
+    end
+  end
+
+  # Install package or packages on defined host
+  #
+  def self.manage_service(host, action, services, dry_run)
+    begin
+      svc_mgr = host.svc_mgr
+      services = services.split(' ')
+      result = ''
+      services.each do |service|
+        sudo = ""
+        sudo = "sudo " if host.user != "root"
+        if svc_mgr == "systemctl"
+          case action
+          when "enable"
+            cmd = sudo+svc_mgr+" enable "+service
+          when "disable"
+            cmd = sudo+svc_mgr+" disable "+service
+          when "start"
+            cmd = sudo+svc_mgr+" start "+service
+          when "stop"
+            cmd = sudo+svc_mgr+" stop "+service
+          when "restart"
+            cmd = sudo+svc_mgr+" restart "+service
+          else
+            raise FormatException, "Action "+action+" not valid"
+          end
+        elsif svc_mgr == "update-rc.d"
+          case action
+          when "enable"
+            cmd = sudo+svc_mgr+" "+service+" enable"
+          when "disable"
+            cmd = sudo+svc_mgr+" "+service+" disable"
+          when "start"
+            svc_mgr = "service"
+            cmd = sudo+svc_mgr+" "+service+" start"
+          when "stop"
+            svc_mgr = "service"
+            cmd = sudo+svc_mgr+" "+service+" stop"
+          when "restart"
+            svc_mgr = "service"
+            cmd = sudo+svc_mgr+" "+service+" restart"
+          else
+            raise FormatException, "Action "+action+" not valid"
+          end
+        elsif svc_mgr == "chkconfig"
+          case action
+          when "enable"
+            cmd = sudo+svc_mgr+" "+service+" on"
+          when "disable"
+            cmd = sudo+svc_mgr+" "+service+" off"
+          when "start"
+            svc_mgr = "service"
+            cmd = sudo+svc_mgr+" "+service+" start"
+          when "stop"
+            svc_mgr = "service"
+            cmd = sudo+svc_mgr+" "+service+" stop"
+          when "restart"
+            svc_mgr = "service"
+            cmd = sudo+svc_mgr+" "+service+" restart"
+          else
+            raise FormatException, "Action "+action+" not valid"
+          end
+        elsif svc_mgr == "rc.d"
+          case action
+          when "enable"
+            cmd = [sudo+"mv /etc/rc.conf.local /tmp/rc.conf.local",
+                    sudo+"chmod 777 /tmp/rc.conf.local",
+                    "echo 'pkg_scripts=\"$pkg_scripts "+service+"\"' >> /tmp/rc.conf.local",
+                    sudo+"chmod 644 /tmp/rc.conf.local",
+                    sudo+"sh -c 'uniq /tmp/rc.conf.local > /etc/rc.conf.local'"]
+            cmd = cmd.join("; ")
+          when "disable"
+            cmd = [sudo+"sh -c \"sed '/"+service+"/d' /etc/rc.conf.local > /tmp/rc.conf.local\"",
+                    sudo+"mv /tmp/rc.conf.local /etc/rc.conf.local"]
+            cmd = cmd.join("; ")
+          when "start"
+            cmd = "/etc/rc.d/"
+            cmd = sudo+cmd+service+" start"
+          when "stop"
+            cmd = "/etc/rc.d/"
+            cmd = sudo+cmd+service+" stop"
+          when "restart"
+            cmd = "/etc/rc.d/"
+            cmd = sudo+cmd+service+" restart"
+          else
+            raise FormatException, "Action "+action+" not valid"
+          end
+        else
+          raise FormatException, "Host "+host.hostname+" doesn't support the 'service' command"
+        end
+        ret = host.exec_cmd(cmd) unless dry_run
+        result = result+ret+";;\n" unless ret.nil?
+      end
+      unless dry_run
+        return [1, result]
+      else
+        return [0, ""]
+      end
+    rescue FormatException => e
+      return [5, e.message]
+    rescue => e
+      error = "Something really bad happened when "+action+"'ing "+services.join(" ").to_s+" on "+host.hostname+": "+e.message
       return [4, error]
     end
   end
@@ -784,15 +921,16 @@ class Deploy
           end
         end
       else
-        line.gsub!(/<%ASYD%>/i, asyd)
-        line.gsub!(/<%MONIT_PW%>/i, host.monit_pw)
-        line.gsub!(/<%IP%>/i, host.ip)
-        line.gsub!(/<%DIST%>/i, host.dist)
-        line.gsub!(/<%DIST_VER%>/i, host.dist_ver.to_s)
-        line.gsub!(/<%ARCH%>/i, host.arch)
-        line.gsub!(/<%HOSTNAME%>/i, host.hostname)
-        line.gsub!(/<%PKG_MANAGER%>/i, host.pkg_mgr)
-        line.gsub!(/<%SSH_PORT%>/i, host.ssh_port.to_s)
+        line.gsub!(/<%ASYD%>/i, asyd) unless asyd.nil?
+        line.gsub!(/<%MONIT_PW%>/i, host.monit_pw) unless host.monit_pw.nil?
+        line.gsub!(/<%IP%>/i, host.ip) unless host.ip.nil?
+        line.gsub!(/<%DIST%>/i, host.dist) unless host.dist.nil?
+        line.gsub!(/<%DIST_VER%>/i, host.dist_ver.to_s) unless host.dist_ver.nil?
+        line.gsub!(/<%ARCH%>/i, host.arch) unless host.arch.nil?
+        line.gsub!(/<%HOSTNAME%>/i, host.hostname) unless host.hostname.nil?
+        line.gsub!(/<%PKG_MANAGER%>/i, host.pkg_mgr) unless host.pkg_mgr.nil?
+        line.gsub!(/<%SVC_MANAGER%>/i, host.svc_mgr) unless host.svc_mgr.nil?
+        line.gsub!(/<%SSH_PORT%>/i, host.ssh_port.to_s) unless host.ssh_port.nil?
       end
     end
     return line
@@ -876,8 +1014,6 @@ class Deploy
     end
     return tempdir
   end
-
-  private
 
   # Checks conditionals on dep file
   #

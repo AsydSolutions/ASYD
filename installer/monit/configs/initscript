@@ -1,4 +1,5 @@
-<%if <%PKG_MANAGER%> == apt or <%PKG_MANAGER%> == zypper%>
+# Version: 0.079
+<%if <%SVC_MANAGER%> == update-rc.d %>
 #!/bin/sh
 
 ### BEGIN INIT INFO
@@ -26,7 +27,7 @@ CONFIG="/etc/monit/monitrc"
 NAME=monit
 DESC="daemon monitor"
 MONIT_OPTS=
-PID="/var/run/$NAME.pid"
+PID="/var/.$NAME.pid"
 
 # Check if DAEMON binary exist
 [ -f $DAEMON ] || exit 0
@@ -73,7 +74,7 @@ case "$1" in
   stop)
     /bin/echo -n "Stopping $DESC: $NAME"
     if start-stop-daemon --retry TERM/5/KILL/5 --oknodo --stop --quiet \
-                         --pidfile $PID --exec $DAEMON
+                         --pidfile $PID
     then
       log_end_msg 0
     else
@@ -89,7 +90,7 @@ case "$1" in
       log_end_msg 0
     else
       log_end_msg 1
-	fi
+  fi
     ;;
   restart|force-reload)
     $0 stop
@@ -108,7 +109,7 @@ esac
 
 exit 0
 <%endif%>
-<%if <%PKG_MANAGER%> == pacman or <%DIST%> == CentOS and <%DIST_VER%> >= 7 or <%DIST%> == RedHat and <%DIST_VER%> >= 7 or <%DIST%> == Fedora and <%DIST_VER%> >= 18%>
+<%if <%SVC_MANAGER%> == systemctl %>
 [Unit]
 Description=Pro-active monitoring utility for unix systems
 After=network.target
@@ -122,7 +123,7 @@ ExecReload=/usr/bin/monit reload
 [Install]
 WantedBy=multi-user.target
 <%endif%>
-<%if <%DIST%> == OpenBSD%>
+<%if <%SVC_MANAGER%> == rc.d %>
 #!/bin/sh
 #
 # $OpenBSD: monit.rc,v 1.2 2012/11/25 13:34:04 ajacoutot Exp $
@@ -134,7 +135,7 @@ daemon_flags="-c /etc/monit/monitrc"
 
 rc_cmd $1
 <%endif%>
-<%if <%DIST%> == CentOS and <%DIST_VER%> <= 6.6 or <%DIST%> == RedHat and <%DIST_VER%> <= 6.6 or <%DIST%> == Fedora and <%DIST_VER%> <= 17%>
+<%if <%SVC_MANAGER%> == chkconfig %>
 # monit - this is a startscript for monit
 #
 # chkconfig: 2345 89 15
@@ -150,7 +151,7 @@ rc_cmd $1
 
 prog="monit"
 option="-c /etc/monit/monitrc"
-pidfile=""
+pidfile="/var/.monit.pid"
 lockfile=""
 
 

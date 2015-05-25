@@ -100,10 +100,17 @@ class ASYD < Sinatra::Application
       redirect to redir
     rescue => e
       NOTEX.synchronize do
-        notification = Notification.create(:type => :error, :sticky => false, :message => e.message)
+        Notification.create(:type => :error, :sticky => false, :message => e.message)
       end
       redir = '/host/'+params['old_hostname']
       redirect to redir
     end
+  end
+
+  get '/host/:host/check-sysinfo' do
+    host = Host.first(:hostname => params[:host])
+    Host.detect(host, true)
+    hostlist = '/host/'+params[:host]
+    redirect to hostlist
   end
 end
