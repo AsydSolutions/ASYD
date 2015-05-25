@@ -110,9 +110,15 @@ module Misc
   # @param cmd [String] command to be executed
   # @return result [String] the result of executing the command
   def exec_cmd(cmd)
-    Net::SSH.start(self.ip, self.user, :port => self.ssh_port, :keys => "data/ssh_key") do |ssh|
-      result = ssh.exec!(cmd)
-      return result
+    3.times do |iteration|
+      begin
+        Net::SSH.start(self.ip, self.user, :port => self.ssh_port, :keys => "data/ssh_key", :timeout => 30) do |ssh|
+          result = ssh.exec!(cmd)
+          return result
+        end
+      rescue Net::SSH::Exception => e
+        return [4, e.message] if iteration == 2 # 4 == execution error
+      end
     end
   end
 
@@ -124,8 +130,14 @@ module Misc
     if remote.start_with? "~/" or remote.start_with? "$HOME/"
       remote.gsub!(/^(~|\$HOME)\//, '')
     end
-    Net::SSH.start(self.ip, self.user, :port => self.ssh_port, :keys => "data/ssh_key") do |ssh|
-      ssh.scp.upload!(local, remote)
+    3.times do |iteration|
+      begin
+        Net::SSH.start(self.ip, self.user, :port => self.ssh_port, :keys => "data/ssh_key", :timeout => 30) do |ssh|
+          ssh.scp.upload!(local, remote)
+        end
+      rescue Net::SSH::Exception => e
+        return [4, e.message] if iteration == 2 # 4 == execution error
+      end
     end
   end
 
@@ -137,8 +149,14 @@ module Misc
     if remote.start_with? "~/" or remote.start_with? "$HOME/"
       remote.gsub!(/^(~|\$HOME)\//, '')
     end
-    Net::SSH.start(self.ip, self.user, :port => self.ssh_port, :keys => "data/ssh_key") do |ssh|
-      ssh.scp.download!(remote, local)
+    3.times do |iteration|
+      begin
+        Net::SSH.start(self.ip, self.user, :port => self.ssh_port, :keys => "data/ssh_key", :timeout => 30) do |ssh|
+          ssh.scp.download!(remote, local)
+        end
+      rescue Net::SSH::Exception => e
+        return [4, e.message] if iteration == 2 # 4 == execution error
+      end
     end
   end
 
@@ -150,23 +168,29 @@ module Misc
     if remote.start_with? "~/" or remote.start_with? "$HOME/"
       remote.gsub!(/^(~|\$HOME)\//, '')
     end
-    Net::SSH.start(self.ip, self.user, :port => self.ssh_port, :keys => "data/ssh_key") do |ssh|
-      match = ssh.exec!("ls "+remote)
-      if !match.nil? && match.start_with?("ls:")
-        ssh.scp.upload!(local, remote, options={:recursive => true})
-      else
-        files = Misc.get_files(local)
-        files.each do |file|
-          newfile = local+"/"+file
-          newremote = remote+"/"+file
-          self.upload_file(newfile, newremote)
+    3.times do |iteration|
+      begin
+        Net::SSH.start(self.ip, self.user, :port => self.ssh_port, :keys => "data/ssh_key", :timeout => 30) do |ssh|
+          match = ssh.exec!("ls "+remote)
+          if !match.nil? && match.start_with?("ls:")
+            ssh.scp.upload!(local, remote, options={:recursive => true})
+          else
+            files = Misc.get_files(local)
+            files.each do |file|
+              newfile = local+"/"+file
+              newremote = remote+"/"+file
+              self.upload_file(newfile, newremote)
+            end
+            dirs = Misc.get_dirs(local)
+            dirs.each do |dir|
+              newdir = local+"/"+dir+"/"
+              newremote = remote+"/"+dir
+              self.upload_dir(newdir, newremote)
+            end
+          end
         end
-        dirs = Misc.get_dirs(local)
-        dirs.each do |dir|
-          newdir = local+"/"+dir+"/"
-          newremote = remote+"/"+dir
-          self.upload_dir(newdir, newremote)
-        end
+      rescue Net::SSH::Exception => e
+        return [4, e.message] if iteration == 2 # 4 == execution error
       end
     end
   end
@@ -179,8 +203,14 @@ module Misc
     if remote.start_with? "~/" or remote.start_with? "$HOME/"
       remote.gsub!(/^(~|\$HOME)\//, '')
     end
-    Net::SSH.start(self.ip, self.user, :port => self.ssh_port, :keys => "data/ssh_key") do |ssh|
-      ssh.scp.download!(remote, local, :recursive => true)
+    3.times do |iteration|
+      begin
+        Net::SSH.start(self.ip, self.user, :port => self.ssh_port, :keys => "data/ssh_key", :timeout => 30) do |ssh|
+          ssh.scp.download!(remote, local, :recursive => true)
+        end
+      rescue Net::SSH::Exception => e
+        return [4, e.message] if iteration == 2 # 4 == execution error
+      end
     end
   end
 
@@ -188,13 +218,15 @@ module Misc
   #
   def reboot
     begin
-      Net::SSH.start(self.ip, self.user, :port => self.ssh_port, :keys => "data/ssh_key") do |ssh|
+      Net::SSH.start(self.ip, self.user, :port => self.ssh_port, :keys => "data/ssh_key", :timeout => 30) do |ssh|
         if self.user != "root"
           ssh.exec("sudo reboot")
         else
           ssh.exec("reboot")
         end
       end
+    rescue Net::SSH::ConnectionTimeout => e
+        return false # ?
     rescue
       return true
     end
