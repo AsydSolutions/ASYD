@@ -1,3 +1,4 @@
+#v0.08
 class ASYD < Sinatra::Application
   get '/confirm_update' do
     if !session[:username] then
