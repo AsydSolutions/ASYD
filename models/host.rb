@@ -52,8 +52,8 @@ class Host
                 if data =~ /^\[sudo\] password/
                   need_passwd = true
                   channel.send_data "#{password}\n"
-                else
-                  last = data.strip
+                elsif data.strip == "1"
+                  last = "1"
                 end
               end
             end
