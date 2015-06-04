@@ -194,7 +194,7 @@ class Deploy
         end
 
         # Set variables from a Deploy
-        if gdoit && m = line.match(/^var (.+) = (exec|http)/i)
+        if gdoit && m = line.match(/^var ([^\s]+) = (exec|http)/i)
           varname = m[1] #we create varname here
           line = line.split(/ = /, 2)[1].strip #and remove the start of the line so we have only the exec or http part
         end
