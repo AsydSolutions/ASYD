@@ -199,6 +199,18 @@ class Deploy
           line = line.split(/ = /, 2)[1].strip #and remove the start of the line so we have only the exec or http part
         end
 
+        # Set variables from json from a Deploy
+        if gdoit && m = line.match(/^var from json = (exec|http)/i)
+          json_vars = true #we will handle it later
+          line = line.split(/ = /, 2)[1].strip #and remove the start of the line so we have only the exec or http part
+        end
+
+        # Set variables from XML from a Deploy
+        if gdoit && m = line.match(/^var from xml = (exec|http)/i)
+          xml_vars = true #we will handle it later
+          line = line.split(/ = /, 2)[1].strip #and remove the start of the line so we have only the exec or http part
+        end
+
         # IGNORE
         if line.start_with?("#") || line.strip.empty? || skip || !gdoit
           # Ignore comments, empty lines, if it's a "skip" (conditional) line or if the global "doit" for the block is false
@@ -422,6 +434,7 @@ class Deploy
               end
             end
             unless dry_run
+              ret = response.body
               msg = "HTTP "+method+" "+url+": "+response.body
               NOTEX.synchronize do
                 Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
@@ -585,6 +598,34 @@ class Deploy
             msg = "Setting variable "+varname+" with value "+value
             Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
           end
+        end
+
+        # Also for json variables
+        if json_vars == true and !dry_run
+          vars = JSON.parse(ret.strip) #the output of exec goes in ret
+          vars.select{ |key, hash|
+            HOSTEX.synchronize do
+              host.add_var(key.to_s, hash.to_s) #and we save the variable as a host variable
+            end
+            NOTEX.synchronize do
+              msg = "Setting variable "+key.to_s+" with value "+hash.to_s
+              Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
+            end
+          }
+        end
+
+        # And XML (not tested)
+        if xml_vars == true and !dry_run
+          vars = Hash.from_xml(ret.strip) #the output of exec goes in ret
+          vars.select{ |key, hash|
+            HOSTEX.synchronize do
+              host.add_var(key.to_s, hash.to_s) #and we save the variable as a host variable
+            end
+            NOTEX.synchronize do
+              msg = "Setting variable "+key.to_s+" with value "+hash.to_s
+              Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
+            end
+          }
         end
       end
       return 1
