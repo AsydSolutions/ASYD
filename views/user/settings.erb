@@ -1,0 +1,20 @@
+<h3> User Settings </h3>
+<legend></legend>
+
+<form method="POST" action="/settings/user">
+  <fieldset>
+    <div class="controls controls-row">
+      <label>Email address</label>
+      <input class="input" name="email" type="email" value="<%= user.email %>" required>
+    </div>
+    <div class="controls controls-row">
+      <label class="checkbox">
+        <input type="checkbox" name="notifications" <%= 'checked' if user.receive_notifications %>> Receive notifications
+      </label>
+      <label></label>
+    </div>
+    <div class="controls controls-row">
+      <button type="submit" class="btn btn-primary">Save</button>
+    </div>
+  </fieldset>
+</form>
