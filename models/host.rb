@@ -136,7 +136,7 @@ class Host
       NOTEX.synchronize do
         Notification.create(:type => :error, :sticky => false, :message => error)
       end
-      host.delete(false)
+      host.delete(false) unless host.nil?
       return false
     end
   end
