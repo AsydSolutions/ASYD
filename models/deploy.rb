@@ -936,11 +936,11 @@ class Deploy
         vars.each do |varname|
           varname = varname[0].strip
           if !host.opt_vars[varname].nil?
-            line.gsub!(/<%VAR:#{varname}%>/i, host.opt_vars[varname])
+            line.gsub!(/<%VAR:#{Regexp.escape(varname)}%>/i, host.opt_vars[varname])
           else
             host.hostgroups.each do |hostgroup|
               if !hostgroup.opt_vars[varname].nil?
-                line.gsub!(/<%VAR:#{varname}%>/i, hostgroup.opt_vars[varname])
+                line.gsub!(/<%VAR:#{Regexp.escape(varname)}%>/i, hostgroup.opt_vars[varname])
               end
             end
           end

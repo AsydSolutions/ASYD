@@ -204,14 +204,17 @@ module Misc
   #
   def hash_to_host_vars(hash, task, prefix = "")
     hash.select{ |key, value|
+      if prefix != ""
+        key = key.to_s+"]"
+      end
       if value.kind_of?(Array)
         i = 0
         value.each do |v|
-          self.hash_to_host_vars(v, task, prefix+key.to_s+"_"+i.to_s+"_")
+          self.hash_to_host_vars(v, task, prefix+key.to_s+"["+i.to_s+"][")
           i = i+1
         end
       elsif value.kind_of?(Hash)
-        self.hash_to_host_vars(value, task, prefix+key.to_s+"_")
+        self.hash_to_host_vars(value, task, prefix+key.to_s+"[")
       else
         HOSTEX.synchronize do
           self.add_var(prefix+key.to_s, value.to_s) #and we save the variable as a host variable
