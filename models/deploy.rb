@@ -603,29 +603,13 @@ class Deploy
         # Also for json variables
         if json_vars == true and !dry_run
           vars = JSON.parse(ret.strip) #the output of exec goes in ret
-          vars.select{ |key, hash|
-            HOSTEX.synchronize do
-              host.add_var(key.to_s, hash.to_s) #and we save the variable as a host variable
-            end
-            NOTEX.synchronize do
-              msg = "Setting variable "+key.to_s+" with value "+hash.to_s
-              Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
-            end
-          }
+          host.hash_to_host_vars(vars, task)
         end
 
-        # And XML (not tested)
+        # And XML
         if xml_vars == true and !dry_run
           vars = Hash.from_xml(ret.strip) #the output of exec goes in ret
-          vars.select{ |key, hash|
-            HOSTEX.synchronize do
-              host.add_var(key.to_s, hash.to_s) #and we save the variable as a host variable
-            end
-            NOTEX.synchronize do
-              msg = "Setting variable "+key.to_s+" with value "+hash.to_s
-              Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
-            end
-          }
+          host.hash_to_host_vars(vars, task)
         end
       end
       return 1
