@@ -199,6 +199,33 @@ module Misc
       return true
     end
   end
+
+  # Convert hash to host vars
+  #
+  def hash_to_host_vars(hash, task, prefix = "")
+    hash.select{ |key, value|
+      if prefix != ""
+        key = key.to_s+"]"
+      end
+      if value.kind_of?(Array)
+        i = 0
+        value.each do |v|
+          self.hash_to_host_vars(v, task, prefix+key.to_s+"["+i.to_s+"][")
+          i = i+1
+        end
+      elsif value.kind_of?(Hash)
+        self.hash_to_host_vars(value, task, prefix+key.to_s+"[")
+      else
+        HOSTEX.synchronize do
+          self.add_var(prefix+key.to_s, value.to_s) #and we save the variable as a host variable
+        end
+        NOTEX.synchronize do
+          msg = "Setting variable "+prefix+key.to_s+" with value "+value.to_s
+          Notification.create(:type => :info, :dismiss => true, :host => self.hostname, :message => msg, :task => task)
+        end
+      end
+    }
+  end
 end
 
 # Returns true if the string is not a number
