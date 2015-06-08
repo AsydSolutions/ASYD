@@ -209,9 +209,20 @@ module Misc
       end
       if value.kind_of?(Array)
         i = 0
+        nohash = 0
         value.each do |v|
-          self.hash_to_host_vars(v, task, prefix+key.to_s+"["+i.to_s+"][")
+          self.hash_to_host_vars(v, task, prefix+key.to_s+"["+i.to_s+"][") if v.kind_of?(Hash)
+          nohash = nohash+1 unless v.kind_of?(Hash)
           i = i+1
+        end
+        if nohash == i
+          HOSTEX.synchronize do
+            self.add_var(prefix+key.to_s, value.to_s) #and we save the variable as a host variable
+          end
+          NOTEX.synchronize do
+            msg = "Setting variable "+prefix+key.to_s+" with value "+value.to_s
+            Notification.create(:type => :info, :dismiss => true, :host => self.hostname, :message => msg, :task => task)
+          end
         end
       elsif value.kind_of?(Hash)
         self.hash_to_host_vars(value, task, prefix+key.to_s+"[")
