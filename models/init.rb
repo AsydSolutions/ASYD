@@ -83,37 +83,37 @@ if File.directory? 'data'
   repository(:config_db).adapter.select('VACUUM')
   repository(:stats_db).adapter.select('VACUUM')
 
-  # Kill daemons and checkpoint at exit to ensure database consistency
-  at_exit {
-    wck = $WALCHECK.get_int(0)
-    bgm = $BGMONIT.get_int(0)
-
-    begin
-      if Misc::checkpid(wck)
-        Awal::checkpoint(:users_db)
-        Awal::checkpoint(:config_db)
-        Awal::checkpoint(:stats_db)
-        Awal::checkpoint(:status_db)
-        Awal::checkpoint(:monitoring_db)
-        Awal::checkpoint(:tasks_db)
-        Awal::checkpoint(:notifications_db)
-        Awal::checkpoint(:hosts_db)
-
-        Process.kill("KILL", wck) if wck > 0
-        Process.kill("TERM", bgm) if bgm > 0
-      end
-      if Misc::checkpid(bgm)
-        Process.kill("KILL", bgm) if bgm > 0
-      end
-    rescue Errno::ESRCH
-      false
-    end
-  }
-
   if Email.all.first.nil?
     Email.create
   end
 end
+
+# Kill daemons and checkpoint at exit to ensure database consistency
+at_exit {
+  wck = $WALCHECK.get_int(0)
+  bgm = $BGMONIT.get_int(0)
+
+  begin
+    if Misc::checkpid(wck)
+      Awal::checkpoint(:users_db)
+      Awal::checkpoint(:config_db)
+      Awal::checkpoint(:stats_db)
+      Awal::checkpoint(:status_db)
+      Awal::checkpoint(:monitoring_db)
+      Awal::checkpoint(:tasks_db)
+      Awal::checkpoint(:notifications_db)
+      Awal::checkpoint(:hosts_db)
+
+      Process.kill("KILL", wck) if wck > 0
+      Process.kill("TERM", bgm) if bgm > 0
+    end
+    if Misc::checkpid(bgm)
+      Process.kill("KILL", bgm) if bgm > 0
+    end
+  rescue Errno::ESRCH
+    false
+  end
+}
 
 MOTEX = ProcessShared::Mutex.new #mutex for monitoring handling
 MNOTEX = ProcessShared::Mutex.new #mutex for monitoring::notification handling
