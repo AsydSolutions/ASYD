@@ -206,7 +206,7 @@ class Host
   def self.detect(host, save = false)
     begin
       sudo = ""
-      sudo = "sudo " if user != "root"
+      sudo = "sudo " if host.user != "root"
       Net::SSH.start(host.ip, host.user, :port => host.ssh_port, :keys => "data/ssh_key", :timeout => 10) do |ssh|
         #check for package manager and add distro
         #1. debian-based
