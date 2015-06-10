@@ -18,7 +18,7 @@ class Setup
       `ssh-keygen -f data/ssh_key -t rsa -N ""`
     end
       # Create models databases
-      DataMapper.auto_migrate!
+      DataMapper.auto_upgrade!
       # And now we set some SQLite pragmas for performance
       repository(:tasks_db).adapter.select('PRAGMA journal_mode = WAL')
       repository(:notifications_db).adapter.select('PRAGMA journal_mode = WAL')
