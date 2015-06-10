@@ -265,24 +265,26 @@ module Monitoring
         max_forks = 15 #we hard limit the max checks to 15 at a time
         forks = [] #and initialize an empty array
         hosts = ::Host.all
-        hosts.each do |host|
-          if forks.count >= max_forks #if we reached the max forks
-            forks2 = forks      # Ensure there's no completed forks on the fork list
-            forks2.each do |pid|
-              forks.delete(pid) unless Misc::checkpid(pid)
+        unless hosts.nil? || hosts.empty?
+          hosts.each do |host|
+            if forks.count >= max_forks #if we reached the max forks
+              forks2 = forks      # Ensure there's no completed forks on the fork list
+              forks2.each do |pid|
+                forks.delete(pid) unless Misc::checkpid(pid)
+              end
+              if forks.count >= max_forks
+                id = Process.wait #then we wait for some child to finish
+                forks.delete(id) #and we remove it from the forks array
+              end
             end
-            if forks.count >= max_forks
-              id = Process.wait #then we wait for some child to finish
-              forks.delete(id) #and we remove it from the forks array
+            frk = Spork.spork do #so we can continue executing a new fork
+              ret = host.perform_monitoring_operations
+              puts "Error when monitoring "+host.hostname+" on the background: "+ret if ret != true and $DBG == 1
             end
+            forks << frk #and store the fork id on the forks array
           end
-          frk = Spork.spork do #so we can continue executing a new fork
-            ret = host.perform_monitoring_operations
-            puts "Error when monitoring "+host.hostname+" on the background: "+ret if ret != true and $DBG == 1
-          end
-          forks << frk #and store the fork id on the forks array
+          Process.waitall
         end
-        Process.waitall
         sleep TTL
         Spork.spork do
           Process.setsid
