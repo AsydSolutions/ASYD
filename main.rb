@@ -1,6 +1,7 @@
 require 'sinatra'
 require_relative 'routes/init'
 require_relative 'models/init'
+require_relative 'enterprise/main' if File.exist?("enterprise/main.rb")
 
 class ASYD < Sinatra::Application
   configure do
