@@ -264,7 +264,7 @@ module Monitoring
       Timeout::timeout(60+TTL) do # Wait for 1 minute plus TTL, kill if executing takes more time
         max_forks = 15 #we hard limit the max checks to 15 at a time
         forks = [] #and initialize an empty array
-        hosts = ::Host.all
+        hosts = File.exist?("data/db/hosts.db") ? ::Host.all : nil
         unless hosts.nil? || hosts.empty?
           hosts.each do |host|
             if forks.count >= max_forks #if we reached the max forks
