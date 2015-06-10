@@ -931,21 +931,22 @@ class Deploy
         service = line.match(/^<%MONITOR:(.+)%>/i)[1]
         host.monitor_service(service)
         line = ""
-      elsif line.match(/<%VAR:.+%>/i)
-        vars = line.scan(/<%VAR:(.+?)%>/i)
-        vars.each do |varname|
-          varname = varname[0].strip
-          if !host.opt_vars[varname].nil?
-            line.gsub!(/<%VAR:#{Regexp.escape(varname)}%>/i, host.opt_vars[varname])
-          else
-            host.hostgroups.each do |hostgroup|
-              if !hostgroup.opt_vars[varname].nil?
-                line.gsub!(/<%VAR:#{Regexp.escape(varname)}%>/i, hostgroup.opt_vars[varname])
+      else
+        if line.match(/<%VAR:.+%>/i)
+          vars = line.scan(/<%VAR:(.+?)%>/i)
+          vars.each do |varname|
+            varname = varname[0].strip
+            if !host.opt_vars[varname].nil?
+              line.gsub!(/<%VAR:#{Regexp.escape(varname)}%>/i, host.opt_vars[varname])
+            else
+              host.hostgroups.each do |hostgroup|
+                if !hostgroup.opt_vars[varname].nil?
+                  line.gsub!(/<%VAR:#{Regexp.escape(varname)}%>/i, hostgroup.opt_vars[varname])
+                end
               end
             end
           end
         end
-      else
         line.gsub!(/<%ASYD%>/i, asyd) unless asyd.nil?
         line.gsub!(/<%MONIT_PW%>/i, host.monit_pw) unless host.monit_pw.nil?
         line.gsub!(/<%IP%>/i, host.ip) unless host.ip.nil?
