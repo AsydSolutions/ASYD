@@ -69,7 +69,7 @@ case "$cmd" in
     status)
         echo -n "ASYD is "
         pid=$(cat "$pidfile" 2> /dev/null)
-        kill -p "$pid" 2> /dev/null && echo "running" || echo "stopped"
+        kill -0 "$pid" 2> /dev/null && echo "running" || echo "stopped"
         ;;
     *)
         echo "Usage: $self {start|stop|restart|status|pid}"
