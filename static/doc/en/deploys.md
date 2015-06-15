@@ -130,6 +130,24 @@ If a variable with the same name exists, it will be overwritten to the new value
 
 *Syntax:* `var <varname> = http <get|post> [if <condition>]: url[, key1=val1, key2=val2, ...]`
 
+**7.1. var from json**
+
+This command allows you to set a series of variables from a json string. This string can be retrieved from
+the output of an "exec" or "http" command. On multidimensional hash/arrays the variable name to be set is
+in the form of `level1[level2][levelN]`. If a variable with the same name exists, it will be overwritten to the new value.
+
+*Syntax:* `var from json = exec [host] [if <condition>]: command`
+
+*Syntax:* `var from json = http <get|post> [if <condition>]: url[, key1=val1, key2=val2, ...]`
+
+**7.2. var from xml**
+
+Behaves the same way as "var from json" (see point 7.1) but for XML-formatted outputs.
+
+*Syntax:* `var from xml = exec [host] [if <condition>]: command`
+
+*Syntax:* `var from xml = http <get|post> [if <condition>]: url[, key1=val1, key2=val2, ...]`
+
 **8. monitor / unmonitor**
 
 This command allows you to monitor (or stop monitoring if "unmonitor" is used) a service. The service parameter must have the same name
