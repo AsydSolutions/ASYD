@@ -302,6 +302,7 @@ module Monitoring
     rescue => e
       puts "Error on background monitoring: "+e.message if $DBG == 1
       exit unless Misc::checkpid($ASYD_PID)
+      sleep TTL
       Spork.spork do
         Process.setsid
         bgm = Spork.spork do
