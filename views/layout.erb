@@ -6,7 +6,7 @@
   <link rel="icon" type="image/png" href="/img/favicon.png">
   <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css">
   <link rel="stylesheet" type="text/css" href="/css/bootstrap-responsive.min.css">
-  <link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,600italic,400,600">
+  <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Open+Sans:400italic,600italic,400,600">
   <link rel="stylesheet" type="text/css" href="/css/font-awesome.min.css">
   <link rel="stylesheet" type="text/css" href="/css/style.css?v=<%= $ASYD_VERSION %>">
   <% if request.path_info.start_with?("/login") %>
@@ -78,6 +78,7 @@
                     <li><a href="/settings">System Settings</a></li>
                     <li class="divider"></li>
                   <%end%>
+                  <li><a href="/settings/user">User settings</a></li>
                   <li><a href="/password/change"><%=t('password.change')%></a></li>
                   <li><a href="/logout"><%=t('menu.logout')%></a></li>
                 </ul>
@@ -165,7 +166,7 @@
             <div class="span4">
               2014, 2015 - ASYD Solutions
             </div>
-            <div class="span2 offset6">
+            <div class="span3 offset5">
               <%= '<a href="/upgrade" data-placement="left" data-trigger="manual" data-original-title="One Click Update" class="update-asyd">' if Setup.update_available? %> v <%= $ASYD_VERSION %> <%= "- Update available</a>" if Setup.update_available? %>
             </div>
           </div>

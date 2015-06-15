@@ -194,8 +194,20 @@ class Deploy
         end
 
         # Set variables from a Deploy
-        if gdoit && m = line.match(/^var (.+) = (exec|http)/i)
+        if gdoit && m = line.match(/^var ([^\s]+) = (exec|http)/i)
           varname = m[1] #we create varname here
+          line = line.split(/ = /, 2)[1].strip #and remove the start of the line so we have only the exec or http part
+        end
+
+        # Set variables from json from a Deploy
+        if gdoit && m = line.match(/^var from json = (exec|http)/i)
+          json_vars = true #we will handle it later
+          line = line.split(/ = /, 2)[1].strip #and remove the start of the line so we have only the exec or http part
+        end
+
+        # Set variables from XML from a Deploy
+        if gdoit && m = line.match(/^var from xml = (exec|http)/i)
+          xml_vars = true #we will handle it later
           line = line.split(/ = /, 2)[1].strip #and remove the start of the line so we have only the exec or http part
         end
 
@@ -422,6 +434,7 @@ class Deploy
               end
             end
             unless dry_run
+              ret = response.body
               msg = "HTTP "+method+" "+url+": "+response.body
               NOTEX.synchronize do
                 Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
@@ -585,6 +598,18 @@ class Deploy
             msg = "Setting variable "+varname+" with value "+value
             Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
           end
+        end
+
+        # Also for json variables
+        if json_vars == true and !dry_run
+          vars = JSON.parse(ret.strip) #the output of exec goes in ret
+          host.hash_to_host_vars(vars, task)
+        end
+
+        # And XML
+        if xml_vars == true and !dry_run
+          vars = Hash.from_xml(ret.strip) #the output of exec goes in ret
+          host.hash_to_host_vars(vars, task)
         end
       end
       return 1
@@ -906,21 +931,22 @@ class Deploy
         service = line.match(/^<%MONITOR:(.+)%>/i)[1]
         host.monitor_service(service)
         line = ""
-      elsif line.match(/<%VAR:.+%>/i)
-        vars = line.scan(/<%VAR:(.+?)%>/i)
-        vars.each do |varname|
-          varname = varname[0].strip
-          if !host.opt_vars[varname].nil?
-            line.gsub!(/<%VAR:#{varname}%>/i, host.opt_vars[varname])
-          else
-            host.hostgroups.each do |hostgroup|
-              if !hostgroup.opt_vars[varname].nil?
-                line.gsub!(/<%VAR:#{varname}%>/i, hostgroup.opt_vars[varname])
+      else
+        if line.match(/<%VAR:.+%>/i)
+          vars = line.scan(/<%VAR:(.+?)%>/i)
+          vars.each do |varname|
+            varname = varname[0].strip
+            if !host.opt_vars[varname].nil?
+              line.gsub!(/<%VAR:#{Regexp.escape(varname)}%>/i, host.opt_vars[varname])
+            else
+              host.hostgroups.each do |hostgroup|
+                if !hostgroup.opt_vars[varname].nil?
+                  line.gsub!(/<%VAR:#{Regexp.escape(varname)}%>/i, hostgroup.opt_vars[varname])
+                end
               end
             end
           end
         end
-      else
         line.gsub!(/<%ASYD%>/i, asyd) unless asyd.nil?
         line.gsub!(/<%MONIT_PW%>/i, host.monit_pw) unless host.monit_pw.nil?
         line.gsub!(/<%IP%>/i, host.ip) unless host.ip.nil?

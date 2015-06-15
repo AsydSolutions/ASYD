@@ -1,6 +1,7 @@
 require 'sinatra'
 require_relative 'routes/init'
 require_relative 'models/init'
+require_relative 'enterprise/main' if File.exist?("enterprise/main.rb")
 
 class ASYD < Sinatra::Application
   configure do
@@ -32,7 +33,7 @@ class ASYD < Sinatra::Application
 
   # Check if ASYD was installed or user is logged in before doing anything
   # Now also checks if ASYD must update
-  before /^(?!\/(setup))(?!\/(login))(?!\/(logout))(?!\/(update))(?!\/(confirm_update))(^(?!\/(password\/request)))(^(?!\/(password\/reset)))/ do
+  before /^(?!\/(setup))(?!\/(login))(?!\/(logout))(?!\/(update))(?!\/(confirm_update))(^(?!\/(password\/request)))(^(?!\/(password\/reset)))(^(?!(\/private)?\/api\/))/ do
     if !File.directory? 'data'
       redirect '/setup'
     else

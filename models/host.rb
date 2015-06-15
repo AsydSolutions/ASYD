@@ -52,8 +52,8 @@ class Host
                 if data =~ /^\[sudo\] password/
                   need_passwd = true
                   channel.send_data "#{password}\n"
-                else
-                  last = data.strip
+                elsif data.strip == "1"
+                  last = "1"
                 end
               end
             end
@@ -136,7 +136,7 @@ class Host
       NOTEX.synchronize do
         Notification.create(:type => :error, :sticky => false, :message => error)
       end
-      host.delete(false)
+      host.delete(false) unless host.nil?
       return false
     end
   end
@@ -206,7 +206,7 @@ class Host
   def self.detect(host, save = false)
     begin
       sudo = ""
-      sudo = "sudo " if user != "root"
+      sudo = "sudo " if host.user != "root"
       Net::SSH.start(host.ip, host.user, :port => host.ssh_port, :keys => "data/ssh_key", :timeout => 10) do |ssh|
         #check for package manager and add distro
         #1. debian-based

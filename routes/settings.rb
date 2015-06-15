@@ -48,4 +48,18 @@ class ASYD < Sinatra::Application
       not_found
     end
   end
+
+  get '/settings/user' do
+    erb :'user/settings'
+  end
+
+  post '/settings/user' do
+    user.update(:email => params["email"])
+    if params.has_key?('notifications')
+      user.update(:receive_notifications => true)
+    else
+      user.update(:receive_notifications => false)
+    end
+    redirect to "/settings/user"
+  end
 end
