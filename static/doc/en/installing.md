@@ -9,11 +9,11 @@ libraries for it to work
 
 On Debian-based systems (as root):
 
-    apt-get update && apt-get install -y ruby1.9.1-full ruby1.9.1-dev git libxslt-dev libxml2-dev libsqlite3-dev make
+    apt-get update && apt-get install -y ruby-full git libxslt-dev libxml2-dev libsqlite3-dev make gcc patch
 
 On RedHat-based systems:
 
-    yum install -y ruby ruby-devel git libxslt-devel libxml2-devel libsqlite3-devel make
+    yum install -y ruby ruby-devel git libxslt-devel libxml2-devel libsqlite3x-devel make gcc patch
 
 **2. Install ASYD from git**
 
