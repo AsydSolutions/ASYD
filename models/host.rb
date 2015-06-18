@@ -219,7 +219,17 @@ class Host
           host.dist = ssh.exec!(sudo+"/tmp/lsb_release -s -i").strip
           host.dist_ver = ssh.exec!(sudo+"/tmp/lsb_release -s -r").strip.to_f
           host.arch = ssh.exec!("uname -m").strip
-        #2. redhat-based
+        #2. redhat-based w/ dnf package manager (Fedora 22)
+        elsif !(ssh.exec!("which dnf") =~ /\/bin\/dnf$/).nil?
+          host.pkg_mgr = "yum"
+          if (ssh.exec!("which scp") =~ /\/bin\/scp$/).nil? || (ssh.exec!("which wget") =~ /\/bin\/wget$/).nil?
+            ssh.exec!(sudo+"dnf install -y openssh-clients wget")
+          end
+          ssh.exec!("wget --no-check-certificate https://raw.githubusercontent.com/AsydSolutions/lsb_release/master/lsb_release -O /tmp/lsb_release && chmod +x /tmp/lsb_release")
+          host.dist = ssh.exec!(sudo+"/tmp/lsb_release -s -i").strip
+          host.dist_ver = ssh.exec!(sudo+"/tmp/lsb_release -s -r").strip.to_f
+          host.arch = ssh.exec!("uname -m").strip
+        #3. redhat-based
         elsif !(ssh.exec!("which yum") =~ /\/bin\/yum$/).nil?
           host.pkg_mgr = "yum"
           if (ssh.exec!("which scp") =~ /\/bin\/scp$/).nil? || (ssh.exec!("which wget") =~ /\/bin\/wget$/).nil?
@@ -229,7 +239,7 @@ class Host
           host.dist = ssh.exec!(sudo+"/tmp/lsb_release -s -i").strip
           host.dist_ver = ssh.exec!(sudo+"/tmp/lsb_release -s -r").strip.to_f
           host.arch = ssh.exec!("uname -m").strip
-        #3. arch-based
+        #4. arch-based
         elsif !(ssh.exec!("which pacman") =~ /\/bin\/pacman$/).nil?
           host.pkg_mgr = "pacman"
           if (ssh.exec!("which wget") =~ /\/bin\/wget$/).nil?
@@ -239,7 +249,7 @@ class Host
           host.dist = ssh.exec!(sudo+"/tmp/lsb_release -s -i").strip
           host.dist_ver = 0
           host.arch = ssh.exec!("uname -m").strip
-        #4. opensuse
+        #5. opensuse
         elsif !(ssh.exec!("which zypper") =~ /\/bin\/zypper$/).nil?
           host.pkg_mgr = "zypper"
           if (ssh.exec!("which wget") =~ /\/bin\/wget$/).nil?
@@ -249,7 +259,7 @@ class Host
           host.dist = ssh.exec!(sudo+"/tmp/lsb_release -s -i").strip
           host.dist_ver = ssh.exec!(sudo+"/tmp/lsb_release -s -r").strip.to_f
           host.arch = ssh.exec!("uname -m").strip
-        #5. solaris
+        #6. solaris
         elsif !(ssh.exec!("export PATH=$PATH:/sbin:/usr/sbin/ && which pkgadd") =~ /\/sbin\/pkgadd$/).nil?
           host.pkg_mgr = "pkgadd"
           if !(ssh.exec!("which pkg") =~ /\/bin\/pkg$/).nil?
@@ -272,7 +282,7 @@ class Host
             host.dist_ver = dv[0].to_f
           end
           host.arch = ssh.exec!("uname -p").strip
-        #6. openbsd
+        #7. openbsd
         elsif !(ssh.exec!("which pkg_add") =~ /\/sbin\/pkg_add$/).nil?
           host.pkg_mgr = "pkg_add"
           host.dist = ssh.exec!("uname -s").strip
