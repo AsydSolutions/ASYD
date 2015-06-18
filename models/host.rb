@@ -221,7 +221,7 @@ class Host
           host.arch = ssh.exec!("uname -m").strip
         #2. redhat-based w/ dnf package manager (Fedora 22)
         elsif !(ssh.exec!("which dnf") =~ /\/bin\/dnf$/).nil?
-          host.pkg_mgr = "yum"
+          host.pkg_mgr = "dnf"
           if (ssh.exec!("which scp") =~ /\/bin\/scp$/).nil? || (ssh.exec!("which wget") =~ /\/bin\/wget$/).nil?
             ssh.exec!(sudo+"dnf install -y openssh-clients wget")
           end
