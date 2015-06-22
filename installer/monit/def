@@ -2,7 +2,7 @@
 # Will be executed on every new system added to ASYD
 # Modify accordingly to your systems (i.e. firewall rules, etc)
 # Alert: This deploy is automatically executed when a host is added, are you sure you want to manually execute it?
-# Version: 0.079
+# Version: 0.09
 
 ###
 # Check first if the system has a service manager
@@ -13,7 +13,7 @@ endif
 
 ###
 # For Linux:
-if <%PKG_MANAGER%> == apt or <%PKG_MANAGER%> == yum or <%PKG_MANAGER%> == pacman or <%PKG_MANAGER%> == zypper
+if <%PKG_MANAGER%> == apt or <%PKG_MANAGER%> == dnf or <%PKG_MANAGER%> == yum or <%PKG_MANAGER%> == pacman or <%PKG_MANAGER%> == zypper
 
   # install monit:
   install: wget tar gzip

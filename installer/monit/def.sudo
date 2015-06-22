@@ -11,7 +11,7 @@ endif
 
 ###
 # For Linux:
-if <%PKG_MANAGER%> == apt or <%PKG_MANAGER%> == yum or <%PKG_MANAGER%> == pacman or <%PKG_MANAGER%> == zypper
+if <%PKG_MANAGER%> == apt or <%PKG_MANAGER%> == dnf or <%PKG_MANAGER%> == yum or <%PKG_MANAGER%> == pacman or <%PKG_MANAGER%> == zypper
 
   # install monit:
   install: wget tar gzip

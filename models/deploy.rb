@@ -652,19 +652,25 @@ class Deploy
           cmd = "sudo "+pkg_mgr
         end
         cmd = cmd+" install -y "+pkg
-      #3. pacman
+      #3. dnf (used by Fedora 22)
+      elsif pkg_mgr == "dnf"
+        if host.user != "root"
+          cmd = "sudo " + pkg_mgr
+        end
+        cmd = cmd + " install -y " + pkg
+      #4. pacman
       elsif pkg_mgr == "pacman"
         if host.user != "root"
           cmd = "sudo "+pkg_mgr
         end
         cmd = cmd+" -Sy --noconfirm --noprogressbar "+pkg    ## NOT FULLY TESTED, DEVELOPMENT IN PROGRESS
-      #4. zypper
+      #5. zypper
       elsif pkg_mgr == "zypper"
         if host.user != "root"
           cmd = "sudo "+pkg_mgr
         end
         cmd = cmd+" -q -n in "+pkg    ## NOT FULLY TESTED, DEVELOPMENT IN PROGRESS
-      #5.1. solaris pkgadd
+      #6.1. solaris pkgadd
       elsif pkg_mgr == "pkgadd"
         if host.user != "root"
           cmd = "sudo /usr/sbin/"+pkg_mgr
@@ -672,19 +678,19 @@ class Deploy
           cmd = "/usr/sbin/"+pkg_mgr
         end
         cmd = cmd+" -a /etc/admin -d "+pkg+" all"    ## NOT FULLY TESTED, DEVELOPMENT IN PROGRESS
-      #5.2. solaris pkg
+      #6.2. solaris pkg
       elsif pkg_mgr == "pkg"
         if host.user != "root"
           cmd = "sudo "+pkg_mgr
         end
         cmd = cmd+" install --accept "+pkg    ## NOT FULLY TESTED, DEVELOPMENT IN PROGRESS
-      #5.3. solaris pkgutil
+      #6.3. solaris pkgutil
       elsif pkg_mgr == "pkgutil"
         if host.user != "root"
           cmd = "sudo "+pkg_mgr
         end
         cmd = cmd+" -y -i "+pkg    ## NOT FULLY TESTED, DEVELOPMENT IN PROGRESS
-      #6. openbsd pkg_add
+      #7. openbsd pkg_add
       elsif pkg_mgr == "pkg_add"
         if host.user != "root"
           cmd = "sudo "+pkg_mgr
@@ -750,19 +756,25 @@ class Deploy
           cmd = "sudo "+pkg_mgr
         end
         cmd = cmd+" remove -y "+pkg
-      #3. pacman
+      #3. dnf (used by Fedora 22)
+      elsif pkg_mgr == "dnf"
+        if host.user != "root"
+          cmd = "sudo " + pkg_mgr
+        end
+        cmd = cmd + " remove -y " + pkg
+      #4. pacman
       elsif pkg_mgr == "pacman"
         if host.user != "root"
           cmd = "sudo "+pkg_mgr
         end
         cmd = cmd+" -R --noconfirm --noprogressbar "+pkg    ## NOT FULLY TESTED, DEVELOPMENT IN PROGRESS
-      #4. zypper
+      #5. zypper
       elsif pkg_mgr == "zypper"
         if host.user != "root"
           cmd = "sudo "+pkg_mgr
         end
         cmd = cmd+" -q -n rm "+pkg    ## NOT FULLY TESTED, DEVELOPMENT IN PROGRESS
-      #5.1. solaris pkgadd
+      #6.1. solaris pkgadd
       elsif pkg_mgr == "pkgadd"
         if host.user != "root"
           cmd = "sudo /usr/sbin/pkgrm"
@@ -770,19 +782,19 @@ class Deploy
           cmd = "/usr/sbin/pkgrm"
         end
         cmd = cmd+" -a /etc/admin "+pkg    ## NOT FULLY TESTED, DEVELOPMENT IN PROGRESS
-      #5.2. solaris pkg
+      #6.2. solaris pkg
       elsif pkg_mgr == "pkg"
         if host.user != "root"
           cmd = "sudo "+pkg_mgr
         end
         cmd = cmd+" uninstall "+pkg    ## NOT FULLY TESTED, DEVELOPMENT IN PROGRESS
-      #5.3. solaris pkgutil
+      #6.3. solaris pkgutil
       elsif pkg_mgr == "pkgutil"
         if host.user != "root"
           cmd = "sudo "+pkg_mgr
         end
         cmd = cmd+" -y -r "+pkg    ## NOT FULLY TESTED, DEVELOPMENT IN PROGRESS
-      #6. openbsd pkg_add
+      #7. openbsd pkg_add
       elsif pkg_mgr == "pkg_add"
         cmd = "pkg_delete"
         if host.user != "root"
