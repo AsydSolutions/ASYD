@@ -14,7 +14,7 @@ endif
 if <%PKG_MANAGER%> == apt or <%PKG_MANAGER%> == dnf or <%PKG_MANAGER%> == yum or <%PKG_MANAGER%> == pacman or <%PKG_MANAGER%> == zypper
 
   # install monit:
-  install: wget tar gzip
+  install: wget tar gzip ca-certificates
   exec: sudo mkdir -p /etc/monit/conf.d
   exec if <%ARCH%> == x86_64: wget http://github.com/AsydSolutions/monit/releases/download/release-5-13-asyd/monit-linux-x64 -O /tmp/monit
   exec if <%ARCH%> == i686: wget http://github.com/AsydSolutions/monit/releases/download/release-5-13-asyd/monit-linux-x86 -O /tmp/monit
