@@ -1,6 +1,6 @@
 class ASYD < Sinatra::Application
   before /^(\/user|team)/ do
-    unless user.is_admin?
+    unless user and user.is_admin?
       redirect "/"
     end
   end
