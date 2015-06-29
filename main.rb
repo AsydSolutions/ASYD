@@ -37,6 +37,13 @@ class ASYD < Sinatra::Application
     if !File.directory? 'data'
       redirect '/setup'
     else
+      auth = Rack::Auth::Basic::Request.new(env)
+      if auth.provided? and auth.basic? and auth.credentials
+        u = User.auth(auth.credentials[0], auth.credentials[1])
+        if u
+          session[:username] = u.username
+        end
+      end
       if !session[:username] or User.first(:username => session[:username]).nil? then
         redirect '/login'
       else
