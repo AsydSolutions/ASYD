@@ -26,6 +26,8 @@ before_fork do |server, worker|
 end
 
 after_fork do |server, worker|
+  $0 = 'ASYD Web Worker'
+
   DataMapper.setup(:tasks_db,  "sqlite3:data/db/tasks.db") #load the tasks database
   DataMapper.setup(:notifications_db,  "sqlite3:data/db/notifications.db") #load the notifications database
   DataMapper.setup(:monitoring_db,  "sqlite3:data/db/monitoring.db") #load the monitoring database

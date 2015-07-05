@@ -39,6 +39,8 @@ module Spork
     logger.debug "spork> parent PID = #{Process.pid}" if logger
     child = fork do
       begin
+        $0 = 'ASYD Background Worker'
+
         start = Time.now
         logger.debug "spork> child PID = #{Process.pid}" if logger
 

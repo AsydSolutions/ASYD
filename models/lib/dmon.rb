@@ -69,6 +69,7 @@ module Dmon
       Spork.spork do
         Process.setsid
         bgm = Spork.spork do
+          $0='ASYD Monitoring Daemon'
           # STDIN.reopen '/dev/null'
           # STDOUT.reopen '/dev/null', 'a'
           # STDERR.reopen STDOUT
@@ -82,6 +83,7 @@ module Dmon
       Spork.spork do
         Process.setsid
         wck = Spork.spork do
+          $0='ASYD WAL Daemon'
           # STDIN.reopen '/dev/null'
           # STDOUT.reopen '/dev/null', 'a'
           # STDERR.reopen STDOUT
@@ -95,6 +97,7 @@ module Dmon
       Spork.spork do
         Process.setsid
         wck = Spork.spork do
+          $0='ASYD Daemon Manager'
           # STDIN.reopen '/dev/null'
           # STDOUT.reopen '/dev/null', 'a'
           # STDERR.reopen STDOUT
