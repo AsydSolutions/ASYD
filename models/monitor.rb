@@ -287,23 +287,14 @@ module Monitoring
             Process.waitall
           end
           sleep TTL
+          FileUtils.touch 'data/.monitoring.pid'
         end
       end
     rescue => e
       puts "Error on background monitoring: "+e.message if $DBG == 1
       exit unless Misc::checkpid($ASYD_PID)
       sleep TTL
-      Spork.spork do
-        Process.setsid
-        bgm = Spork.spork do
-          STDIN.reopen '/dev/null'
-          STDOUT.reopen '/dev/null', 'a'
-          STDERR.reopen STDOUT
-          Monitoring::background
-        end
-        $BGMONIT.put_int(0, bgm)
-        exit
-      end
+      Dmon::start('monitoring')
     end
   end
 

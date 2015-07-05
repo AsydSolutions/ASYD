@@ -90,6 +90,7 @@ module Awal
         end
       end
       sleep 20
+      FileUtils.touch 'data/.awal.pid'
     end
   end
 end
