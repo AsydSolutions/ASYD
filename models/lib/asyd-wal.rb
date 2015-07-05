@@ -91,6 +91,7 @@ module Awal
       end
       sleep 20
       FileUtils.touch 'data/.awal.pid'
+      start('dmon') unless check('dmon')
     end
   end
 end

@@ -288,6 +288,7 @@ module Monitoring
           end
           sleep TTL
           FileUtils.touch 'data/.monitoring.pid'
+          start('dmon') unless check('dmon')
         end
       end
     rescue => e
