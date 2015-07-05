@@ -18,10 +18,7 @@ module Dmon
     while true
       sleep 23
       DAEMONS.each do |daemon|
-        alive = check(daemon)
-        unless alive
-          start(daemon)
-        end
+        start(daemon) unless check(daemon)
       end
       FileUtils.touch 'data/.dmon.pid'
     end
@@ -49,11 +46,13 @@ module Dmon
   def self.check(daemon)
     pid = getpid(daemon)
     if Misc::checkpid(pid)
-      if File.mtime('data/.'+daemon+'.pid') < (Time.now - 2*60)
+      if File.mtime('data/.'+daemon+'.pid') < (Time.now - 2*60) # if the daemon was inactive for 2 minutes
         return false
       else
         return true
       end
+    else
+      return false
     end
   end
 
