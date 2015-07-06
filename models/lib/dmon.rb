@@ -68,42 +68,42 @@ module Dmon
       # monitoring on the background
       Spork.spork do
         Process.setsid
-        bgm = Spork.spork do
+        pid = Spork.spork do
           $0='ASYD Monitoring Daemon'
           # STDIN.reopen '/dev/null'
           # STDOUT.reopen '/dev/null', 'a'
           # STDERR.reopen STDOUT
           Monitoring.background
         end
-        setpid(daemon, bgm)
+        setpid(daemon, pid)
         exit
       end
     elsif daemon == 'awal'
       # check for checkpoints
       Spork.spork do
         Process.setsid
-        wck = Spork.spork do
+        pid = Spork.spork do
           $0='ASYD WAL Daemon'
           # STDIN.reopen '/dev/null'
           # STDOUT.reopen '/dev/null', 'a'
           # STDERR.reopen STDOUT
           Awal::should_checkpoint?
         end
-        setpid(daemon, wck)
+        setpid(daemon, pid)
         exit
       end
     elsif daemon == 'dmon'
       # The Dmon-handler
       Spork.spork do
         Process.setsid
-        wck = Spork.spork do
+        pid = Spork.spork do
           $0='ASYD Daemon Manager'
           # STDIN.reopen '/dev/null'
           # STDOUT.reopen '/dev/null', 'a'
           # STDERR.reopen STDOUT
           Dmon::handler
         end
-        setpid(daemon, wck)
+        setpid(daemon, pid)
         exit
       end
     end
