@@ -12,7 +12,6 @@ stderr_path "log/asyd.log"
 stdout_path "log/asyd.log"
 
 preload_app true
-rewindable_input false
 
 before_fork do |server, worker|
   if File.exist?('data/.dmon.pid')
