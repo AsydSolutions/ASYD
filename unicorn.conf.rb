@@ -12,8 +12,7 @@ stderr_path "log/asyd.log"
 stdout_path "log/asyd.log"
 
 preload_app true
-GC.respond_to?(:copy_on_write_friendly=) and
-  GC.copy_on_write_friendly = true
+rewindable_input false
 
 before_fork do |server, worker|
   if File.exist?('data/.dmon.pid')
