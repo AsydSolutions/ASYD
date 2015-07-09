@@ -1,4 +1,3 @@
-# Version: 0.079
 <%if <%SVC_MANAGER%> == update-rc.d %>
 #!/bin/sh
 
@@ -199,3 +198,5 @@ esac
 
 exit $RETVAL
 <%endif%>
+
+# Version: 0.091
