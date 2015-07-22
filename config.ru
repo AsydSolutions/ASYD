@@ -9,6 +9,12 @@ end
 
 require 'rubygems'
 require 'i18n'
+
+# Unicorn self-process killer
+require 'unicorn/worker_killer'
+# Max requests per worker
+use Unicorn::WorkerKiller::MaxRequests, 150, 200
+
 load 'main.rb'
 
 I18n.load_path += Dir[File.join(File.dirname(__FILE__), 'static', 'lang', '*.yml').to_s]

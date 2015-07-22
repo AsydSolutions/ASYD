@@ -1,11 +1,12 @@
 $UNICORN = 1
 $ASYD_PID = Process.pid
-$ASYD_VERSION = 0.091
+$ASYD_VERSION = 0.092
 $DBG = 0 #debug?
+$PORT = 3000
 
 FileUtils.mkdir("log") unless File.directory?("log")
 
-listen 3000
+listen $PORT
 worker_processes 1
 pid ".asyd.pid"
 stderr_path "log/asyd.log"

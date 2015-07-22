@@ -54,4 +54,8 @@ class ASYD < Sinatra::Application
     erb 'Reloading, please wait... <script> setTimeout(function () { window.location.href = "/settings"; }, 5000); </script>'
   end
 
+  get '/api/ping' do
+    'pong'
+  end
+
 end

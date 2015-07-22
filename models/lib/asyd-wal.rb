@@ -91,6 +91,7 @@ module Awal
       end
       sleep 20
       FileUtils.touch 'data/.awal.pid'
+      Net::HTTP.get_response(URI.parse("http://localhost:#{$PORT}/api/ping"))
       Dmon::start('dmon') unless Dmon::check('dmon')
     end
   end

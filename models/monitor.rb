@@ -288,6 +288,7 @@ module Monitoring
           end
           sleep TTL
           FileUtils.touch 'data/.monitoring.pid'
+          Net::HTTP.get_response(URI.parse("http://localhost:#{$PORT}/api/ping"))
           Dmon::start('dmon') unless Dmon::check('dmon')
         end
       end

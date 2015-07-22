@@ -16,11 +16,12 @@ module Dmon
     }
 
     while true
-      sleep 23
+      sleep 63
       DAEMONS.each do |daemon|
         start(daemon) unless check(daemon)
       end
       FileUtils.touch 'data/.dmon.pid'
+      Net::HTTP.get_response(URI.parse("http://localhost:#{$PORT}/api/ping"))
     end
   end
 
