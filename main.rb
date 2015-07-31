@@ -6,7 +6,7 @@ require_relative 'enterprise/main' if File.exist?("enterprise/main.rb")
 class ASYD < Sinatra::Application
   configure do
     set :public_folder, Proc.new { File.join(root, "static/lib") }
-    # set :environment, :production
+    set :environment, :production unless $DBG == 1
     enable :sessions
   end
 

@@ -9,11 +9,15 @@ libraries for it to work
 
 On Debian-based systems (as root):
 
-    apt-get update && apt-get install -y ruby-full git libxslt-dev libxml2-dev libsqlite3-dev make gcc patch
+    apt-get update && apt-get install -y ruby-full git libxslt-dev libxml2-dev libsqlite3-dev zlib1g-dev make gcc patch
 
 On RedHat-based systems:
 
     yum install -y ruby ruby-devel git libxslt-devel libxml2-devel libsqlite3x-devel make gcc patch
+
+On Arch Linux:
+
+    pacman -Sy ruby git libxslt libxml2 sqlite make gcc patch
 
 **2. Install ASYD from git**
 

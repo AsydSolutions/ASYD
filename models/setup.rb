@@ -65,8 +65,7 @@ class Setup
 
   def self.update_available?
     begin
-      file = open('https://www.asyd.eu/asyd.version')
-      last_ver = file.read.strip
+      last_ver = Net::HTTP.get(URI 'https://www.asyd.eu/asyd.version').strip
       return true unless last_ver.to_f <= $ASYD_VERSION
       return false
     rescue

@@ -53,7 +53,7 @@ case "$cmd" in
             done
             if kill -0 "$pid" 2> /dev/null; then
                 echo " FAILED"
-                # We failed to forcefully kill ASYD, something is horribly wrong and the process is noy dying!
+                # We failed to forcefully kill ASYD, something is horribly wrong and the process is not dying!
                 exit 3
             fi
         fi
@@ -71,8 +71,13 @@ case "$cmd" in
         pid=$(cat "$pidfile" 2> /dev/null)
         kill -0 "$pid" 2> /dev/null && echo "running" || echo "stopped"
         ;;
+    count)
+        nr=$(ps aux |grep ASYD |wc -l)
+        echo -n $nr
+        exit $(($nr))
+        ;;
     *)
-        echo "Usage: $self {start|stop|restart|status|pid}"
+        echo "Usage: $self {start|stop|restart|status|pid|count}"
         exit 1
         ;;
 esac

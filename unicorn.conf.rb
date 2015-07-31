@@ -1,52 +1,40 @@
 $UNICORN = 1
 $ASYD_PID = Process.pid
-$ASYD_VERSION = 0.0901
+$ASYD_VERSION = 0.099
 $DBG = 0 #debug?
+$PORT = 3000
 
 FileUtils.mkdir("log") unless File.directory?("log")
 
-listen 3000
+listen $PORT
 worker_processes 1
 pid ".asyd.pid"
 stderr_path "log/asyd.log"
 stdout_path "log/asyd.log"
 
 preload_app true
-GC.respond_to?(:copy_on_write_friendly=) and
-  GC.copy_on_write_friendly = true
 
 before_fork do |server, worker|
-  wck = $WALCHECK.get_int(0)
-  bgm = $BGMONIT.get_int(0)
+  if File.exist?('data/.dmon.pid')
+    Dmon::stop('dmon')
+  end
 
-  Process.kill("TERM", wck) if wck > 0
-  Process.kill("TERM", bgm) if bgm > 0
+  DataObjects::Pooling.pools.each do |pool|
+    pool.dispose
+  end
 end
 
 after_fork do |server, worker|
-  # check for checkpoints
-  Spork.spork do
-    Process.setsid
-    wck = Spork.spork do
-      # STDIN.reopen '/dev/null'
-      # STDOUT.reopen '/dev/null', 'a'
-      # STDERR.reopen STDOUT
-      Awal::should_checkpoint?
-    end
-    $WALCHECK.put_int(0, wck)
-    exit
-  end
+  $0 = 'ASYD Web Worker'
 
-  # monitoring on the background
-  Spork.spork do
-    Process.setsid
-    bgm = Spork.spork do
-      # STDIN.reopen '/dev/null'
-      # STDOUT.reopen '/dev/null', 'a'
-      # STDERR.reopen STDOUT
-      Monitoring.background
-    end
-    $BGMONIT.put_int(0, bgm)
-    exit
-  end
+  DataMapper.setup(:tasks_db,  "sqlite3:data/db/tasks.db") #load the tasks database
+  DataMapper.setup(:notifications_db,  "sqlite3:data/db/notifications.db") #load the notifications database
+  DataMapper.setup(:monitoring_db,  "sqlite3:data/db/monitoring.db") #load the monitoring database
+  DataMapper.setup(:hosts_db,  "sqlite3:data/db/hosts.db") #load the hosts database
+  DataMapper.setup(:users_db,  "sqlite3:data/db/users.db") #load the users database
+  DataMapper.setup(:status_db, "sqlite3:data/db/status.db") #load the status database
+  DataMapper.setup(:config_db, "sqlite3:data/db/config.db") #load the config database
+  DataMapper.setup(:stats_db, "sqlite3:data/db/stats.db") #load the stats database
+
+  Dmon::init
 end

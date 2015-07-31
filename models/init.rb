@@ -4,7 +4,6 @@ require 'fileutils'
 require 'net/ssh'
 require 'net/scp'
 require 'net/http'
-require 'open-uri'
 require 'pathname'
 require 'find'
 require 'tempfile'
@@ -21,6 +20,7 @@ require_relative "lib/flavored_markdown"
 require_relative "lib/errors"
 require_relative "lib/URI-monkey-patch"
 require_relative "lib/asyd-wal"
+require_relative "lib/dmon"
 require_relative "misc"
 require_relative "setup"
 require_relative "deploy"
@@ -86,40 +86,22 @@ if File.directory? 'data'
   if Email.all.first.nil?
     Email.create
   end
+
+  at_exit {
+    Awal::checkpoint(:users_db)
+    Awal::checkpoint(:config_db)
+    Awal::checkpoint(:stats_db)
+    Awal::checkpoint(:status_db)
+    Awal::checkpoint(:monitoring_db)
+    Awal::checkpoint(:tasks_db)
+    Awal::checkpoint(:notifications_db)
+    Awal::checkpoint(:hosts_db)
+    Dmon::stop('dmon')
+  }
 end
-
-# Kill daemons and checkpoint at exit to ensure database consistency
-at_exit {
-  wck = $WALCHECK.get_int(0)
-  bgm = $BGMONIT.get_int(0)
-
-  begin
-    if Misc::checkpid(wck)
-      Awal::checkpoint(:users_db)
-      Awal::checkpoint(:config_db)
-      Awal::checkpoint(:stats_db)
-      Awal::checkpoint(:status_db)
-      Awal::checkpoint(:monitoring_db)
-      Awal::checkpoint(:tasks_db)
-      Awal::checkpoint(:notifications_db)
-      Awal::checkpoint(:hosts_db)
-
-      Process.kill("KILL", wck) if wck > 0
-      Process.kill("TERM", bgm) if bgm > 0
-    end
-    if Misc::checkpid(bgm)
-      Process.kill("KILL", bgm) if bgm > 0
-    end
-  rescue Errno::ESRCH
-    false
-  end
-}
 
 MOTEX = ProcessShared::Mutex.new #mutex for monitoring handling
 MNOTEX = ProcessShared::Mutex.new #mutex for monitoring::notification handling
 NOTEX = Awal::Mutex.new #mutex for notification handling
 TATEX = Awal::Mutex.new #mutex for task handling
 HOSTEX = Awal::Mutex.new #mutex for hosts operations
-
-$WALCHECK = ProcessShared::SharedMemory.new(:int)
-$BGMONIT = ProcessShared::SharedMemory.new(:int)

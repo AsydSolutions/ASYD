@@ -6,7 +6,7 @@ Powerful, versatile, agentless and fully opensource, with integrated web interfa
 
 Installation on Debian:
 
-	apt-get update && apt-get install -y ruby-full git libxslt-dev libxml2-dev libsqlite3-dev make gcc patch
+	apt-get update && apt-get install -y ruby-full git libxslt-dev libxml2-dev libsqlite3-dev zlib1g-dev make gcc patch
 	gem install bundler
 
 	git clone https://github.com/AsydSolutions/asyd.git
@@ -26,5 +26,3 @@ You can read the console output on `log/asyd.log`
 
 
 **Please read the documentation: [[English](https://github.com/AsydSolutions/asyd/blob/master/static/doc/en/README.md)] [[Spanish](https://github.com/AsydSolutions/asyd/blob/master/static/doc/es/README.md)] [[German](https://github.com/AsydSolutions/asyd/blob/master/static/doc/de/README.md)] [[Dutch](https://github.com/AsydSolutions/asyd/blob/master/static/doc/nl/README.md)]**
-
-Use it at your own risk, is still on a very early development stage, might (and likely will) contain bugs
