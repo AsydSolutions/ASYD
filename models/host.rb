@@ -36,7 +36,6 @@ class Host
       host.opt_vars = {} #initialize opt_vars as an empty hash
       #start connection to remote host
       Net::SSH.start(host.ip, host.user, :port => host.ssh_port, :keys => "data/ssh_key", :password => password, :timeout => 10) do |ssh|
-
         #check for admin capabilities/nopasswd
         if user != "root"
           need_passwd = false
@@ -49,7 +48,7 @@ class Host
             channel.exec("sudo cat /tmp/1") do |ch, success|
               raise unless success
               channel.on_data do |ch, data|
-                if data =~ /^\[sudo\] password/
+                if data =~ /^\[sudo\] password/ || data =~ /^Password/
                   need_passwd = true
                   channel.send_data "#{password}\n"
                 elsif data.strip == "1"
@@ -63,7 +62,7 @@ class Host
             raise StandardError, "User has no admin privileges"
           end
           if need_passwd
-            cmd = "sudo cp /etc/sudoers /tmp/sudoers; sudo sh -c 'echo \"#{user} ALL=NOPASSWD: ALL\" >> /tmp/sudoers'; sudo sh -c 'uniq /tmp/sudoers > /etc/sudoers'; sudo rm /tmp/sudoers"
+            cmd = "if [ -f \"/etc/sudoers.d/#{user}\" ]; then sudo cp /etc/sudoers.d/#{user} /tmp/sudoers#{user}; fi; sudo sh -c 'echo \"Defaults:#{user} !requiretty\" >> /tmp/sudoers#{user}'; sudo sh -c 'echo \"#{user} ALL=NOPASSWD: ALL\" >> /tmp/sudoers#{user}'; sudo sh -c 'uniq /tmp/sudoers#{user} > /etc/sudoers.d/#{user}'; sudo rm /tmp/sudoers#{user}"
             ssh.open_channel do |channel|
               channel.request_pty do |ch, success|
                 raise StandardError, "Could not obtain pty" unless success
@@ -71,7 +70,7 @@ class Host
               channel.exec(cmd) do |ch, success|
                 raise unless success
                 channel.on_data do |ch, data|
-                  if data =~ /^\[sudo\] password/
+                  if data =~ /^\[sudo\] password/ || data =~ /^Password/
                     channel.send_data "#{password}\n"
                   end
                 end
@@ -259,7 +258,13 @@ class Host
           host.dist = ssh.exec!(sudo+"/tmp/lsb_release -s -i").strip
           host.dist_ver = ssh.exec!(sudo+"/tmp/lsb_release -s -r").strip.to_f
           host.arch = ssh.exec!("uname -m").strip
-        #6. solaris
+        #6. void-linux
+        elsif !(ssh.exec!("which xbps-install") =~ /\/bin\/xbps-install$/).nil?
+          host.pkg_mgr = "xbps"
+          host.dist = "Void Linux"
+          host.dist_ver = ssh.exec!("uname -r").strip.to_f
+          host.arch = ssh.exec!("uname -m").strip
+        #7. solaris
         elsif !(ssh.exec!("export PATH=$PATH:/sbin:/usr/sbin/ && which pkgadd") =~ /\/sbin\/pkgadd$/).nil?
           host.pkg_mgr = "pkgadd"
           if !(ssh.exec!("which pkg") =~ /\/bin\/pkg$/).nil?
@@ -282,7 +287,7 @@ class Host
             host.dist_ver = dv[0].to_f
           end
           host.arch = ssh.exec!("uname -p").strip
-        #7. openbsd
+        #8. openbsd
         elsif !(ssh.exec!("which pkg_add") =~ /\/sbin\/pkg_add$/).nil?
           host.pkg_mgr = "pkg_add"
           host.dist = ssh.exec!("uname -s").strip
@@ -300,12 +305,13 @@ class Host
           host.svc_mgr = "update-rc.d"  # old debian
         elsif !(ssh.exec!(sudo+"which chkconfig") =~ /\/sbin\/chkconfig$/).nil?
           host.svc_mgr = "chkconfig"    # old rhel
+        elsif !(ssh.exec!("which runit") =~ /\/bin\/runit$/).nil?
+          host.svc_mgr = "runit"  # void-linux
         elsif host.pkg_mgr == "pkg_add"
           host.svc_mgr = "rc.d"         # openbsd
         else
           host.svc_mgr = "none"         # else (i.e. solaris)
         end
-
         host.save if save
         return [1, ""]
 

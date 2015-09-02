@@ -2,18 +2,18 @@
 # Will be executed on every new system added to ASYD
 # Modify accordingly to your systems (i.e. firewall rules, etc)
 # Alert: This deploy is automatically executed when a host is added, are you sure you want to manually execute it?
-# Version: 0.09
+# Version: 0.1
 
 ###
 # Check first if the system has a service manager
-if <%SVC_MANAGER%> != update-rc.d and <%SVC_MANAGER%> != chkconfig and <%SVC_MANAGER%> != systemctl and <%SVC_MANAGER%> != rc.d and <%SVC_MANAGER%> != none
+if <%SVC_MANAGER%> != update-rc.d and <%SVC_MANAGER%> != chkconfig and <%SVC_MANAGER%> != systemctl and <%SVC_MANAGER%> != rc.d and <%SVC_MANAGER%> != runit and <%SVC_MANAGER%> != none
   There is no service manager defined, please go to the host detail view and recheck system information
 endif
 ###
 
 ###
 # For Linux:
-if <%PKG_MANAGER%> == apt or <%PKG_MANAGER%> == dnf or <%PKG_MANAGER%> == yum or <%PKG_MANAGER%> == pacman or <%PKG_MANAGER%> == zypper
+if <%PKG_MANAGER%> == apt or <%PKG_MANAGER%> == dnf or <%PKG_MANAGER%> == yum or <%PKG_MANAGER%> == pacman or <%PKG_MANAGER%> == zypper or <%PKG_MANAGER%> == xbps
 
   # install monit:
   install: wget tar gzip ca-certificates
@@ -35,6 +35,14 @@ if <%PKG_MANAGER%> == apt or <%PKG_MANAGER%> == dnf or <%PKG_MANAGER%> == yum or
   if <%SVC_MANAGER%> == systemctl
     config file: initscript, /usr/lib/systemd/system/monit.service
     exec: chmod +x /usr/lib/systemd/system/monit.service
+  endif
+  
+  # runit:
+  if <%SVC_MANAGER%> == runit
+    config file: run, /tmp/monit-run
+    exec: mkdir /etc/sv/monit
+    exec: chmod +x /tmp/monit-run
+    exec: mv /tmp/monit-run /etc/sv/monit/run
   endif
 
   enable service: monit

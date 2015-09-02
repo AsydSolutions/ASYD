@@ -670,7 +670,15 @@ class Deploy
           cmd = "sudo "+pkg_mgr
         end
         cmd = cmd+" -q -n in "+pkg    ## NOT FULLY TESTED, DEVELOPMENT IN PROGRESS
-      #6.1. solaris pkgadd
+      #6. void-linux
+      elsif pkg_mgr == "xbps"
+        if host.user != "root"
+          cmd = "sudo /usr/bin/"+pkg_mgr
+        else
+          cmd = "/usr/bin/"+pkg_mgr
+        end
+        cmd = cmd + "-install -y " + pkg     ## NOT FULLY TESTED, DEVELOPMENT IN PROGRESS
+      #7.1. solaris pkgadd
       elsif pkg_mgr == "pkgadd"
         if host.user != "root"
           cmd = "sudo /usr/sbin/"+pkg_mgr
@@ -678,19 +686,19 @@ class Deploy
           cmd = "/usr/sbin/"+pkg_mgr
         end
         cmd = cmd+" -a /etc/admin -d "+pkg+" all"    ## NOT FULLY TESTED, DEVELOPMENT IN PROGRESS
-      #6.2. solaris pkg
+      #7.2. solaris pkg
       elsif pkg_mgr == "pkg"
         if host.user != "root"
           cmd = "sudo "+pkg_mgr
         end
         cmd = cmd+" install --accept "+pkg    ## NOT FULLY TESTED, DEVELOPMENT IN PROGRESS
-      #6.3. solaris pkgutil
+      #7.3. solaris pkgutil
       elsif pkg_mgr == "pkgutil"
         if host.user != "root"
           cmd = "sudo "+pkg_mgr
         end
         cmd = cmd+" -y -i "+pkg    ## NOT FULLY TESTED, DEVELOPMENT IN PROGRESS
-      #7. openbsd pkg_add
+      #8. openbsd pkg_add
       elsif pkg_mgr == "pkg_add"
         if host.user != "root"
           cmd = "sudo "+pkg_mgr
@@ -730,6 +738,7 @@ class Deploy
   #
   def self.uninstall(host, pkg, dry_run, pkg_mgr = nil)
     begin
+
       if pkg.include? "&" or pkg.include? "|" or pkg.include? ">" or pkg.include? "<" or pkg.include? "`" or pkg.include? "$"
         raise FormatException
       end
@@ -774,7 +783,15 @@ class Deploy
           cmd = "sudo "+pkg_mgr
         end
         cmd = cmd+" -q -n rm "+pkg    ## NOT FULLY TESTED, DEVELOPMENT IN PROGRESS
-      #6.1. solaris pkgadd
+      #6. void-linux
+      elsif pkg_mgr == "xbps"
+        if host.user != "root"
+          cmd = "sudo /usr/bin/"+pkg_mgr
+        else
+          cmd = "/usr/bin/"+pkg_mgr
+        end
+        cmd = cmd + "-remove -y "+pkg     ## NOT FULLY TESTED, DEVELOPMENT IN PROGRESS
+      #7.1. solaris pkgadd
       elsif pkg_mgr == "pkgadd"
         if host.user != "root"
           cmd = "sudo /usr/sbin/pkgrm"
@@ -782,19 +799,19 @@ class Deploy
           cmd = "/usr/sbin/pkgrm"
         end
         cmd = cmd+" -a /etc/admin "+pkg    ## NOT FULLY TESTED, DEVELOPMENT IN PROGRESS
-      #6.2. solaris pkg
+      #7.2. solaris pkg
       elsif pkg_mgr == "pkg"
         if host.user != "root"
           cmd = "sudo "+pkg_mgr
         end
         cmd = cmd+" uninstall "+pkg    ## NOT FULLY TESTED, DEVELOPMENT IN PROGRESS
-      #6.3. solaris pkgutil
+      #7.3. solaris pkgutil
       elsif pkg_mgr == "pkgutil"
         if host.user != "root"
           cmd = "sudo "+pkg_mgr
         end
         cmd = cmd+" -y -r "+pkg    ## NOT FULLY TESTED, DEVELOPMENT IN PROGRESS
-      #7. openbsd pkg_add
+      #8. openbsd pkg_add
       elsif pkg_mgr == "pkg_add"
         cmd = "pkg_delete"
         if host.user != "root"
@@ -909,6 +926,21 @@ class Deploy
           when "restart"
             cmd = "/etc/rc.d/"
             cmd = sudo+cmd+service+" restart"
+          else
+            raise FormatException, "Action "+action+" not valid"
+          end
+        elsif svc_mgr == "runit"
+          case action
+          when "enable", "start"
+            cmd = sudo + "ln -s /etc/sv/" + service + " /var/service/" + service
+          when "disable", "stop"
+            cmd = [sudo + "rm /var/services/" + service,
+                            "killall -I -q " + service]
+          when "restart"
+            cmd = [sudo + "rm /var/services/" + service,
+                            "killall -I -q " + service,
+                             sudo + "ln -s /etc/sv/" + service + " /var/service/" + service]
+            cmd = cmd.join("; ")
           else
             raise FormatException, "Action "+action+" not valid"
           end
