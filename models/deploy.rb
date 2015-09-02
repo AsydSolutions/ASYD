@@ -931,16 +931,16 @@ class Deploy
           end
         elsif svc_mgr == "runit"
           case action
-          when "enable", "start"
+          when "enable"
             cmd = sudo + "ln -s /etc/sv/" + service + " /var/service/" + service
-          when "disable", "stop"
-            cmd = [sudo + "rm /var/services/" + service,
-                            "killall -I -q " + service]
+          when "start"
+            cmd = sudo + "sv start" + service
+          when "stop"
+            cmd = [sudo + "sv stop " + service]
+          when "disable"
+            cmd = sudo + "rm /var/services/" + service
           when "restart"
-            cmd = [sudo + "rm /var/services/" + service,
-                            "killall -I -q " + service,
-                             sudo + "ln -s /etc/sv/" + service + " /var/service/" + service]
-            cmd = cmd.join("; ")
+            cmd = sudo + "sv restart " + service
           else
             raise FormatException, "Action "+action+" not valid"
           end
