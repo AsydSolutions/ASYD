@@ -112,7 +112,7 @@ module Misc
   def exec_cmd(cmd)
     3.times do |iteration|
       begin
-        Net::SSH.start(self.ip, self.user, :port => self.ssh_port, :keys => "data/ssh_key", :timeout => 30) do |ssh|
+        Net::SSH.start(self.ip, self.user, :port => self.ssh_port, :keys => "data/ssh_key", :timeout => 30, :user_known_hosts_file => "/dev/null", :compression => true) do |ssh|
           result = ssh.exec!(cmd)
           return result
         end
@@ -133,7 +133,7 @@ module Misc
     end
     3.times do |iteration|
       begin
-        Net::SSH.start(self.ip, self.user, :port => self.ssh_port, :keys => "data/ssh_key", :timeout => 30) do |ssh|
+        Net::SSH.start(self.ip, self.user, :port => self.ssh_port, :keys => "data/ssh_key", :timeout => 30, :user_known_hosts_file => "/dev/null", :compression => true) do |ssh|
           ssh.scp.upload!(local, remote)
         end
         break
@@ -153,7 +153,7 @@ module Misc
     end
     3.times do |iteration|
       begin
-        Net::SSH.start(self.ip, self.user, :port => self.ssh_port, :keys => "data/ssh_key", :timeout => 30) do |ssh|
+        Net::SSH.start(self.ip, self.user, :port => self.ssh_port, :keys => "data/ssh_key", :timeout => 30, :user_known_hosts_file => "/dev/null", :compression => true) do |ssh|
           ssh.scp.download!(remote, local)
         end
         break
@@ -173,7 +173,7 @@ module Misc
     end
     3.times do |iteration|
       begin
-        Net::SSH.start(self.ip, self.user, :port => self.ssh_port, :keys => "data/ssh_key", :timeout => 30) do |ssh|
+        Net::SSH.start(self.ip, self.user, :port => self.ssh_port, :keys => "data/ssh_key", :timeout => 30, :user_known_hosts_file => "/dev/null", :compression => true) do |ssh|
           match = ssh.exec!("ls "+remote)
           if !match.nil? && match.start_with?("ls:")
             ssh.scp.upload!(local, remote, options={:recursive => true})
@@ -209,7 +209,7 @@ module Misc
     end
     3.times do |iteration|
       begin
-        Net::SSH.start(self.ip, self.user, :port => self.ssh_port, :keys => "data/ssh_key", :timeout => 30) do |ssh|
+        Net::SSH.start(self.ip, self.user, :port => self.ssh_port, :keys => "data/ssh_key", :timeout => 30, :user_known_hosts_file => "/dev/null", :compression => true) do |ssh|
           ssh.scp.download!(remote, local, :recursive => true)
         end
         break
@@ -223,7 +223,7 @@ module Misc
   #
   def reboot
     begin
-      Net::SSH.start(self.ip, self.user, :port => self.ssh_port, :keys => "data/ssh_key", :timeout => 30) do |ssh|
+      Net::SSH.start(self.ip, self.user, :port => self.ssh_port, :keys => "data/ssh_key", :timeout => 30, :user_known_hosts_file => "/dev/null", :compression => true) do |ssh|
         if self.user != "root"
           ssh.exec("sudo reboot")
         else
