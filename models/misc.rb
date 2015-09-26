@@ -116,6 +116,7 @@ module Misc
           result = ssh.exec!(cmd)
           return result
         end
+        break
       rescue Net::SSH::Exception => e
         return [4, e.message] if iteration == 2 # 4 == execution error
       end
@@ -135,6 +136,7 @@ module Misc
         Net::SSH.start(self.ip, self.user, :port => self.ssh_port, :keys => "data/ssh_key", :timeout => 30) do |ssh|
           ssh.scp.upload!(local, remote)
         end
+        break
       rescue Net::SSH::Exception => e
         return [4, e.message] if iteration == 2 # 4 == execution error
       end
@@ -154,6 +156,7 @@ module Misc
         Net::SSH.start(self.ip, self.user, :port => self.ssh_port, :keys => "data/ssh_key", :timeout => 30) do |ssh|
           ssh.scp.download!(remote, local)
         end
+        break
       rescue Net::SSH::Exception => e
         return [4, e.message] if iteration == 2 # 4 == execution error
       end
@@ -189,6 +192,7 @@ module Misc
             end
           end
         end
+        break
       rescue Net::SSH::Exception => e
         return [4, e.message] if iteration == 2 # 4 == execution error
       end
@@ -208,6 +212,7 @@ module Misc
         Net::SSH.start(self.ip, self.user, :port => self.ssh_port, :keys => "data/ssh_key", :timeout => 30) do |ssh|
           ssh.scp.download!(remote, local, :recursive => true)
         end
+        break
       rescue Net::SSH::Exception => e
         return [4, e.message] if iteration == 2 # 4 == execution error
       end
