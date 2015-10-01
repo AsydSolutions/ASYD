@@ -23,6 +23,7 @@ You can currently add systems based on:
  * CentOS
  * Arch Linux
  * OpenSUSE
+ * Void Linux
  * Solaris/OpenIndiana
  * OpenBSD
 

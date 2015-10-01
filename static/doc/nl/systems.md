@@ -24,6 +24,7 @@ Je kan momenteel onderstaande systemen toevoegen gebaseerd op:
  * CentOS
  * Arch Linux
  * OpenSUSE
+ * Void Linux
  * Solaris/OpenIndiana
  * OpenBSD
 

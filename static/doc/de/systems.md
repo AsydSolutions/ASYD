@@ -23,6 +23,7 @@ Derzeit unterstützte Systeme:
  * CentOS
  * Arch Linux
  * OpenSUSE
+ * Void Linux
  * Solaris/OpenIndiana
  * OpenBSD
 
