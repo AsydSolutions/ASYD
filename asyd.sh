@@ -6,6 +6,7 @@
 # 2 - Failed to start the daemon
 # 3 - Failed to kill the daemon
 # 4 - Failed to restart the daemon
+# 128+ - Amount of ASYD processes running (subtract 128 to get the real number)
 
 self="$0"
 cmd="$1"
@@ -72,9 +73,9 @@ case "$cmd" in
         kill -0 "$pid" 2> /dev/null && echo "running" || echo "stopped"
         ;;
     count)
-        nr=$(ps aux |grep ASYD |wc -l)
-        echo -n $nr
-        exit $(($nr))
+		num=$(ps xh -ocommand | grep -E '^ASYD ' | wc -l)
+        echo -n "$num"
+        exit $((128+$num))
         ;;
     *)
         echo "Usage: $self {start|stop|restart|status|pid|count}"
