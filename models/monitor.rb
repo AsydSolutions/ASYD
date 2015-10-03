@@ -312,7 +312,7 @@ class Monitor
   # Return a list of monitors
   #
   def self.all
-    monitors = Misc::get_files("data/monitors/")
+    monitors = Misc::get_files("data/monitors/").sort_by{|entry| entry.downcase}
     return monitors
   end
 

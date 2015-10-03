@@ -4,7 +4,7 @@ class Deploy
   # Return a list of deploys
   #
   def self.all
-    deploys = Misc::get_dirs("data/deploys/")
+    deploys = Misc::get_dirs("data/deploys/").sort_by{|entry| entry.downcase}
     return deploys
   end
 
