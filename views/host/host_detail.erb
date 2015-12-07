@@ -47,6 +47,7 @@
       </div>
       <div class="widget-content">
         <div class="control-group" id="fields">
+	  <% unless @host.opt_vars.nil? %>
             <%@host.opt_vars.each do |var|%>
             <div class="controls">
               <form class="input-prepend input-append" id="del_host_var" action='/host/del-var' method='post'>
@@ -58,6 +59,7 @@
               </form>
             </div>
             <%end%>
+	  <%end%>
 
           <form id="add_host_var" action='/host/add-var' method='post'>
             <div class="controls">
@@ -152,8 +154,10 @@
       <dt style="margin-left: 25px"><%%ARCH%></dt><dd style="margin-left: 175px"><%=@host.arch%></dd>
       <dt style="margin-left: 15px"><%%PGK_MANAGER%></dt><dd style="margin-left: 175px"><%=@host.pkg_mgr%></dd>
       <dt style="margin-left: 15px"><%%SVC_MANAGER%></dt><dd style="margin-left: 175px"><%= @host.svc_mgr ? @host.svc_mgr : "not set - recheck system info" %></dd><br>
-      <%@host.opt_vars.each do |var|%>
-        <dt style="margin-left: 15px"><%%VAR:<%=var[0]%>%></dt><dd style="margin-left: 175px"><%=var[1]%></dd>
+      <% unless @host.opt_vars.nil? %>
+	<%@host.opt_vars.each do |var|%>
+          <dt style="margin-left: 15px"><%%VAR:<%=var[0]%>%></dt><dd style="margin-left: 175px"><%=var[1]%></dd>
+        <%end%>
       <%end%>
     </dl>
   </div>

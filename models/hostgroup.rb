@@ -31,24 +31,22 @@ class Hostgroup
   end
 
   def add_var(name, value)
-    vars = self.opt_vars #load opt_vars
-    if !vars[name].nil?
-      return false #error = varname exists
+    if self.opt_vars.nil?
+      self.opt_vars = {}
+      self.save
     end
-    vars[name] = value #add a new variable to the hash and update
-    self.update(:opt_vars => nil)
-    self.update(:opt_vars => vars)
+    if !self.opt_vars[name].nil?
+      del_var(name)
+    end
+    self.update(:opt_vars => opt_vars.merge(name => value))
     return true #all ok
   end
 
   def del_var(name)
-    vars = self.opt_vars #load opt_vars
-    if vars[name].nil?
+    if self.opt_vars[name].nil?
       return false #error = varname doesn't exists
     end
-    vars.delete(name) #delete the variable and update
-    self.update(:opt_vars => nil)
-    self.update(:opt_vars => vars)
+    self.update(:opt_vars => opt_vars.except(name))
     return true #all ok
   end
 
