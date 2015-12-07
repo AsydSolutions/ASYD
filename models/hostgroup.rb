@@ -35,9 +35,6 @@ class Hostgroup
       self.opt_vars = {}
       self.save
     end
-    if !self.opt_vars[name].nil?
-      del_var(name)
-    end
     self.update(:opt_vars => opt_vars.merge(name => value))
     return true #all ok
   end
