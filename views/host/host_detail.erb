@@ -156,7 +156,7 @@
       <dt style="margin-left: 15px"><%%SVC_MANAGER%></dt><dd style="margin-left: 175px"><%= @host.svc_mgr ? @host.svc_mgr : "not set - recheck system info" %></dd><br>
       <% unless @host.opt_vars.nil? %>
 	<%@host.opt_vars.each do |var|%>
-          <dt style="margin-left: 15px"><%%VAR:<%=var[0]%>%></dt><dd style="margin-left: 175px"><%=var[1]%></dd>
+          <dt style="margin-left: 15px">&lt;%VAR:<%=var[0]%>%&gt;</dt><dd style="margin-left: 175px"><%=var[1]%></dd>
         <%end%>
       <%end%>
     </dl>
