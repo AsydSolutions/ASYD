@@ -27,7 +27,8 @@ class Email
       if cfg.method != :exchange
         mail = Mail.new do
           to to_
-          from cfg.user
+          from cfg.user if cfg.method == :smtp
+          smtp_envelope_from 'notification-mailer@asyd.eu' if cfg.method == :sendmail
           subject subject_
           text_part do
             body body_
