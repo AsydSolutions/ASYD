@@ -4,7 +4,7 @@ module Dmon
   def self.init
     DAEMONS.each do |daemon|
       start(daemon)
-    end
+    end if File.directory? 'data'
   end
 
   def self.handler

@@ -36,7 +36,19 @@ class ASYD < Sinatra::Application
       admins = Team.new(:name => "admins", :capabilities => :admin)
       admins.add_member(user)
     end
-    redirect to home
+    redirect to '/setup/finish'
+  end
+
+  get '/setup/finish' do
+    Spork.spork do
+      Process.setsid
+      Spork.spork do
+        sleep 1.5
+        exec "./asyd.sh restart"
+      end
+      exit
+    end
+    erb 'Completing setup, please wait... <script> setTimeout(function () { window.location.href = "/"; }, 8000); </script>'
   end
 
   get '/upgrade' do
