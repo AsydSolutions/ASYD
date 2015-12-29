@@ -4,9 +4,9 @@
 			<div class="widget-header">
 				<i class="icon-trello"></i><h3><%=t('group.other')%></h3>
 			</div>
-			<div class="widget-content">
+			<div id="hostgroups-list" class="widget-content">
 				<div style="position:absolute; margin:10px; z-index:90;">
-					<a data-toggle="modal" href="#addGroup" class="btn">
+					<a data-toggle="modal" href="#addGroup" class="btn addHostgroupToggle">
 						<%=t('group.add')%> <i class="btn-icon-only icon-plus"></i>
 					</a>
 				</div>
@@ -83,9 +83,9 @@
 			<div class="widget-header">
 				<i class="icon-hdd"></i><h3><%=t('host.other')%></h3>
 			</div>
-			<div class="widget-content">
+			<div id="hosts-list" class="widget-content">
 				<div style="position:absolute; margin:10px; z-index:90;">
-					<a data-toggle="modal" href="#addServer" class="btn">
+					<a data-toggle="modal" href="#addServer" class="btn addServerToggle">
 						<%=t('host.add')%> <i class="btn-icon-only icon-plus"></i>
 					</a>
 				</div>
@@ -151,8 +151,8 @@
 		</div>
 		<div class="modal-footer">
 			<a class="btn" data-dismiss="modal" aria-hidden="true"><%=t('action.cancel')%></a>
-			<button type="submit" class="btn btn-primary" onclick="load_spinner()"><%=t('action.add')%></button>
-			<input type="submit" class="btn btn-primary" onclick="load_spinner()" name="more" value="<%=t('action.add')%> <%=t('action.more')%>">
+			<button type="submit" class="btn btn-primary addServerButton" onclick="load_spinner()"><%=t('action.add')%></button>
+			<input type="submit" class="btn btn-primary addServerButton" onclick="load_spinner()" name="more" value="<%=t('action.add')%> <%=t('action.more')%>">
 		</div>
 	</form>
 </div>
