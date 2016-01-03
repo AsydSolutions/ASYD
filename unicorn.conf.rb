@@ -1,6 +1,6 @@
 $UNICORN = 1
 $ASYD_PID = Process.pid
-$ASYD_VERSION = 0.1
+$ASYD_VERSION = 0.11
 $DBG = 0 #debug?
 $PORT = 3000
 
