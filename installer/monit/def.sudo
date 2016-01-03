@@ -2,11 +2,11 @@
 # Will be executed on every new system added to ASYD
 # Modify accordingly to your systems (i.e. firewall rules, etc)
 # Alert: This deploy is automatically executed when a host is added, are you sure you want to manually execute it?
-# Version: 0.1
+# Version: 0.11
 
 ###
 # Check first if the system has a service manager
-if <%SVC_MANAGER%> != update-rc.d and <%SVC_MANAGER%> != chkconfig and <%SVC_MANAGER%> != systemctl and <%SVC_MANAGER%> != rc.d and <%SVC_MANAGER%> != runit and <%SVC_MANAGER%> != none
+if <%SVC_MANAGER%> != update-rc.d and <%SVC_MANAGER%> != chkconfig and <%SVC_MANAGER%> != systemctl and <%SVC_MANAGER%> != rc.d and <%SVC_MANAGER%> != runit and <%SVC_MANAGER%> != service and <%SVC_MANAGER%> != none
   There is no service manager defined, please go to the host detail view and recheck system information
 endif
 ###
@@ -117,6 +117,31 @@ if <%DIST%> == OpenBSD
 
 endif
 ###
+
+
+###
+# TODO
+# For FreeBSD:
+if <%DIST%> == FreeBSD
+	exec: sudo mkdir -p /etc/monit/conf.d
+    exec if <%ARCH%> == amd64: wget https://github.com/AsydSolutions/monit/releases/download/release-5-13-asyd/monit-freebsd-x64 -O /tmp/monit
+    exec if <%ARCH%> == i386: wget https://github.com/AsydSolutions/monit/releases/download/release-5-13-asyd/monit-freebsd-x86 -O /tmp/monit
+    exec: sudo mv /tmp/monit /usr/local/bin/
+    exec: sudo chmod +x /usr/local/bin/monit
+    
+    config file: monitrc, /tmp/monitrc
+    config file: monit.in, /tmp/monit.in
+    exec: sudo mv /tmp/monitrc /usr/local/etc/monitrc
+    exec: sudo mv /tmp/monit.in /usr/local/etc/rc.d/monit
+    exec: sudo chmod 700 /usr/local/etc/monitrc
+    exec: sudo chmod +x /usr/local/etc/rc.d/monit
+    exec: sudo chown root /usr/local/etc/rc.d/monit
+    exec: sudo chown root /usr/local/etc/monitrc
+    
+    enable service: monit
+    restart service: monit
+    
+endif
 
 # Last, we set the monitored flag
 var monitored = exec: echo 1
