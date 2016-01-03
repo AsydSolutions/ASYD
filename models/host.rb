@@ -35,7 +35,7 @@ class Host
       host.monit_pw = (0...8).map { o[rand(o.length)] }.join
       host.opt_vars = {} #initialize opt_vars as an empty hash
       #start connection to remote host
-      Net::SSH.start(host.ip, host.user, :port => host.ssh_port, :keys => "data/ssh_key", :password => password, :timeout => 10, :user_known_hosts_file => "/dev/null", :compression => true) do |ssh|
+      Net::SSH.start(host.ip, host.user, :port => host.ssh_port, :keys => "data/ssh_key", :password => password, :timeout => 10, :user_known_hosts_file => "/dev/null", :compression => true, :number_of_password_prompts => 0) do |ssh|
         #check for admin capabilities/nopasswd
         if user != "root"
           need_passwd = false
