@@ -691,8 +691,13 @@ class Deploy
         if host.user != "root"
           cmd = "sudo "+pkg_mgr
         end
-        cmd = cmd+" install --accept "+pkg    ## NOT FULLY TESTED, DEVELOPMENT IN PROGRESS
-      #7.3. solaris pkgutil
+        # 7.3 freebsd also uses pkg
+        if host.dist == "FreeBSD"
+          cmd = cmd+" install --yes "+pkg    ## NOT FULLY TESTED, DEVELOPMENT IN PROGRESS
+        else
+          cmd = cmd+" install --accept "+pkg    ## NOT FULLY TESTED, DEVELOPMENT IN PROGRESS
+        end
+      #7.4. solaris pkgutil
       elsif pkg_mgr == "pkgutil"
         if host.user != "root"
           cmd = "sudo "+pkg_mgr
@@ -804,8 +809,13 @@ class Deploy
         if host.user != "root"
           cmd = "sudo "+pkg_mgr
         end
-        cmd = cmd+" uninstall "+pkg    ## NOT FULLY TESTED, DEVELOPMENT IN PROGRESS
-      #7.3. solaris pkgutil
+        #7.3 freebsd also uses pkg
+        if host.dist == "FreeBSD"
+          cmd = cmd+" uninstall --yes"+pkg    ## NOT FULLY TESTED, DEVELOPMENT IN PROGRESS
+        else
+          cmd = cmd+" uninstall "+pkg    ## NOT FULLY TESTED, DEVELOPMENT IN PROGRESS
+        end
+      #7.4. solaris pkgutil
       elsif pkg_mgr == "pkgutil"
         if host.user != "root"
           cmd = "sudo "+pkg_mgr
@@ -943,6 +953,19 @@ class Deploy
             cmd = sudo + "sv restart " + service
           else
             raise FormatException, "Action "+action+" not valid"
+          end
+        elsif svc_mgr == "service"
+          case action
+          when "enable"
+            cmd = "echo '"+ service + "_enable=\"yes\"' > /tmp/rc-" + service + " && " + sudo + "mv /tmp/rc-" + service + "  /etc/rc.conf.d/" + service
+          when "start"
+            cmd = "if [ -f /etc/rc.conf.d/"+service + " ] ; then " + sudo + "service " + service + " start; else " + sudo + "service + " + service + " onestart; fi"
+          when "stop"
+            cmd = "if [ -f /etc/rc.conf.d/"+service + " ] ; then " + sudo + "service " + service + " stop; else " + sudo + "service + " + service + " onestop; fi"
+          when "disable"
+            cmd = sudo + " rm -f /etc/rc.conf.d/"+service
+          when "restart"
+            cmd = "if [ -f /etc/rc.conf.d/"+service + " ] ; then " + sudo + "service " + service + " restart; else " + sudo + "service + " + service + " onerestart; fi"
           end
         else
           raise FormatException, "Host "+host.hostname+" doesn't support the 'service' command"

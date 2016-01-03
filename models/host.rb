@@ -288,6 +288,12 @@ class Host
           host.dist = ssh.exec!("uname -s").strip
           host.dist_ver = ssh.exec!("uname -r").strip.to_f
           host.arch = ssh.exec!("uname -m").strip
+        #9. freebsd
+        elsif !(ssh.exec!("which freebsd-version") =~ /\/bin\/freebsd-version$/).nil?
+          host.pkg_mgr = "pkg"
+          host.dist = ssh.exec!("uname -s").strip
+          host.dist_ver = ssh.exec!("uname -r").strip[/\d+(?:\.\d+)?/]
+          host.arch = ssh.exec!("uname -m").strip
         else
           raise StandardError, "The OS of the machine is not yet supported" #OS not supported yet
         end
@@ -300,10 +306,12 @@ class Host
           host.svc_mgr = "update-rc.d"  # old debian
         elsif !(ssh.exec!(sudo+"which chkconfig") =~ /\/sbin\/chkconfig$/).nil?
           host.svc_mgr = "chkconfig"    # old rhel
-        elsif !(ssh.exec!("which runit") =~ /\/bin\/runit$/).nil?
+        elsif !(ssh.exec!(sudo+"which runit") =~ /\/bin\/runit$/).nil?
           host.svc_mgr = "runit"  # void-linux
         elsif host.pkg_mgr == "pkg_add"
           host.svc_mgr = "rc.d"         # openbsd
+        elsif !(ssh.exec!(sudo+"which freebsd-version") =~ /\/bin\/freebsd-version$/).nil?
+          host.svc_mgr = "service"
         else
           host.svc_mgr = "none"         # else (i.e. solaris)
         end
