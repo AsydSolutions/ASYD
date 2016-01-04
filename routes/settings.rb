@@ -13,6 +13,7 @@ class ASYD < Sinatra::Application
       if !Gem::Specification::find_all_by_name('viewpoint').any?
         @disclaimer = true
       end
+      @pub_key = File.read('data/ssh_key.pub')
       erb :'system/system_settings'
     else
       not_found
@@ -43,6 +44,21 @@ class ASYD < Sinatra::Application
         cfg.password = params['password']
       end
       cfg.save
+      redirect to "/settings"
+    else
+      not_found
+    end
+  end
+
+  post '/settings/ssh-keys' do
+    if user.is_admin?
+      p params[:priv_key].inspect
+      File.open('data/ssh_key', "w") do |f|
+        f.write(params[:priv_key][:tempfile].read)
+      end
+      File.open('data/ssh_key.pub', "w") do |f|
+        f.write(params[:pub_key][:tempfile].read)
+      end
       redirect to "/settings"
     else
       not_found
