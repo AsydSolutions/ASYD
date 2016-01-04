@@ -1,3 +1,5 @@
+<div class="row">
+  <div class="span6">
 <h3> E-Mail Settings </h3>
 <legend></legend>
 <div class="btn-group control-group" data-toggle-name="sendMethod" data-toggle="buttons-radio" >
@@ -60,4 +62,37 @@
     </form>
   <% end %>
   </div>
+</div>
+</div>
+
+<div class="span6">
+<h3> Change SSH Keys </h3>
+<p class="text-error">Warning: changing you SSH keys might cause ASYD being unable to connect any of your hosts anymore!!! Make sure your new key is installed on your hosts or re-add them.</p>
+    <form method="POST" action="/settings/ssh-keys" enctype='multipart/form-data'>
+      <fieldset>
+        <div id="ssh-key-form">
+          <div class="control-group">
+            <label class="control-label" for="priv_key">New <%=t('ssh.private_key')%></label>
+            <div class="controls">
+              <input class="input-file" name="priv_key" type="file" required>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label" for="pub_key">New <%=t('ssh.public_key')%></label>
+            <div class="controls">
+              <input class="input-file" name="pub_key" type="file" required>
+            </div>
+          </div>
+          <div class="control-group"><input class="btn btn-danger" type='submit' value="Change SSH keys" onclick="return confirm('Are you sure you want to update your SSH keys?');"></div>
+        </div>
+      </fieldset>
+    </form>
+    <div class="control-group">
+      <label class="control-label" for="priv_key">Current <%=t('ssh.public_key')%></label>
+      <div class="controls">
+        <textarea class="field span6" rows="3"><%= @pub_key %></textarea>
+      </div>
+    </div>
+</div>
+</div>
 </div>
