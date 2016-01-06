@@ -6,7 +6,7 @@
 
 ###
 # Check first if the system has a service manager
-if <%SVC_MANAGER%> != update-rc.d and <%SVC_MANAGER%> != chkconfig and <%SVC_MANAGER%> != systemctl and <%SVC_MANAGER%> != rc.d and <%SVC_MANAGER%> != runit and <%SVC_MANAGER%> != service and <%SVC_MANAGER%> != none
+if <%SVC_MANAGER%> != update-rc.d and <%SVC_MANAGER%> != chkconfig and <%SVC_MANAGER%> != systemctl and <%SVC_MANAGER%> != rc.d and <%SVC_MANAGER%> != runit and <%SVC_MANAGER%> != service and <%SVC_MANAGER%> != launchd and <%SVC_MANAGER%> != none
   There is no service manager defined, please go to the host detail view and recheck system information
 endif
 ###
@@ -120,7 +120,6 @@ endif
 
 
 ###
-# TODO
 # For FreeBSD:
 if <%DIST%> == FreeBSD
 	exec: sudo mkdir -p /etc/monit/conf.d
@@ -142,6 +141,31 @@ if <%DIST%> == FreeBSD
     restart service: monit
     
 endif
+
+
+###
+# For MacOSX:
+if <%DIST%> == MacOSX
+    install: wget
+    exec: sudo mkdir -p /etc/monit/conf.d
+    exec: wget https://github.com/AsydSolutions/monit/releases/download/release-5-13-asyd/monit-macosx-x64 -O /tmp/monit
+    exec: sudo mv /tmp/monit /usr/local/bin/
+    exec: sudo chmod +x /usr/local/bin/monit
+    
+    config file: monitrc, /tmp/monitrc
+    config file: monit.plist, /tmp/monit.plist
+    exec: sudo mv /tmp/monitrc /usr/local/etc/monitrc
+    exec: sudo mv /tmp/monit.plist /Library/LaunchDaemons/org.asyd.monit.plist
+    exec: sudo chmod 700 /usr/local/etc/monitrc
+    exec: sudo chmod 755 /Library/LaunchDaemons/org.asyd.monit.plist
+    exec: sudo chown root:admin /usr/local/etc/monitrc
+    exec: sudo chown root:admin /Library/LaunchDaemons/org.asyd.monit.plist
+    
+    enable service: org.asyd.monit.plist
+    restart service: org.asyd.monit.plist
+    
+endif
+
 
 # Last, we set the monitored flag
 var monitored = exec: echo 1

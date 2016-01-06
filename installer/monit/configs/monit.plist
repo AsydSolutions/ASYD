@@ -1,0 +1,23 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+"http://www.apple.com/DTDs/PropertyList-1.0.dtd" >
+<plist version='1.0'>
+<dict>
+<key>Label</key><string>org.asyd.monit</string>
+<key>ProgramArguments</key>
+<array>
+        <string>/opt/local/bin/daemondo</string>
+        <string>--label=monit</string>
+        <string>--start-cmd</string>
+        <string>/usr/local/bin/monit</string>
+        <string>-I</string>
+        <string>-c</string>
+        <string>/usr/local/etc/monitrc</string>
+        <string>;</string>
+        <string>--pid=exec</string>
+</array>
+<key>Debug</key><false/>
+<key>Disabled</key><true/>
+<key>KeepAlive</key><true/>
+</dict>
+</plist>

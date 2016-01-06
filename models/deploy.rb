@@ -710,6 +710,12 @@ class Deploy
         end
         pkg_path = 'export PKG_PATH="http://ftp.openbsd.org/pub/OpenBSD/'+host.dist_ver.to_s+'/packages/'+host.arch+'/"'
         cmd = pkg_path+" && "+cmd+" -U -I -x "+pkg    ## NOT FULLY TESTED, DEVELOPMENT IN PROGRESS
+      #9. macosx port
+      elsif pkg_mgr == "port"
+        if host.user != "root"
+          cmd = "sudo " + pkg_mgr
+        end
+        cmd = cmd + " install -c " + pkg ## NOT FULLY TESTED, DEVELOPMENT IN PROGRESS
       end
       unless dry_run
         result = host.exec_cmd(cmd)
@@ -828,6 +834,12 @@ class Deploy
           cmd = "sudo "+cmd
         end
         cmd = cmd+" -I -x "+pkg    ## NOT FULLY TESTED, DEVELOPMENT IN PROGRESS
+      #9. macosx port
+      elsif pkg_mgr == "port"
+        if host.user != "root"
+          cmd = "sudo " + pkg_mgr
+        end
+        cmd = cmd + " -u uninstall " + pkg ## NOT FULLY TESTED, DEVELOPMENT IN PROGRESS
       end
       unless dry_run
         result = host.exec_cmd(cmd)
@@ -966,6 +978,23 @@ class Deploy
             cmd = sudo + " rm -f /etc/rc.conf.d/"+service
           when "restart"
             cmd = "if [ -f /etc/rc.conf.d/"+service + " ] ; then " + sudo + "service " + service + " restart; else " + sudo + "service + " + service + " onerestart; fi"
+          else
+            raise FormatException, "Action "+action+" not valid"
+          end
+        elsif svc_mgr == "launchd"
+          case action
+          when "enable"
+            cmd = "launchctl load /Library/LaunchDaemons/" + service
+          when "start"
+            cmd = "launchctl load -w /Library/LaunchDaemons/" + service
+          when "stop"
+            cmd = "launchctl unload /Library/LaunchDaemons/" + service
+          when "disable"
+            cmd = "launchctl unload -w /Library/LaunchDaemons/" + service
+          when "restart"
+            cmd = "launchctl unload -w /Library/LaunchDaemons/" + service + " && " + "launchctl load -w /Library/LaunchDaemons/" + service
+          else
+            raise FormatException, "Action "+action+" not valid"
           end
         else
           raise FormatException, "Host "+host.hostname+" doesn't support the 'service' command"

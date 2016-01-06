@@ -6,7 +6,7 @@
 
 ###
 # Check first if the system has a service manager
-if <%SVC_MANAGER%> != update-rc.d and <%SVC_MANAGER%> != chkconfig and <%SVC_MANAGER%> != systemctl and <%SVC_MANAGER%> != rc.d and <%SVC_MANAGER%> != runit and <%SVC_MANAGER%> != service and <%SVC_MANAGER%> != none
+if <%SVC_MANAGER%> != update-rc.d and <%SVC_MANAGER%> != chkconfig and <%SVC_MANAGER%> != systemctl and <%SVC_MANAGER%> != rc.d and <%SVC_MANAGER%> != runit and <%SVC_MANAGER%> != service and <%SVC_MANAGER%> != launchd and <%SVC_MANAGER%> != none
   There is no service manager defined, please go to the host detail view and recheck system information
 endif
 ###
@@ -112,7 +112,6 @@ endif
 ###
 
 ###
-# TODO
 # For FreeBSD:
 if <%DIST%> == FreeBSD
 	exec: mkdir -p /etc/monit/conf.d
@@ -128,6 +127,28 @@ if <%DIST%> == FreeBSD
     
     enable service: monit
     restart service: monit
+    
+endif
+
+
+###
+# For MacOSX:
+if <%DIST%> == MacOSX
+    install: wget
+    exec: mkdir -p /etc/monit/conf.d
+    exec: wget https://github.com/AsydSolutions/monit/releases/download/release-5-13-asyd/monit-macosx-x64 -O /tmp/monit
+    exec: mv /tmp/monit /usr/local/bin/
+    exec: chmod +x /usr/local/bin/monit
+    
+    config file: monitrc, /usr/local/etc/monitrc
+    config file: monit.plist, /Library/LaunchDaemons/org.macports.monit.plist
+    exec: chmod 700 /usr/local/etc/monitrc
+    exec: chmod 755 /Library/LaunchDaemons/org.asyd.monit.plist
+    exec: chown root:admin /usr/local/etc/monitrc
+    exec: chown root:admin /Library/LaunchDaemons/org.asyd.monit.plist
+    
+    enable service: org.asyd.monit.plist
+    restart service: org.asyd.monit.plist
     
 endif
 

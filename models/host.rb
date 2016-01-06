@@ -62,7 +62,7 @@ class Host
             raise StandardError, "User has no admin privileges"
           end
           if need_passwd
-            cmd = "if [ -f \"/etc/sudoers.d/#{user}\" ]; then sudo cp /etc/sudoers.d/#{user} /tmp/sudoers#{user}; fi; sudo sh -c 'echo \"Defaults:#{user} !requiretty\" >> /tmp/sudoers#{user}'; sudo sh -c 'echo \"#{user} ALL=NOPASSWD: ALL\" >> /tmp/sudoers#{user}'; sudo sh -c 'uniq /tmp/sudoers#{user} > /etc/sudoers.d/#{user}'; sudo rm /tmp/sudoers#{user}"
+            cmd = "if [ -f \"/etc/sudoers.d/#{user}\" ]; then sudo cp /etc/sudoers.d/#{user} /tmp/sudoers#{user}; fi; sudo sh -c 'mkdir /etc/sudoers.d &>/dev/null'; sudo sh -c 'chown root:wheel /etc/sudoers.d'; sudo sh -c 'chmod 440 /etc/sudoers.d' ; sudo sh -c 'echo \"Defaults:#{user} !requiretty\" >> /tmp/sudoers#{user}'; sudo sh -c 'echo \"#{user} ALL=NOPASSWD: ALL\" >> /tmp/sudoers#{user}'; sudo sh -c 'uniq /tmp/sudoers#{user} > /etc/sudoers.d/#{user}'; sudo rm /tmp/sudoers#{user}"
             ssh.open_channel do |channel|
               channel.request_pty do |ch, success|
                 raise StandardError, "Could not obtain pty" unless success
@@ -294,6 +294,12 @@ class Host
           host.dist = ssh.exec!("uname -s").strip
           host.dist_ver = ssh.exec!("uname -r").strip[/\d+(?:\.\d+)?/]
           host.arch = ssh.exec!("uname -m").strip
+        #10. MacOsX
+        elsif !(ssh.exec!("which sw_vers") =~ /\/bin\/sw_vers$/).nil?
+          host.pkg_mgr = "port"
+          host.dist = ssh.exec!("sw_vers -productName").gsub(/\s+/, "") 
+          host.dist_ver = ssh.exec!("sw_vers -productVersion").strip
+          host.arch = ssh.exec!("uname -m").strip
         else
           raise StandardError, "The OS of the machine is not yet supported" #OS not supported yet
         end
@@ -312,6 +318,8 @@ class Host
           host.svc_mgr = "rc.d"         # openbsd
         elsif !(ssh.exec!(sudo+"which freebsd-version") =~ /\/bin\/freebsd-version$/).nil?
           host.svc_mgr = "service"
+        elsif !(ssh.exec!(sudo+"which launchd") =~ /\/sbin\/launchd$/).nil?
+          host.svc_mgr = "launchd"
         else
           host.svc_mgr = "none"         # else (i.e. solaris)
         end
