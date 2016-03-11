@@ -56,7 +56,8 @@ module Misc
 
   # Gets ASYD server IP address
   def get_asyd_ip
-    ip = UDPSocket.open {|s| s.connect(self.ip, 1); s.addr.last}
+    cmd = "echo $SSH_CLIENT | awk '{ print $1}'"
+    ip = self.exec_cmd(cmd).strip
     return ip
   end
 
