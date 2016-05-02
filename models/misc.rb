@@ -317,9 +317,9 @@ module Misc
       self.ssh_initiated?
 
       if self.user != "root"
-        self.ssh.exec("sudo reboot")
+        self.ssh.exec!("sudo reboot")
       else
-        self.ssh.exec("reboot")
+        self.ssh.exec!("reboot")
       end
     rescue Net::SSH::ConnectionTimeout => e
         return false # ?
