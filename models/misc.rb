@@ -209,34 +209,47 @@ module Misc
   #
   # @param local [String] path to the local dir
   # @param remote [String] remote path for uploading the directory
-  def upload_dir(local, remote)
+  # @param orig [String] path to the original config directory
+  def upload_dir(local, remote, orig)
     if remote.start_with? "~/" or remote.start_with? "$HOME/"
       remote.gsub!(/^(~|\$HOME)\//, '')
     end
     3.times do |iteration|
       begin
         Net::SSH.start(self.ip, self.user, :port => self.ssh_port, :keys => "data/ssh_key", :timeout => 30, :user_known_hosts_file => "/dev/null", :compression => true) do |ssh|
-          match = ssh.exec!("ls "+remote)
+          sudo = ""
+          sudo = "sudo " if self.user != "root"
+          match = ssh.exec!(sudo+"ls "+remote)
           if !match.nil? && match.start_with?("ls:")
-            ssh.scp.upload!(local, remote, options={:recursive => true})
+              dirname = [*('a'..'z'),*('0'..'9')].shuffle[0,8].join
+              ssh.scp.upload!(local, "/tmp/"+dirname, options={:recursive => true})
+              ret = ssh.exec!(sudo+"mv /tmp/"+dirname+" "+remote)
+              if !ret.nil? && ret.start_with?("mv:")
+                ssh.exec("sudo rm -r /tmp/"+dirname)
+                raise "Cannot overwite non-directory '"+remote+"'"
+              end
           else
             files = Misc.get_files(local)
             files.each do |file|
               newfile = local+"/"+file
               newremote = remote+"/"+file
-              self.upload_file(newfile, newremote)
+              neworig = orig+"/"+file
+              self.upload_file(newfile, newremote, neworig)
             end
             dirs = Misc.get_dirs(local)
             dirs.each do |dir|
               newdir = local+"/"+dir+"/"
               newremote = remote+"/"+dir
-              self.upload_dir(newdir, newremote)
+              neworig = orig+"/"+dir+"/"
+              self.upload_dir(newdir, newremote, neworig)
             end
           end
         end
         break
       rescue Net::SSH::Exception => e
         return [4, e.message] if iteration == 2 # 4 == execution error
+      rescue Exception => e
+        return [4, e.message]
       end
     end
   end

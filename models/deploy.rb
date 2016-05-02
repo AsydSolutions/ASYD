@@ -329,10 +329,11 @@ class Deploy
             parsed_cfg = parse_config_dir(host, cfg_src, nil) unless noparse
             unless dry_run
               if noparse
-                host.upload_dir(cfg_src, cfg_dst)
+                ret = host.upload_dir(cfg_src, cfg_dst, cfg_src)
               else
-                host.upload_dir(parsed_cfg, cfg_dst)
+                ret = host.upload_dir(parsed_cfg, cfg_dst, cfg_src)
               end
+              raise ExecutionError, ret[1] if ret.kind_of?(Array) and ret[0] == 4
             end
             FileUtils.rm_r parsed_cfg, :secure=>true unless noparse
             unless dry_run
