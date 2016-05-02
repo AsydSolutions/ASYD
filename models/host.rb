@@ -16,7 +16,6 @@ class Host
   property :pkg_mgr, String
   property :svc_mgr, String
   property :monit_pw, String
-  property :monitored, Boolean, :default => false # <-- DEPRECATED, keep for compatibility, will be removed in 2 releases
   property :opt_vars, Object
   property :created_at, DateTime
   property :updated_at, DateTime
@@ -297,7 +296,7 @@ class Host
         #10. MacOsX
         elsif !(ssh.exec!("which sw_vers") =~ /\/bin\/sw_vers$/).nil?
           host.pkg_mgr = "port"
-          host.dist = ssh.exec!("sw_vers -productName").gsub(/\s+/, "") 
+          host.dist = ssh.exec!("sw_vers -productName").gsub(/\s+/, "")
           host.dist_ver = ssh.exec!("sw_vers -productVersion").strip
           host.arch = ssh.exec!("uname -m").strip
         else
