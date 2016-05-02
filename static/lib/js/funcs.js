@@ -275,6 +275,7 @@ var editDeploy = function (path)
   }});
   $('#filePath').html(path);
   var editor = CodeMirror.fromTextArea(editBox, {
+    lineNumbers: true,
     mode: "text/x-sh"
   });
   editor.on("change", function () {
@@ -301,6 +302,7 @@ var editMonitor = function (path)
   }});
   $('#filePath').html(path);
   var editor = CodeMirror.fromTextArea(editBox, {
+    lineNumbers: true,
     mode: "text/x-sh"
   });
   editor.on("change", function () {
