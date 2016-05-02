@@ -294,10 +294,11 @@ class Deploy
             cfg_dst = cfg[1].strip
             unless dry_run
               if noparse
-                host.upload_file(cfg_src, cfg_dst)
+                ret = host.upload_file(cfg_src, cfg_dst, cfg_src)
               else
-                host.upload_file(parsed_cfg.path, cfg_dst)
+                ret = host.upload_file(parsed_cfg.path, cfg_dst, cfg_src)
               end
+              raise ExecutionError, ret[1] if ret.kind_of?(Array) and ret[0] == 4
             end
             parsed_cfg.unlink unless noparse
             unless dry_run

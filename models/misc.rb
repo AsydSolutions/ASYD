@@ -128,18 +128,59 @@ module Misc
   #
   # @param local [String] path to the local file
   # @param remote [String] remote path for uploading the file
-  def upload_file(local, remote)
+  # @param orig [String] path to the original config file
+  def upload_file(local, remote, orig)
     if remote.start_with? "~/" or remote.start_with? "$HOME/"
       remote.gsub!(/^(~|\$HOME)\//, '')
+    end
+    if remote.end_with?("/")
+      destination = remote+File.basename(orig)
+      remote_path = remote
+    else
+      destination = remote
+      remote_path = File.dirname(remote)
     end
     3.times do |iteration|
       begin
         Net::SSH.start(self.ip, self.user, :port => self.ssh_port, :keys => "data/ssh_key", :timeout => 30, :user_known_hosts_file => "/dev/null", :compression => true) do |ssh|
-          ssh.scp.upload!(local, remote)
+          if self.user != "root"
+            exit_code = nil
+            ssh.open_channel do |channel|
+              channel.exec("sudo mkdir -p "+remote_path) do |ch, success|
+                channel.on_request("exit-status") do |ch,data|
+                  exit_code = data.read_long
+                end
+              end
+            end
+            ssh.loop
+            if exit_code == 0
+              ssh.scp.upload!(local, "/tmp/"+File.basename(orig))
+              ssh.exec("sudo mv /tmp/"+File.basename(orig)+" "+destination)
+            else
+              raise "Unable to create remote path '"+destination+"'"
+            end
+          else
+            exit_code = nil
+            ssh.open_channel do |channel|
+              channel.exec("mkdir -p "+remote_path) do |ch, success|
+                channel.on_request("exit-status") do |ch,data|
+                  exit_code = data.read_long
+                end
+              end
+            end
+            ssh.loop
+            if exit_code == 0
+              ssh.scp.upload!(local, destination)
+            else
+              raise "Unable to create remote path '"+destination+"'"
+            end
+          end
         end
         break
       rescue Net::SSH::Exception => e
         return [4, e.message] if iteration == 2 # 4 == execution error
+      rescue Exception => e
+        return [4, e.message]
       end
     end
   end
