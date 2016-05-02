@@ -106,6 +106,17 @@ module Misc
     end
   end
 
+  # Verifies that ssh connection is stablished, else stablishes it
+  #
+  def ssh_initiated?
+    if self.ssh.nil?
+      @ssh_initiated_here = true
+      self.ssh = Net::SSH.start(self.ip, self.user, :port => self.ssh_port, :keys => "data/ssh_key", :timeout => 30, :user_known_hosts_file => "/dev/null", :compression => true)
+    else
+      self.ssh = Net::SSH.start(self.ip, self.user, :port => self.ssh_port, :keys => "data/ssh_key", :timeout => 30, :user_known_hosts_file => "/dev/null", :compression => true) if self.ssh.closed?
+    end
+  end
+
   # Executes a command on a remote host
   #
   # @param cmd [String] command to be executed
@@ -113,13 +124,18 @@ module Misc
   def exec_cmd(cmd)
     3.times do |iteration|
       begin
-        Net::SSH.start(self.ip, self.user, :port => self.ssh_port, :keys => "data/ssh_key", :timeout => 30, :user_known_hosts_file => "/dev/null", :compression => true) do |ssh|
-          result = ssh.exec!(cmd)
-          return result
-        end
+        self.ssh_initiated?
+
+        result = self.ssh.exec!(cmd)
+        return result
         break
       rescue Net::SSH::Exception => e
+        self.ssh.close if iteration < 2
+        self.ssh = Net::SSH.start(self.ip, self.user, :port => self.ssh_port, :keys => "data/ssh_key", :timeout => 30, :user_known_hosts_file => "/dev/null", :compression => true) if iteration < 2
         return [4, e.message] if iteration == 2 # 4 == execution error
+      ensure
+        self.ssh.close if @ssh_initiated_here
+        self.ssh = nil if @ssh_initiated_here
       end
     end
   end
@@ -142,45 +158,50 @@ module Misc
     end
     3.times do |iteration|
       begin
-        Net::SSH.start(self.ip, self.user, :port => self.ssh_port, :keys => "data/ssh_key", :timeout => 30, :user_known_hosts_file => "/dev/null", :compression => true) do |ssh|
-          if self.user != "root"
-            exit_code = nil
-            ssh.open_channel do |channel|
-              channel.exec("sudo mkdir -p "+remote_path) do |ch, success|
-                channel.on_request("exit-status") do |ch,data|
-                  exit_code = data.read_long
-                end
+        self.ssh_initiated?
+
+        if self.user != "root"
+          exit_code = nil
+          self.ssh.open_channel do |channel|
+            channel.exec("sudo mkdir -p "+remote_path) do |ch, success|
+              channel.on_request("exit-status") do |ch,data|
+                exit_code = data.read_long
               end
             end
-            ssh.loop
-            if exit_code == 0
-              ssh.scp.upload!(local, "/tmp/"+File.basename(orig))
-              ssh.exec("sudo mv /tmp/"+File.basename(orig)+" "+destination)
-            else
-              raise "Unable to create remote path '"+destination+"'"
-            end
+          end
+          self.ssh.loop
+          if exit_code == 0
+            self.ssh.scp.upload!(local, "/tmp/"+File.basename(orig))
+            self.ssh.exec("sudo mv /tmp/"+File.basename(orig)+" "+destination)
           else
-            exit_code = nil
-            ssh.open_channel do |channel|
-              channel.exec("mkdir -p "+remote_path) do |ch, success|
-                channel.on_request("exit-status") do |ch,data|
-                  exit_code = data.read_long
-                end
+            raise "Unable to create remote path '"+destination+"'"
+          end
+        else
+          exit_code = nil
+          self.ssh.open_channel do |channel|
+            channel.exec("mkdir -p "+remote_path) do |ch, success|
+              channel.on_request("exit-status") do |ch,data|
+                exit_code = data.read_long
               end
             end
-            ssh.loop
-            if exit_code == 0
-              ssh.scp.upload!(local, destination)
-            else
-              raise "Unable to create remote path '"+destination+"'"
-            end
+          end
+          self.ssh.loop
+          if exit_code == 0
+            self.ssh.scp.upload!(local, destination)
+          else
+            raise "Unable to create remote path '"+destination+"'"
           end
         end
         break
       rescue Net::SSH::Exception => e
+        self.ssh.close if iteration < 2
+        self.ssh = Net::SSH.start(self.ip, self.user, :port => self.ssh_port, :keys => "data/ssh_key", :timeout => 30, :user_known_hosts_file => "/dev/null", :compression => true) if iteration < 2
         return [4, e.message] if iteration == 2 # 4 == execution error
       rescue Exception => e
         return [4, e.message]
+      ensure
+        self.ssh.close if @ssh_initiated_here
+        self.ssh = nil if @ssh_initiated_here
       end
     end
   end
@@ -195,12 +216,17 @@ module Misc
     end
     3.times do |iteration|
       begin
-        Net::SSH.start(self.ip, self.user, :port => self.ssh_port, :keys => "data/ssh_key", :timeout => 30, :user_known_hosts_file => "/dev/null", :compression => true) do |ssh|
-          ssh.scp.download!(remote, local)
-        end
+        self.ssh_initiated?
+
+        self.ssh.scp.download!(remote, local)
         break
       rescue Net::SSH::Exception => e
+        self.ssh.close if iteration < 2
+        self.ssh = Net::SSH.start(self.ip, self.user, :port => self.ssh_port, :keys => "data/ssh_key", :timeout => 30, :user_known_hosts_file => "/dev/null", :compression => true) if iteration < 2
         return [4, e.message] if iteration == 2 # 4 == execution error
+      ensure
+        self.ssh.close if @ssh_initiated_here
+        self.ssh = nil if @ssh_initiated_here
       end
     end
   end
@@ -216,40 +242,45 @@ module Misc
     end
     3.times do |iteration|
       begin
-        Net::SSH.start(self.ip, self.user, :port => self.ssh_port, :keys => "data/ssh_key", :timeout => 30, :user_known_hosts_file => "/dev/null", :compression => true) do |ssh|
-          sudo = ""
-          sudo = "sudo " if self.user != "root"
-          match = ssh.exec!(sudo+"ls "+remote)
-          if !match.nil? && match.start_with?("ls:")
-              dirname = [*('a'..'z'),*('0'..'9')].shuffle[0,8].join
-              ssh.scp.upload!(local, "/tmp/"+dirname, options={:recursive => true})
-              ret = ssh.exec!(sudo+"mv /tmp/"+dirname+" "+remote)
-              if !ret.nil? && ret.start_with?("mv:")
-                ssh.exec("sudo rm -r /tmp/"+dirname)
-                raise "Cannot overwite non-directory '"+remote+"'"
-              end
-          else
-            files = Misc.get_files(local)
-            files.each do |file|
-              newfile = local+"/"+file
-              newremote = remote+"/"+file
-              neworig = orig+"/"+file
-              self.upload_file(newfile, newremote, neworig)
+        self.ssh_initiated?
+
+        sudo = ""
+        sudo = "sudo " if self.user != "root"
+        match = self.ssh.exec!(sudo+"ls "+remote)
+        if !match.nil? && match.start_with?("ls:")
+            dirname = [*('a'..'z'),*('0'..'9')].shuffle[0,8].join
+            self.ssh.scp.upload!(local, "/tmp/"+dirname, options={:recursive => true})
+            ret = self.ssh.exec!(sudo+"mv /tmp/"+dirname+" "+remote)
+            if !ret.nil? && ret.start_with?("mv:")
+              self.ssh.exec("sudo rm -r /tmp/"+dirname)
+              raise "Cannot overwite non-directory '"+remote+"'"
             end
-            dirs = Misc.get_dirs(local)
-            dirs.each do |dir|
-              newdir = local+"/"+dir+"/"
-              newremote = remote+"/"+dir
-              neworig = orig+"/"+dir+"/"
-              self.upload_dir(newdir, newremote, neworig)
-            end
+        else
+          files = Misc.get_files(local)
+          files.each do |file|
+            newfile = local+"/"+file
+            newremote = remote+"/"+file
+            neworig = orig+"/"+file
+            self.upload_file(newfile, newremote, neworig)
+          end
+          dirs = Misc.get_dirs(local)
+          dirs.each do |dir|
+            newdir = local+"/"+dir+"/"
+            newremote = remote+"/"+dir
+            neworig = orig+"/"+dir+"/"
+            self.upload_dir(newdir, newremote, neworig)
           end
         end
         break
       rescue Net::SSH::Exception => e
+        self.ssh.close if iteration < 2
+        self.ssh = Net::SSH.start(self.ip, self.user, :port => self.ssh_port, :keys => "data/ssh_key", :timeout => 30, :user_known_hosts_file => "/dev/null", :compression => true) if iteration < 2
         return [4, e.message] if iteration == 2 # 4 == execution error
       rescue Exception => e
         return [4, e.message]
+      ensure
+        self.ssh.close if @ssh_initiated_here
+        self.ssh = nil if @ssh_initiated_here
       end
     end
   end
@@ -264,12 +295,17 @@ module Misc
     end
     3.times do |iteration|
       begin
-        Net::SSH.start(self.ip, self.user, :port => self.ssh_port, :keys => "data/ssh_key", :timeout => 30, :user_known_hosts_file => "/dev/null", :compression => true) do |ssh|
-          ssh.scp.download!(remote, local, :recursive => true)
-        end
+        self.ssh_initiated?
+
+        self.ssh.scp.download!(remote, local, :recursive => true)
         break
       rescue Net::SSH::Exception => e
+        self.ssh.close if iteration < 2
+        self.ssh = Net::SSH.start(self.ip, self.user, :port => self.ssh_port, :keys => "data/ssh_key", :timeout => 30, :user_known_hosts_file => "/dev/null", :compression => true) if iteration < 2
         return [4, e.message] if iteration == 2 # 4 == execution error
+      ensure
+        self.ssh.close if @ssh_initiated_here
+        self.ssh = nil if @ssh_initiated_here
       end
     end
   end
@@ -278,12 +314,12 @@ module Misc
   #
   def reboot
     begin
-      Net::SSH.start(self.ip, self.user, :port => self.ssh_port, :keys => "data/ssh_key", :timeout => 30, :user_known_hosts_file => "/dev/null", :compression => true) do |ssh|
-        if self.user != "root"
-          ssh.exec("sudo reboot")
-        else
-          ssh.exec("reboot")
-        end
+      self.ssh_initiated?
+
+      if self.user != "root"
+        self.ssh.exec("sudo reboot")
+      else
+        self.ssh.exec("reboot")
       end
     rescue Net::SSH::ConnectionTimeout => e
         return false # ?

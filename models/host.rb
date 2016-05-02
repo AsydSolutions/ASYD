@@ -22,6 +22,8 @@ class Host
   has n, :hostgroup_members
   has n, :hostgroups, :through => :hostgroup_members
 
+  attr_accessor :ssh
+
   def self.init(hostname, ip, user, ssh_port, password)
     begin
       host = Host.create(:hostname => hostname.strip)

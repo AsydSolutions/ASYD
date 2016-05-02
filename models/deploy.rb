@@ -95,6 +95,8 @@ class Deploy
         path = "data/deploys/"+dep+"/def"
       end
 
+      host.ssh = Net::SSH.start(host.ip, host.user, :port => host.ssh_port, :keys => "data/ssh_key", :timeout => 30, :user_known_hosts_file => "/dev/null", :compression => true) if host.ssh.nil? or host.ssh.closed?
+
       # Check deploy (dry run)
       unless from_deploy and !dry_run # check only once when calling from deploy
         ret = Deploy.deploy(host, path, cfg_root, task, true)
@@ -113,6 +115,8 @@ class Deploy
       return [5, e.message] # 5 == format exception
     rescue TargetUnreachable => e
       return [6, e.message] # 6 == host unreachable
+    ensure
+      host.ssh.close unless dry_run or from_deploy
     end
   end
 
@@ -136,6 +140,8 @@ class Deploy
         path = "data/deploys/"+dep+"/undeploy"
       end
 
+      host.ssh = Net::SSH.start(host.ip, host.user, :port => host.ssh_port, :keys => "data/ssh_key", :timeout => 30, :user_known_hosts_file => "/dev/null", :compression => true) if host.ssh.nil? or host.ssh.closed?
+
       # Check deploy (dry run)
       unless from_deploy and !dry_run # check only once when calling from deploy
         ret = Deploy.deploy(host, path, cfg_root, task, true)
@@ -154,6 +160,8 @@ class Deploy
       return [5, e.message] # 5 == format exception
     rescue TargetUnreachable => e
       return [6, e.message] # 6 == host unreachable
+    ensure
+      host.ssh.close unless dry_run or from_deploy
     end
   end
 
@@ -626,7 +634,7 @@ class Deploy
 
   # Install package or packages on defined host
   #
-  def self.install(host, pkg, dry_run, pkg_mgr = nil)
+  def self.install(host, pkg, dry_run = false, pkg_mgr = nil)
     begin
       if pkg.include? "&" or pkg.include? "|" or pkg.include? ">" or pkg.include? "<" or pkg.include? "`" or pkg.include? "$"
         raise FormatException
@@ -749,7 +757,7 @@ class Deploy
 
   # Uninstall package or packages on defined host
   #
-  def self.uninstall(host, pkg, dry_run, pkg_mgr = nil)
+  def self.uninstall(host, pkg, dry_run = false, pkg_mgr = nil)
     begin
 
       if pkg.include? "&" or pkg.include? "|" or pkg.include? ">" or pkg.include? "<" or pkg.include? "`" or pkg.include? "$"
