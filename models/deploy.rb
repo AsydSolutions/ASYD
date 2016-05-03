@@ -389,6 +389,7 @@ class Deploy
             cmd = parse(host, line[1].strip) #parse for vars
             unless dry_run
               ret = exec_host.exec_cmd(cmd)
+              raise ExecutionError, ret[1] if ret.kind_of?(Array) and ret[0] == 4
               msg = "Executed '"+cmd+"' on "+exec_host.hostname
               msg = msg+": "+ret unless ret.nil?
               NOTEX.synchronize do

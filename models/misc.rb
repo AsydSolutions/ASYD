@@ -106,9 +106,13 @@ module Misc
     end
   end
 
-  # Verifies that ssh connection is stablished, else stablishes it
+  # Verifies the host is alive and a ssh connection is stablished, else stablishes it
   #
   def ssh_initiated?
+    if !Misc::is_port_open?(self.ip, self.ssh_port, pingback=true)
+      raise "Error: host "+self.hostname+" unreachable"
+    end
+
     if self.ssh.nil?
       @ssh_initiated_here = true
       self.ssh = Net::SSH.start(self.ip, self.user, :port => self.ssh_port, :keys => "data/ssh_key", :timeout => 30, :user_known_hosts_file => "/dev/null", :compression => true)
@@ -133,6 +137,8 @@ module Misc
         self.ssh.close if iteration < 2
         self.ssh = Net::SSH.start(self.ip, self.user, :port => self.ssh_port, :keys => "data/ssh_key", :timeout => 30, :user_known_hosts_file => "/dev/null", :compression => true) if iteration < 2
         return [4, e.message] if iteration == 2 # 4 == execution error
+      rescue Exception => e
+        return [4, e.message]
       ensure
         self.ssh.close if @ssh_initiated_here
         self.ssh = nil if @ssh_initiated_here
@@ -224,6 +230,8 @@ module Misc
         self.ssh.close if iteration < 2
         self.ssh = Net::SSH.start(self.ip, self.user, :port => self.ssh_port, :keys => "data/ssh_key", :timeout => 30, :user_known_hosts_file => "/dev/null", :compression => true) if iteration < 2
         return [4, e.message] if iteration == 2 # 4 == execution error
+      rescue Exception => e
+        return [4, e.message]
       ensure
         self.ssh.close if @ssh_initiated_here
         self.ssh = nil if @ssh_initiated_here
@@ -303,6 +311,8 @@ module Misc
         self.ssh.close if iteration < 2
         self.ssh = Net::SSH.start(self.ip, self.user, :port => self.ssh_port, :keys => "data/ssh_key", :timeout => 30, :user_known_hosts_file => "/dev/null", :compression => true) if iteration < 2
         return [4, e.message] if iteration == 2 # 4 == execution error
+      rescue Exception => e
+        return [4, e.message]
       ensure
         self.ssh.close if @ssh_initiated_here
         self.ssh = nil if @ssh_initiated_here

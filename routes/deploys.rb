@@ -34,21 +34,23 @@ class ASYD < Sinatra::Application
       end
       Spork.spork do
         sleep 0.2
-        result = Deploy.install(host, params['package'])
-        if result[0] == 1
+        if !Misc::is_port_open?(host.ip, host.ssh_port, pingback=true)
           NOTEX.synchronize do
-            Notification.create(:type => :success, :sticky => true, :message => result[1], :task => task)
-          end
-          TATEX.synchronize do
-            task.update(:status => :finished)
-          end
-        else
-          NOTEX.synchronize do
-            Notification.create(:type => :error, :sticky => true, :message => result[1], :task => task)
+            Notification.create(:type => :error, :sticky => true, :message => "Error: host "+host.hostname+" unreachable", :task => task)
           end
           TATEX.synchronize do
             task.update(:status => :failed)
           end
+          Kernel.exit!
+        end
+        result = Deploy.install(host, params['package'])
+        NOTEX.synchronize do
+          Notification.create(:type => :success, :sticky => true, :message => result[1], :task => task) if result[0] == 1
+          Notification.create(:type => :error, :sticky => true, :message => result[1], :task => task) unless result[0] == 1
+        end
+        TATEX.synchronize do
+          task.update(:status => :finished) if result[0] == 1
+          task.update(:status => :failed) unless result[0] == 1
         end
       end
     elsif target[0] == "hostgroup"
@@ -64,6 +66,13 @@ class ASYD < Sinatra::Application
       success.put_int(0, 1) #default to true
       Spork.spork do
         hostgroup.group_launch { |host|
+          if !Misc::is_port_open?(host.ip, host.ssh_port, pingback=true)
+            NOTEX.synchronize do
+              Notification.create(:type => :error, :dismiss => true, :message => "Error: host "+host.hostname+" unreachable", :task => task)
+            end
+            success.put_int(0, 0)
+            Kernel.exit!
+          end
           result = Deploy.install(host, params['package'])
           if result[0] == 1
             NOTEX.synchronize do
@@ -78,22 +87,18 @@ class ASYD < Sinatra::Application
             success.put_int(0, 0)
           end
         }
-        if success.get_int(0) == 1
-          NOTEX.synchronize do
+        NOTEX.synchronize do
+          if success.get_int(0) == 1
             msg = "Packages successfully installed on "+target[0]+" "+target[1]
             Notification.create(:type => :success, :sticky => true, :message => msg, :task => task)
-          end
-          TATEX.synchronize do
-            task.update(:status => :finished)
-          end
-        else
-          NOTEX.synchronize do
+          else
             msg = "Error installing packages on "+target[0]+" "+target[1]
             Notification.create(:type => :error, :sticky => true, :message => msg, :task => task)
           end
-          TATEX.synchronize do
-            task.update(:status => :failed)
-          end
+        end
+        TATEX.synchronize do
+          task.update(:status => :finished) if success.get_int(0) == 1
+          task.update(:status => :failed) unless success.get_int(0) == 1
         end
         success.close
       end
@@ -117,13 +122,26 @@ class ASYD < Sinatra::Application
       end
       Spork.spork do
         sleep 0.2
+        task_failed = false
+        if !Misc::is_port_open?(host.ip, host.ssh_port, pingback=true)
+          NOTEX.synchronize do
+            Notification.create(:type => :error, :sticky => true, :message => "Error: host "+host.hostname+" unreachable", :task => task)
+          end
+          TATEX.synchronize do
+            task.update(:status => :failed)
+          end
+          Kernel.exit!
+        end
         cmd = Deploy.parse(host, params['cmd'])
         result = host.exec_cmd(cmd)
         NOTEX.synchronize do
-          Notification.create(:type => :success, :sticky => true, :message => "Result: "+result, :task => task)
+          Notification.create(:type => :success, :sticky => true, :message => "Result: "+result, :task => task) unless result.kind_of?(Array)
+          Notification.create(:type => :error, :sticky => true, :message => result[1], :task => task) if result.kind_of?(Array) and result[0] == 4
+          task_failed = true if result.kind_of?(Array) and result[0] == 4
         end
         TATEX.synchronize do
-          task.update(:status => :finished)
+          task.update(:status => :finished) unless task_failed
+          task.update(:status => :failed) if task_failed
         end
       end
     elsif target[0] == "hostgroup"
@@ -135,22 +153,40 @@ class ASYD < Sinatra::Application
       NOTEX.synchronize do
         Notification.create(:type => :info, :message => t('task.actions.'+task.action.to_s)+" '"+params['cmd']+"' on "+hostgroup.name, :task => task)
       end
+      success = ProcessShared::SharedMemory.new(:int) #shared with the forks
+      success.put_int(0, 1) #default to true
       Spork.spork do
         hostgroup.group_launch { |host|
+          if !Misc::is_port_open?(host.ip, host.ssh_port, pingback=true)
+            NOTEX.synchronize do
+              Notification.create(:type => :error, :dismiss => true, :message => "Error: host "+host.hostname+" unreachable", :task => task)
+            end
+            success.put_int(0, 0)
+            Kernel.exit!
+          end
           cmd = Deploy.parse(host, params['cmd'])
           result = host.exec_cmd(cmd)
           NOTEX.synchronize do
             msg = "Executed "+cmd+" on "+host.hostname+": "+result
-            Notification.create(:type => :success, :dismiss => true, :message => msg, :task => task)
+            Notification.create(:type => :success, :dismiss => true, :message => msg, :task => task) unless result.kind_of?(Array)
+            Notification.create(:type => :error, :dismiss => true, :message => result[1], :task => task) if result.kind_of?(Array) and result[0] == 4
+            success.put_int(0, 0) if result.kind_of?(Array) and result[0] == 4
           end
         }
         NOTEX.synchronize do
-          msg = "Command successfully executed on "+target[0]+" "+target[1]
-          Notification.create(:type => :success, :sticky => true, :message => msg, :task => task)
+          if success.get_int(0) == 1
+            msg = "Command successfully executed on "+target[0]+" "+target[1]
+            Notification.create(:type => :success, :sticky => true, :message => msg, :task => task)
+          else
+            msg = "Error executing command on "+target[0]+" "+target[1]
+            Notification.create(:type => :error, :sticky => true, :message => msg, :task => task)
+          end
         end
         TATEX.synchronize do
-          task.update(:status => :finished)
+          task.update(:status => :finished) if success.get_int(0) == 1
+          task.update(:status => :failed) unless success.get_int(0) == 1
         end
+        success.close
       end
     end
     deploys = '/deploys/list'
