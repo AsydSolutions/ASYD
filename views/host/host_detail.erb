@@ -145,7 +145,7 @@
   <div class="modal-body">
     <dl class="dl-horizontal">
       <dt style="margin-left: 25px">Variable</dt><dd style="margin-left: 175px">Value</dd><br>
-      <dt style="margin-left: 25px"><%%ASYD%></dt><dd style="margin-left: 175px"><%=@host.get_asyd_ip%></dd>
+      <dt style="margin-left: 25px"><%%ASYD%></dt><dd style="margin-left: 175px"><%=@status.system_status == "ok" ? @host.get_asyd_ip : "Host down, try again later"%></dd>
       <dt style="margin-left: 25px"><%%HOSTNAME%></dt><dd style="margin-left: 175px"><%=@host.hostname%></dd>
       <dt style="margin-left: 25px"><%%IP%></dt><dd style="margin-left: 175px"><%=@host.ip%></dd>
       <dt style="margin-left: 25px"><%%SSH_PORT%></dt><dd style="margin-left: 175px"><%=@host.ssh_port%></dd>

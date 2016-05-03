@@ -57,8 +57,9 @@ module Misc
   # Gets ASYD server IP address
   def get_asyd_ip
     cmd = "echo $SSH_CLIENT | awk '{ print $1}'"
-    ip = self.exec_cmd(cmd).strip
-    return ip
+    ip = self.exec_cmd(cmd)
+    return ip.strip unless ip.kind_of?(Array) and ip[0] == 4
+    return "Host down, try again later" if ip.kind_of?(Array) and ip[0] == 4
   end
 
   # Get max allocable forks
