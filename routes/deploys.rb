@@ -34,7 +34,7 @@ class ASYD < Sinatra::Application
       end
       Spork.spork do
         sleep 0.2
-        if !Misc::is_port_open?(host.ip, host.ssh_port, pingback=true)
+        if !Misc::is_port_open?(host.ip, host.ssh_port, pingback=false, ssh=true)
           NOTEX.synchronize do
             Notification.create(:type => :error, :sticky => true, :message => "Error: host "+host.hostname+" unreachable", :task => task)
           end
@@ -66,7 +66,7 @@ class ASYD < Sinatra::Application
       success.put_int(0, 1) #default to true
       Spork.spork do
         hostgroup.group_launch { |host|
-          if !Misc::is_port_open?(host.ip, host.ssh_port, pingback=true)
+          if !Misc::is_port_open?(host.ip, host.ssh_port, pingback=false, ssh=true)
             NOTEX.synchronize do
               Notification.create(:type => :error, :dismiss => true, :message => "Error: host "+host.hostname+" unreachable", :task => task)
             end
@@ -123,7 +123,7 @@ class ASYD < Sinatra::Application
       Spork.spork do
         sleep 0.2
         task_failed = false
-        if !Misc::is_port_open?(host.ip, host.ssh_port, pingback=true)
+        if !Misc::is_port_open?(host.ip, host.ssh_port, pingback=false, ssh=true)
           NOTEX.synchronize do
             Notification.create(:type => :error, :sticky => true, :message => "Error: host "+host.hostname+" unreachable", :task => task)
           end
@@ -157,7 +157,7 @@ class ASYD < Sinatra::Application
       success.put_int(0, 1) #default to true
       Spork.spork do
         hostgroup.group_launch { |host|
-          if !Misc::is_port_open?(host.ip, host.ssh_port, pingback=true)
+          if !Misc::is_port_open?(host.ip, host.ssh_port, pingback=false, ssh=true)
             NOTEX.synchronize do
               Notification.create(:type => :error, :dismiss => true, :message => "Error: host "+host.hostname+" unreachable", :task => task)
             end

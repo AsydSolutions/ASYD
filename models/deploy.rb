@@ -83,7 +83,7 @@ class Deploy
         error = "Error: host not found"
         raise ExecutionError, error
       end
-      if !Misc::is_port_open?(host.ip, host.ssh_port, pingback=true)
+      if !Misc::is_port_open?(host.ip, host.ssh_port, pingback=true, ssh=true)
         error = "Error: host "+host.hostname+" unreachable"
         raise TargetUnreachable, error
       end
@@ -128,7 +128,7 @@ class Deploy
         error = "Error: host not found"
         raise ExecutionError, error
       end
-      if !Misc::is_port_open?(host.ip, host.ssh_port, pingback=true)
+      if !Misc::is_port_open?(host.ip, host.ssh_port, pingback=true, ssh=true)
         error = "Error: host "+host.hostname+" unreachable"
         raise TargetUnreachable, error
       end

@@ -92,10 +92,11 @@ module Misc
   end
 
   # Checks if a port is open (so if the host is reachable)
-  def self.is_port_open?(ip, port, pingback=false, seconds=3)
+  def self.is_port_open?(ip, port, pingback=false, ssh=false, seconds=3)
     begin
       Timeout::timeout(seconds) do
         s = TCPSocket.new(ip, port)
+        s.write "SSH-2.0-Ruby/ASYD\r\n" if ssh
         s.gets if pingback
         s.close
         true
@@ -110,11 +111,10 @@ module Misc
   # Verifies the host is alive and a ssh connection is stablished, else stablishes it
   #
   def ssh_initiated?
-    if !Misc::is_port_open?(self.ip, self.ssh_port, pingback=true)
-      raise "Error: host "+self.hostname+" unreachable"
-    end
-
     if self.ssh.nil?
+      if !Misc::is_port_open?(self.ip, self.ssh_port, pingback=false, ssh=true)
+        raise "Error: host "+self.hostname+" unreachable"
+      end
       @ssh_initiated_here = true
       self.ssh = Net::SSH.start(self.ip, self.user, :port => self.ssh_port, :keys => "data/ssh_key", :timeout => 30, :user_known_hosts_file => "/dev/null", :compression => true)
     else
