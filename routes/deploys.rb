@@ -43,7 +43,9 @@ class ASYD < Sinatra::Application
           end
           Kernel.exit!
         end
+        host.ssh = Net::SSH.start(host.ip, host.user, :port => host.ssh_port, :keys => "data/ssh_key", :timeout => 30, :user_known_hosts_file => "/dev/null", :compression => true)
         result = Deploy.install(host, params['package'])
+        host.ssh.close if !host.ssh.nil? and !host.ssh.closed?
         NOTEX.synchronize do
           Notification.create(:type => :success, :sticky => true, :message => result[1], :task => task) if result[0] == 1
           Notification.create(:type => :error, :sticky => true, :message => result[1], :task => task) unless result[0] == 1
@@ -73,7 +75,9 @@ class ASYD < Sinatra::Application
             success.put_int(0, 0)
             Kernel.exit!
           end
+          host.ssh = Net::SSH.start(host.ip, host.user, :port => host.ssh_port, :keys => "data/ssh_key", :timeout => 30, :user_known_hosts_file => "/dev/null", :compression => true)
           result = Deploy.install(host, params['package'])
+          host.ssh.close if !host.ssh.nil? and !host.ssh.closed?
           if result[0] == 1
             NOTEX.synchronize do
               msg = "Installed "+params['package']+" on "+host.hostname+": "+result[1]
@@ -132,8 +136,10 @@ class ASYD < Sinatra::Application
           end
           Kernel.exit!
         end
+        host.ssh = Net::SSH.start(host.ip, host.user, :port => host.ssh_port, :keys => "data/ssh_key", :timeout => 30, :user_known_hosts_file => "/dev/null", :compression => true)
         cmd = Deploy.parse(host, params['cmd'])
         result = host.exec_cmd(cmd)
+        host.ssh.close if !host.ssh.nil? and !host.ssh.closed?
         NOTEX.synchronize do
           Notification.create(:type => :success, :sticky => true, :message => "Result: "+result, :task => task) unless result.kind_of?(Array)
           Notification.create(:type => :error, :sticky => true, :message => result[1], :task => task) if result.kind_of?(Array) and result[0] == 4
@@ -164,8 +170,10 @@ class ASYD < Sinatra::Application
             success.put_int(0, 0)
             Kernel.exit!
           end
+          host.ssh = Net::SSH.start(host.ip, host.user, :port => host.ssh_port, :keys => "data/ssh_key", :timeout => 30, :user_known_hosts_file => "/dev/null", :compression => true)
           cmd = Deploy.parse(host, params['cmd'])
           result = host.exec_cmd(cmd)
+          host.ssh.close if !host.ssh.nil? and !host.ssh.closed?
           NOTEX.synchronize do
             msg = "Executed "+cmd+" on "+host.hostname+": "+result
             Notification.create(:type => :success, :dismiss => true, :message => msg, :task => task) unless result.kind_of?(Array)

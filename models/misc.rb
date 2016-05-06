@@ -112,9 +112,7 @@ module Misc
   #
   def ssh_initiated?
     if self.ssh.nil?
-      if !Misc::is_port_open?(self.ip, self.ssh_port, pingback=false, ssh=true)
-        raise "Error: host "+self.hostname+" unreachable"
-      end
+      raise "Error: host "+self.hostname+" unreachable" if !Misc::is_port_open?(self.ip, self.ssh_port, pingback=false, ssh=true)
       @ssh_initiated_here = true
       self.ssh = Net::SSH.start(self.ip, self.user, :port => self.ssh_port, :keys => "data/ssh_key", :timeout => 30, :user_known_hosts_file => "/dev/null", :compression => true)
     else
@@ -135,7 +133,7 @@ module Misc
         return result
         break
       rescue Net::SSH::Exception => e
-        self.ssh.close if iteration < 2
+        self.ssh.close if iteration < 2 and !self.ssh.nil? and !self.ssh.closed?
         self.ssh = Net::SSH.start(self.ip, self.user, :port => self.ssh_port, :keys => "data/ssh_key", :timeout => 30, :user_known_hosts_file => "/dev/null", :compression => true) if iteration < 2
         return [4, e.message] if iteration == 2 # 4 == execution error
       rescue Exception => e
@@ -201,7 +199,7 @@ module Misc
         end
         break
       rescue Net::SSH::Exception => e
-        self.ssh.close if iteration < 2
+        self.ssh.close if iteration < 2 and !self.ssh.nil? and !self.ssh.closed?
         self.ssh = Net::SSH.start(self.ip, self.user, :port => self.ssh_port, :keys => "data/ssh_key", :timeout => 30, :user_known_hosts_file => "/dev/null", :compression => true) if iteration < 2
         return [4, e.message] if iteration == 2 # 4 == execution error
       rescue Exception => e
@@ -228,7 +226,7 @@ module Misc
         self.ssh.scp.download!(remote, local)
         break
       rescue Net::SSH::Exception => e
-        self.ssh.close if iteration < 2
+        self.ssh.close if iteration < 2 and !self.ssh.nil? and !self.ssh.closed?
         self.ssh = Net::SSH.start(self.ip, self.user, :port => self.ssh_port, :keys => "data/ssh_key", :timeout => 30, :user_known_hosts_file => "/dev/null", :compression => true) if iteration < 2
         return [4, e.message] if iteration == 2 # 4 == execution error
       rescue Exception => e
@@ -282,7 +280,7 @@ module Misc
         end
         break
       rescue Net::SSH::Exception => e
-        self.ssh.close if iteration < 2
+        self.ssh.close if iteration < 2 and !self.ssh.nil? and !self.ssh.closed?
         self.ssh = Net::SSH.start(self.ip, self.user, :port => self.ssh_port, :keys => "data/ssh_key", :timeout => 30, :user_known_hosts_file => "/dev/null", :compression => true) if iteration < 2
         return [4, e.message] if iteration == 2 # 4 == execution error
       rescue Exception => e
@@ -309,7 +307,7 @@ module Misc
         self.ssh.scp.download!(remote, local, :recursive => true)
         break
       rescue Net::SSH::Exception => e
-        self.ssh.close if iteration < 2
+        self.ssh.close if iteration < 2 and !self.ssh.nil? and !self.ssh.closed?
         self.ssh = Net::SSH.start(self.ip, self.user, :port => self.ssh_port, :keys => "data/ssh_key", :timeout => 30, :user_known_hosts_file => "/dev/null", :compression => true) if iteration < 2
         return [4, e.message] if iteration == 2 # 4 == execution error
       rescue Exception => e

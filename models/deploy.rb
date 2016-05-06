@@ -83,9 +83,8 @@ class Deploy
         error = "Error: host not found"
         raise ExecutionError, error
       end
-      if !Misc::is_port_open?(host.ip, host.ssh_port, pingback=true, ssh=true)
-        error = "Error: host "+host.hostname+" unreachable"
-        raise TargetUnreachable, error
+      if host.ssh.nil? or host.ssh.closed?
+        raise TargetUnreachable, "Error: host "+host.hostname+" unreachable" if !Misc::is_port_open?(host.ip, host.ssh_port, pingback=true, ssh=true)
       end
 
       cfg_root = "data/deploys/"+dep+"/configs/"
@@ -116,7 +115,7 @@ class Deploy
     rescue TargetUnreachable => e
       return [6, e.message] # 6 == host unreachable
     ensure
-      host.ssh.close unless dry_run or from_deploy
+      host.ssh.close unless dry_run or from_deploy or host.ssh.nil? or host.ssh.closed?
     end
   end
 
@@ -128,9 +127,8 @@ class Deploy
         error = "Error: host not found"
         raise ExecutionError, error
       end
-      if !Misc::is_port_open?(host.ip, host.ssh_port, pingback=true, ssh=true)
-        error = "Error: host "+host.hostname+" unreachable"
-        raise TargetUnreachable, error
+      if host.ssh.nil? or host.ssh.closed?
+        raise TargetUnreachable, "Error: host "+host.hostname+" unreachable" if !Misc::is_port_open?(host.ip, host.ssh_port, pingback=true, ssh=true)
       end
 
       cfg_root = "data/deploys/"+dep+"/configs/"
@@ -161,7 +159,7 @@ class Deploy
     rescue TargetUnreachable => e
       return [6, e.message] # 6 == host unreachable
     ensure
-      host.ssh.close unless dry_run or from_deploy
+      host.ssh.close unless dry_run or from_deploy or host.ssh.nil? or host.ssh.closed?
     end
   end
 
