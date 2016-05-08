@@ -121,18 +121,18 @@ class Host
       return host #return the object itself
     rescue Net::SSH::AuthenticationFailed
       NOTEX.synchronize do
-        Notification.create(:type => :error, :sticky => false, :message => I18n.t('error.host.auth'))
+        Notification.create(:type => :error, :sticky => false, :message => I18n.t('error.host.auth', host: hostname))
       end
       host.delete(false)
       return false
     rescue Errno::EHOSTUNREACH
       NOTEX.synchronize do
-        Notification.create(:type => :error, :sticky => false, :message => I18n.t('error.host.unreach'))
+        Notification.create(:type => :error, :sticky => false, :message => I18n.t('error.host.unreach', host: hostname))
       end
       host.delete(false)
       return false
     rescue => e
-      error = I18n.t('error.host.misc')+": "+e.message
+      error = I18n.t('error.host.misc', host: hostname)+e.message
       NOTEX.synchronize do
         Notification.create(:type => :error, :sticky => false, :message => error)
       end
