@@ -6,7 +6,6 @@ Encoding.default_internal = Encoding::UTF_8
 gem "sinatra"
 gem "net-ssh"
 gem "net-scp"
-gem "yard"
 gem "nokogiri"
 gem "sqlite3"
 gem "unicorn"
