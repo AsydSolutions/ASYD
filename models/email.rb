@@ -16,10 +16,10 @@ class Email
   property :method, Enum[ :sendmail, :smtp, :exchange ], :default => :sendmail
   property :path, String, :default => "/usr/sbin/sendmail"
   property :host, String, :default => "localhost"
-  property :port, String, :default => "587"
+  property :port, String, :default => "587", :length => 5
   property :tls, Boolean, :default => true
   property :user, String
-  property :password, String
+  property :password, String, :length => 100
 
   def self.mail(to_, subject_, body_)
     begin

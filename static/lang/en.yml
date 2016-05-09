@@ -60,7 +60,7 @@ en:
     wrong: "Wrong password"
   email: "E-Mail"
   name: "Name"
-  ip: "IP address"
+  ip: "IP / fqdn"
   used: "used"
   total: "total"
   deploy: "Deploy"
@@ -84,9 +84,9 @@ en:
       short: "Our apologies, something isn&#39;t working."
       detail: "Thank you for your patience, as we fix that."
     host:
-      auth: "Authentication error, please check the provided password"
-      unreach: "Host unreachable, please check the network"
-      misc: "Error adding the host"
+      auth: "Authentication error on host %{host}, please check the provided password"
+      unreach: "Host %{host} unreachable, please check the network"
+      misc: "Error adding the host %{host}: "
     email:
       invalid: "The email doesn&#39;t exist in our database."
 
@@ -175,8 +175,6 @@ en:
     add_host:
       admin: "(must have admin privileges)"
       password: "- Or leave empty to use ASYD's SSH key"
-      ip:
-        valid: "Must be a valid IP address"
     del_host:
       title: "Remove Host"
       confirm: "Are you sure you want to delete %{host} from your server list?"

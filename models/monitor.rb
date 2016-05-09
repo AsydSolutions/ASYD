@@ -29,14 +29,33 @@ module Monitoring
 
     def monitor
       begin
-        ret = Deploy.launch(self, "monit", nil)
+        task = nil
+        TATEX.synchronize do
+          task = Task.create(:action => :deploying, :object => "monit", :target => self.hostname, :target_type => :host)
+        end
+        NOTEX.synchronize do
+          ::Notification.create(:type => :info, :message => I18n.t('task.actions.deploying')+" monit on "+self.hostname, :task => task)
+        end
+        self.reload
+        ret = Deploy.launch(self, "monit", task)
         if ret != 1
           raise ExecutionError, ret[1]
+        else
+          NOTEX.synchronize do
+            msg = "Deploy monit successfully deployed on host "+self.hostname
+            ::Notification.create(:type => :success, :sticky => false, :message => msg, :task => task)
+          end
+          TATEX.synchronize do
+            task.update(:status => :finished)
+          end
         end
       rescue ExecutionError => e
         NOTEX.synchronize do
           msg = "Unable to monitor host "+self.hostname+": "+e.message
-          ::Notification.create(:type => :error, :sticky => true, :message => msg)
+          ::Notification.create(:type => :error, :sticky => true, :message => msg, :task => task)
+        end
+        TATEX.synchronize do
+          task.update(:status => :failed)
         end
       end
     end

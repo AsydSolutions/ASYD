@@ -1,4 +1,4 @@
-#v0.08
+#v1.0.0
 class ASYD < Sinatra::Application
   get '/confirm_update' do
     if !session[:username] then
@@ -73,94 +73,90 @@ module Updater
   def self.update_actions
     actions = Array.new # Array for defining actions
 
-    #-#-#
-    # Check for monit deploy version
-    old_version = nil
-    path = "data/deploys/monit/def" # the old def file
-    f = File.open(path, "r").read
-    f.gsub!(/\r\n?/, "\n")
-    f.each_line do |line|
-      if !line.match(/^# ?version:/i).nil?
-        old_version = line.gsub!(/^# ?version:/i, "").strip
-      end
-    end
-    new_version = nil
-    path = "installer/monit/def" # the new def file
-    if File.file?(path)
+    if File.directory?('data/deploys/monit') # If the monit directory exists we check for the version
+      #-#-#
+      # Check for monit deploy version
+      old_version = nil
+      path = "data/deploys/monit/def" # the old def file
       f = File.open(path, "r").read
       f.gsub!(/\r\n?/, "\n")
       f.each_line do |line|
         if !line.match(/^# ?version:/i).nil?
-          new_version = line.gsub!(/^# ?version:/i, "").strip
+          old_version = line.gsub!(/^# ?version:/i, "").strip
         end
       end
-      if old_version.nil? or old_version.to_f < new_version.to_f then
-        actions << "update_monit"
+      new_version = nil
+      path = "installer/monit/def" # the new def file
+      if File.file?(path)
+        f = File.open(path, "r").read
+        f.gsub!(/\r\n?/, "\n")
+        f.each_line do |line|
+          if !line.match(/^# ?version:/i).nil?
+            new_version = line.gsub!(/^# ?version:/i, "").strip
+          end
+        end
+        if old_version.nil? or Gem::Version.new(old_version) < Gem::Version.new(new_version) then
+          actions << "update_monit"
+        end
       end
-    end
-    #-#-#
+      #-#-#
 
-    #-#-#
-    # Check for monit config version
-    old_version = nil
-    path = "data/deploys/monit/configs/monitrc" # the old monitrc file
-    f = File.open(path, "r").read
-    f.gsub!(/\r\n?/, "\n")
-    f.each_line do |line|
-      if !line.match(/^# ?version:/i).nil?
-        old_version = line.gsub!(/^# ?version:/i, "").strip
-      end
-    end
-    new_version = nil
-    path = "installer/monit/configs/monitrc" # the new monitrc file
-    if File.file?(path)
+      #-#-#
+      # Check for monit config version
+      old_version = nil
+      path = "data/deploys/monit/configs/monitrc" # the old monitrc file
       f = File.open(path, "r").read
       f.gsub!(/\r\n?/, "\n")
       f.each_line do |line|
         if !line.match(/^# ?version:/i).nil?
-          new_version = line.gsub!(/^# ?version:/i, "").strip
+          old_version = line.gsub!(/^# ?version:/i, "").strip
         end
       end
-      if old_version.nil? or old_version.to_f < new_version.to_f then
-        actions << "update_monit_config"
+      new_version = nil
+      path = "installer/monit/configs/monitrc" # the new monitrc file
+      if File.file?(path)
+        f = File.open(path, "r").read
+        f.gsub!(/\r\n?/, "\n")
+        f.each_line do |line|
+          if !line.match(/^# ?version:/i).nil?
+            new_version = line.gsub!(/^# ?version:/i, "").strip
+          end
+        end
+        if old_version.nil? or Gem::Version.new(old_version) < Gem::Version.new(new_version) then
+          actions << "update_monit_config"
+        end
       end
-    end
-    #-#-#
+      #-#-#
 
-    #-#-#
-    # Check for monit initscript version
-    old_version = nil
-    path = "data/deploys/monit/configs/initscript" # the old init file
-    f = File.open(path, "r").read
-    f.gsub!(/\r\n?/, "\n")
-    f.each_line do |line|
-      if !line.match(/^# ?version:/i).nil?
-        old_version = line.gsub!(/^# ?version:/i, "").strip
-      end
-    end
-    new_version = nil
-    path = "installer/monit/configs/initscript" # the new init file
-    if File.file?(path)
+      #-#-#
+      # Check for monit initscript version
+      old_version = nil
+      path = "data/deploys/monit/configs/initscript" # the old init file
       f = File.open(path, "r").read
       f.gsub!(/\r\n?/, "\n")
       f.each_line do |line|
         if !line.match(/^# ?version:/i).nil?
-          new_version = line.gsub!(/^# ?version:/i, "").strip
+          old_version = line.gsub!(/^# ?version:/i, "").strip
         end
       end
-      if old_version.nil? or old_version.to_f < new_version.to_f then
-        actions << "update_monit_init"
+      new_version = nil
+      path = "installer/monit/configs/initscript" # the new init file
+      if File.file?(path)
+        f = File.open(path, "r").read
+        f.gsub!(/\r\n?/, "\n")
+        f.each_line do |line|
+          if !line.match(/^# ?version:/i).nil?
+            new_version = line.gsub!(/^# ?version:/i, "").strip
+          end
+        end
+        if old_version.nil? or Gem::Version.new(old_version) < Gem::Version.new(new_version) then
+          actions << "update_monit_init"
+        end
       end
+      #-#-#
+    else # If the monit directory does not exists just copy over the entire directory
+      FileUtils.mv("installer/monit", "data/deploys/monit")
     end
-    #-#-#
-
-    #-#-#
-    # Migration from old host.monitored to new "monitored" opt_var
-    hosts = Host.all(:monitored => true)
-    if hosts.length > 0
-      actions << "update_monitored_status"
-    end
-    #-#-#
 
     #-#-#
     # Populate HostStats and TaskStats database

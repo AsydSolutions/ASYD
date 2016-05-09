@@ -198,5 +198,81 @@ esac
 
 exit $RETVAL
 <%endif%>
+<%if <%SVC_MANAGER%> == runit %>
+#!/bin/sh
+if [ ! -f "/var/.monit.pid" ]; then
+    /usr/bin/monit -c /etc/monit/monitrc
+fi
+<%endif%>
+<%if <%SVC_MANAGER%> == service %>
+#!/bin/sh
+#
+# $FreeBSD: head/sysutils/monit/files/monit.in 340872 2014-01-24 00:14:07Z mat $
+#
 
-# Version: 0.091
+# PROVIDE: monit
+# REQUIRE: NETWORKING SERVERS
+# BEFORE: DAEMON
+# KEYWORD: shutdown
+
+#
+# Add the following lines to /etc/rc.conf to enable monit:
+# monit_enable (bool):        Set to "NO" by default.
+#                             Set it to "YES" to enable monit
+# monit_flags (str):          Flags passed to monit on startup.
+#                             Default is "".
+#
+. /etc/rc.subr
+
+name=monit
+rcvar=monit_enable
+load_rc_config ${name}
+
+: ${monit_enable:=NO}
+
+extra_commands=reload
+restart_precmd=monit_checkconfig
+reload_precmd=monit_checkconfig
+
+default_config=/usr/local/etc/monitrc
+required_files=${default_config}
+command="/usr/local/bin/monit"
+command_args="-c ${default_config}"
+pidfile=/var/.monit.pid
+stop_cmd=" kill -15 $(cat /var/.monit.pid)"
+
+monit_checkconfig()
+{
+        echo "Performing sanity check on monit configuration:"
+        ${command} ${command_args} -t
+}
+
+run_rc_command "$1"
+<%endif%>
+<%if <%SVC_MANAGER%> == launchd %>
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+"http://www.apple.com/DTDs/PropertyList-1.0.dtd" >
+<plist version='1.0'>
+<dict>
+<key>Label</key><string>org.asyd.monit</string>
+<key>ProgramArguments</key>
+<array>
+        <string>/opt/local/bin/daemondo</string>
+        <string>--label=monit</string>
+        <string>--start-cmd</string>
+        <string>/usr/local/bin/monit</string>
+        <string>-I</string>
+        <string>-c</string>
+        <string>/usr/local/etc/monitrc</string>
+        <string>;</string>
+        <string>--pid=exec</string>
+</array>
+<key>Debug</key><false/>
+<key>Disabled</key><true/>
+<key>KeepAlive</key><true/>
+</dict>
+</plist>
+<%endif%>
+
+# Version: 1.0.0

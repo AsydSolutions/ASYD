@@ -79,22 +79,28 @@ class ASYD < Sinatra::Application
   post '/host/edit' do
     begin
       HOSTEX.synchronize do
-        oldhost = Host.first(:hostname => params['old_hostname'])
-        newhost = Host.create(:hostname => params['hostname'],
-                              :ip => params['ip'],
-                              :ssh_port => params['ssh_port'],
-                              :user => oldhost.user,
-                              :dist => oldhost.dist,
-                              :dist_ver => oldhost.dist_ver,
-                              :arch => oldhost.arch,
-                              :pkg_mgr => oldhost.pkg_mgr,
-                              :monit_pw => oldhost.monit_pw,
-                              :opt_vars => oldhost.opt_vars,
-                              :created_at => oldhost.created_at)
-        oldhost.hostgroups.each do |group|
-          group.add_member(newhost)
+        if params['old_hostname'] == params['hostname']
+          host = Host.first(:hostname => params['old_hostname'])
+          host.update(:ip => params['ip'])
+          host.update(:ssh_port => params['ssh_port'])
+        else
+          oldhost = Host.first(:hostname => params['old_hostname'])
+          newhost = Host.create(:hostname => params['hostname'],
+                                :ip => params['ip'],
+                                :ssh_port => params['ssh_port'],
+                                :user => oldhost.user,
+                                :dist => oldhost.dist,
+                                :dist_ver => oldhost.dist_ver,
+                                :arch => oldhost.arch,
+                                :pkg_mgr => oldhost.pkg_mgr,
+                                :monit_pw => oldhost.monit_pw,
+                                :opt_vars => oldhost.opt_vars,
+                                :created_at => oldhost.created_at)
+          oldhost.hostgroups.each do |group|
+            group.add_member(newhost)
+          end
+          oldhost.delete(false)
         end
-        oldhost.delete(false)
       end
       redir = '/host/'+params['hostname']
       redirect to redir

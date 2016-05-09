@@ -2,6 +2,7 @@
   <div class="span8 offset1">
     <h1><%=t('update.title')%></h1>
     <hr>
+    Remember ALWAYS to backup your 'data/' directory before upgrading to avoid data loss.<br /><br />
     <%=t('update.actions')%><br />
     <% @actions.each do |action| %>
       <%=t('update.'+action)%><br />

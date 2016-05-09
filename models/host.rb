@@ -16,12 +16,13 @@ class Host
   property :pkg_mgr, String
   property :svc_mgr, String
   property :monit_pw, String
-  property :monitored, Boolean, :default => false # <-- DEPRECATED, keep for compatibility, will be removed in 2 releases
   property :opt_vars, Object
   property :created_at, DateTime
   property :updated_at, DateTime
   has n, :hostgroup_members
   has n, :hostgroups, :through => :hostgroup_members
+
+  attr_accessor :ssh
 
   def self.init(hostname, ip, user, ssh_port, password)
     begin
@@ -62,7 +63,7 @@ class Host
             raise StandardError, "User has no admin privileges"
           end
           if need_passwd
-            cmd = "if [ -f \"/etc/sudoers.d/#{user}\" ]; then sudo cp /etc/sudoers.d/#{user} /tmp/sudoers#{user}; fi; sudo sh -c 'echo \"Defaults:#{user} !requiretty\" >> /tmp/sudoers#{user}'; sudo sh -c 'echo \"#{user} ALL=NOPASSWD: ALL\" >> /tmp/sudoers#{user}'; sudo sh -c 'uniq /tmp/sudoers#{user} > /etc/sudoers.d/#{user}'; sudo rm /tmp/sudoers#{user}"
+            cmd = "if [ -f \"/etc/sudoers.d/#{user}\" ]; then sudo cp /etc/sudoers.d/#{user} /tmp/sudoers#{user}; fi; sudo sh -c 'mkdir /etc/sudoers.d &>/dev/null'; sudo sh -c 'chown root:wheel /etc/sudoers.d'; sudo sh -c 'chmod 440 /etc/sudoers.d' ; sudo sh -c 'echo \"Defaults:#{user} !requiretty\" >> /tmp/sudoers#{user}'; sudo sh -c 'echo \"#{user} ALL=NOPASSWD: ALL\" >> /tmp/sudoers#{user}'; sudo sh -c 'uniq /tmp/sudoers#{user} > /etc/sudoers.d/#{user}'; sudo rm /tmp/sudoers#{user}"
             ssh.open_channel do |channel|
               channel.request_pty do |ch, success|
                 raise StandardError, "Could not obtain pty" unless success
@@ -120,18 +121,18 @@ class Host
       return host #return the object itself
     rescue Net::SSH::AuthenticationFailed
       NOTEX.synchronize do
-        Notification.create(:type => :error, :sticky => false, :message => I18n.t('error.host.auth'))
+        Notification.create(:type => :error, :sticky => false, :message => I18n.t('error.host.auth', host: hostname))
       end
       host.delete(false)
       return false
     rescue Errno::EHOSTUNREACH
       NOTEX.synchronize do
-        Notification.create(:type => :error, :sticky => false, :message => I18n.t('error.host.unreach'))
+        Notification.create(:type => :error, :sticky => false, :message => I18n.t('error.host.unreach', host: hostname))
       end
       host.delete(false)
       return false
     rescue => e
-      error = I18n.t('error.host.misc')+": "+e.message
+      error = I18n.t('error.host.misc', host: hostname)+e.message
       NOTEX.synchronize do
         Notification.create(:type => :error, :sticky => false, :message => error)
       end
@@ -288,6 +289,18 @@ class Host
           host.dist = ssh.exec!("uname -s").strip
           host.dist_ver = ssh.exec!("uname -r").strip.to_f
           host.arch = ssh.exec!("uname -m").strip
+        #9. freebsd
+        elsif !(ssh.exec!("which freebsd-version") =~ /\/bin\/freebsd-version$/).nil?
+          host.pkg_mgr = "pkg"
+          host.dist = ssh.exec!("uname -s").strip
+          host.dist_ver = ssh.exec!("uname -r").strip[/\d+(?:\.\d+)?/]
+          host.arch = ssh.exec!("uname -m").strip
+        #10. MacOsX
+        elsif !(ssh.exec!("which sw_vers") =~ /\/bin\/sw_vers$/).nil?
+          host.pkg_mgr = "port"
+          host.dist = ssh.exec!("sw_vers -productName").gsub(/\s+/, "")
+          host.dist_ver = ssh.exec!("sw_vers -productVersion").strip
+          host.arch = ssh.exec!("uname -m").strip
         else
           raise StandardError, "The OS of the machine is not yet supported" #OS not supported yet
         end
@@ -300,10 +313,14 @@ class Host
           host.svc_mgr = "update-rc.d"  # old debian
         elsif !(ssh.exec!(sudo+"which chkconfig") =~ /\/sbin\/chkconfig$/).nil?
           host.svc_mgr = "chkconfig"    # old rhel
-        elsif !(ssh.exec!("which runit") =~ /\/bin\/runit$/).nil?
+        elsif !(ssh.exec!(sudo+"which runit") =~ /\/bin\/runit$/).nil?
           host.svc_mgr = "runit"  # void-linux
         elsif host.pkg_mgr == "pkg_add"
           host.svc_mgr = "rc.d"         # openbsd
+        elsif !(ssh.exec!(sudo+"which freebsd-version") =~ /\/bin\/freebsd-version$/).nil?
+          host.svc_mgr = "service"
+        elsif !(ssh.exec!(sudo+"which launchd") =~ /\/sbin\/launchd$/).nil?
+          host.svc_mgr = "launchd"
         else
           host.svc_mgr = "none"         # else (i.e. solaris)
         end

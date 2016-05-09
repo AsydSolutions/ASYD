@@ -83,9 +83,8 @@ class Deploy
         error = "Error: host not found"
         raise ExecutionError, error
       end
-      if !Misc::is_port_open?(host.ip, host.ssh_port, pingback=true)
-        error = "Error: host "+host.hostname+" unreachable"
-        raise TargetUnreachable, error
+      if host.ssh.nil? or host.ssh.closed?
+        raise TargetUnreachable, "Error: host "+host.hostname+" unreachable" if !Misc::is_port_open?(host.ip, host.ssh_port, pingback=true, ssh=true)
       end
 
       cfg_root = "data/deploys/"+dep+"/configs/"
@@ -94,6 +93,8 @@ class Deploy
       else
         path = "data/deploys/"+dep+"/def"
       end
+
+      host.ssh = Net::SSH.start(host.ip, host.user, :port => host.ssh_port, :keys => "data/ssh_key", :timeout => 30, :user_known_hosts_file => "/dev/null", :compression => true) if host.ssh.nil? or host.ssh.closed?
 
       # Check deploy (dry run)
       unless from_deploy and !dry_run # check only once when calling from deploy
@@ -113,6 +114,8 @@ class Deploy
       return [5, e.message] # 5 == format exception
     rescue TargetUnreachable => e
       return [6, e.message] # 6 == host unreachable
+    ensure
+      host.ssh.close unless dry_run or from_deploy or host.ssh.nil? or host.ssh.closed?
     end
   end
 
@@ -124,9 +127,8 @@ class Deploy
         error = "Error: host not found"
         raise ExecutionError, error
       end
-      if !Misc::is_port_open?(host.ip, host.ssh_port, pingback=true)
-        error = "Error: host "+host.hostname+" unreachable"
-        raise TargetUnreachable, error
+      if host.ssh.nil? or host.ssh.closed?
+        raise TargetUnreachable, "Error: host "+host.hostname+" unreachable" if !Misc::is_port_open?(host.ip, host.ssh_port, pingback=true, ssh=true)
       end
 
       cfg_root = "data/deploys/"+dep+"/configs/"
@@ -135,6 +137,8 @@ class Deploy
       else
         path = "data/deploys/"+dep+"/undeploy"
       end
+
+      host.ssh = Net::SSH.start(host.ip, host.user, :port => host.ssh_port, :keys => "data/ssh_key", :timeout => 30, :user_known_hosts_file => "/dev/null", :compression => true) if host.ssh.nil? or host.ssh.closed?
 
       # Check deploy (dry run)
       unless from_deploy and !dry_run # check only once when calling from deploy
@@ -154,6 +158,8 @@ class Deploy
       return [5, e.message] # 5 == format exception
     rescue TargetUnreachable => e
       return [6, e.message] # 6 == host unreachable
+    ensure
+      host.ssh.close unless dry_run or from_deploy or host.ssh.nil? or host.ssh.closed?
     end
   end
 
@@ -294,10 +300,11 @@ class Deploy
             cfg_dst = cfg[1].strip
             unless dry_run
               if noparse
-                host.upload_file(cfg_src, cfg_dst)
+                ret = host.upload_file(cfg_src, cfg_dst, cfg_src)
               else
-                host.upload_file(parsed_cfg.path, cfg_dst)
+                ret = host.upload_file(parsed_cfg.path, cfg_dst, cfg_src)
               end
+              raise ExecutionError, ret[1] if ret.kind_of?(Array) and ret[0] == 4
             end
             parsed_cfg.unlink unless noparse
             unless dry_run
@@ -328,10 +335,11 @@ class Deploy
             parsed_cfg = parse_config_dir(host, cfg_src, nil) unless noparse
             unless dry_run
               if noparse
-                host.upload_dir(cfg_src, cfg_dst)
+                ret = host.upload_dir(cfg_src, cfg_dst, cfg_src)
               else
-                host.upload_dir(parsed_cfg, cfg_dst)
+                ret = host.upload_dir(parsed_cfg, cfg_dst, cfg_src)
               end
+              raise ExecutionError, ret[1] if ret.kind_of?(Array) and ret[0] == 4
             end
             FileUtils.rm_r parsed_cfg, :secure=>true unless noparse
             unless dry_run
@@ -379,6 +387,7 @@ class Deploy
             cmd = parse(host, line[1].strip) #parse for vars
             unless dry_run
               ret = exec_host.exec_cmd(cmd)
+              raise ExecutionError, ret[1] if ret.kind_of?(Array) and ret[0] == 4
               msg = "Executed '"+cmd+"' on "+exec_host.hostname
               msg = msg+": "+ret unless ret.nil?
               NOTEX.synchronize do
@@ -624,7 +633,7 @@ class Deploy
 
   # Install package or packages on defined host
   #
-  def self.install(host, pkg, dry_run, pkg_mgr = nil)
+  def self.install(host, pkg, dry_run = false, pkg_mgr = nil)
     begin
       if pkg.include? "&" or pkg.include? "|" or pkg.include? ">" or pkg.include? "<" or pkg.include? "`" or pkg.include? "$"
         raise FormatException
@@ -691,8 +700,13 @@ class Deploy
         if host.user != "root"
           cmd = "sudo "+pkg_mgr
         end
-        cmd = cmd+" install --accept "+pkg    ## NOT FULLY TESTED, DEVELOPMENT IN PROGRESS
-      #7.3. solaris pkgutil
+        # 7.3 freebsd also uses pkg
+        if host.dist == "FreeBSD"
+          cmd = cmd+" install --yes "+pkg    ## NOT FULLY TESTED, DEVELOPMENT IN PROGRESS
+        else
+          cmd = cmd+" install --accept "+pkg    ## NOT FULLY TESTED, DEVELOPMENT IN PROGRESS
+        end
+      #7.4. solaris pkgutil
       elsif pkg_mgr == "pkgutil"
         if host.user != "root"
           cmd = "sudo "+pkg_mgr
@@ -705,6 +719,12 @@ class Deploy
         end
         pkg_path = 'export PKG_PATH="http://ftp.openbsd.org/pub/OpenBSD/'+host.dist_ver.to_s+'/packages/'+host.arch+'/"'
         cmd = pkg_path+" && "+cmd+" -U -I -x "+pkg    ## NOT FULLY TESTED, DEVELOPMENT IN PROGRESS
+      #9. macosx port
+      elsif pkg_mgr == "port"
+        if host.user != "root"
+          cmd = "sudo " + pkg_mgr
+        end
+        cmd = cmd + " install -c " + pkg ## NOT FULLY TESTED, DEVELOPMENT IN PROGRESS
       end
       unless dry_run
         result = host.exec_cmd(cmd)
@@ -736,7 +756,7 @@ class Deploy
 
   # Uninstall package or packages on defined host
   #
-  def self.uninstall(host, pkg, dry_run, pkg_mgr = nil)
+  def self.uninstall(host, pkg, dry_run = false, pkg_mgr = nil)
     begin
 
       if pkg.include? "&" or pkg.include? "|" or pkg.include? ">" or pkg.include? "<" or pkg.include? "`" or pkg.include? "$"
@@ -804,8 +824,13 @@ class Deploy
         if host.user != "root"
           cmd = "sudo "+pkg_mgr
         end
-        cmd = cmd+" uninstall "+pkg    ## NOT FULLY TESTED, DEVELOPMENT IN PROGRESS
-      #7.3. solaris pkgutil
+        #7.3 freebsd also uses pkg
+        if host.dist == "FreeBSD"
+          cmd = cmd+" uninstall --yes"+pkg    ## NOT FULLY TESTED, DEVELOPMENT IN PROGRESS
+        else
+          cmd = cmd+" uninstall "+pkg    ## NOT FULLY TESTED, DEVELOPMENT IN PROGRESS
+        end
+      #7.4. solaris pkgutil
       elsif pkg_mgr == "pkgutil"
         if host.user != "root"
           cmd = "sudo "+pkg_mgr
@@ -818,6 +843,12 @@ class Deploy
           cmd = "sudo "+cmd
         end
         cmd = cmd+" -I -x "+pkg    ## NOT FULLY TESTED, DEVELOPMENT IN PROGRESS
+      #9. macosx port
+      elsif pkg_mgr == "port"
+        if host.user != "root"
+          cmd = "sudo " + pkg_mgr
+        end
+        cmd = cmd + " -u uninstall " + pkg ## NOT FULLY TESTED, DEVELOPMENT IN PROGRESS
       end
       unless dry_run
         result = host.exec_cmd(cmd)
@@ -941,6 +972,36 @@ class Deploy
             cmd = sudo + "rm /var/services/" + service
           when "restart"
             cmd = sudo + "sv restart " + service
+          else
+            raise FormatException, "Action "+action+" not valid"
+          end
+        elsif svc_mgr == "service"
+          case action
+          when "enable"
+            cmd = "echo '"+ service + "_enable=\"yes\"' > /tmp/rc-" + service + " && " + sudo + "mv /tmp/rc-" + service + "  /etc/rc.conf.d/" + service
+          when "start"
+            cmd = "if [ -f /etc/rc.conf.d/"+service + " ] ; then " + sudo + "service " + service + " start; else " + sudo + "service + " + service + " onestart; fi"
+          when "stop"
+            cmd = "if [ -f /etc/rc.conf.d/"+service + " ] ; then " + sudo + "service " + service + " stop; else " + sudo + "service + " + service + " onestop; fi"
+          when "disable"
+            cmd = sudo + " rm -f /etc/rc.conf.d/"+service
+          when "restart"
+            cmd = "if [ -f /etc/rc.conf.d/"+service + " ] ; then " + sudo + "service " + service + " restart; else " + sudo + "service + " + service + " onerestart; fi"
+          else
+            raise FormatException, "Action "+action+" not valid"
+          end
+        elsif svc_mgr == "launchd"
+          case action
+          when "enable"
+            cmd = "launchctl load /Library/LaunchDaemons/" + service
+          when "start"
+            cmd = "launchctl load -w /Library/LaunchDaemons/" + service
+          when "stop"
+            cmd = "launchctl unload /Library/LaunchDaemons/" + service
+          when "disable"
+            cmd = "launchctl unload -w /Library/LaunchDaemons/" + service
+          when "restart"
+            cmd = "launchctl unload -w /Library/LaunchDaemons/" + service + " && " + "launchctl load -w /Library/LaunchDaemons/" + service
           else
             raise FormatException, "Action "+action+" not valid"
           end

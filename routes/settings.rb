@@ -52,7 +52,6 @@ class ASYD < Sinatra::Application
 
   post '/settings/ssh-keys' do
     if user.is_admin?
-      p params[:priv_key].inspect
       File.open('data/ssh_key', "w") do |f|
         f.write(params[:priv_key][:tempfile].read)
       end

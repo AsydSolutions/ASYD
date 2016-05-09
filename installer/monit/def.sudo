@@ -2,11 +2,11 @@
 # Will be executed on every new system added to ASYD
 # Modify accordingly to your systems (i.e. firewall rules, etc)
 # Alert: This deploy is automatically executed when a host is added, are you sure you want to manually execute it?
-# Version: 0.1
+# Version: 1.0.0
 
 ###
 # Check first if the system has a service manager
-if <%SVC_MANAGER%> != update-rc.d and <%SVC_MANAGER%> != chkconfig and <%SVC_MANAGER%> != systemctl and <%SVC_MANAGER%> != rc.d and <%SVC_MANAGER%> != runit and <%SVC_MANAGER%> != none
+if <%SVC_MANAGER%> != update-rc.d and <%SVC_MANAGER%> != chkconfig and <%SVC_MANAGER%> != systemctl and <%SVC_MANAGER%> != rc.d and <%SVC_MANAGER%> != runit and <%SVC_MANAGER%> != service and <%SVC_MANAGER%> != launchd and <%SVC_MANAGER%> != none
   There is no service manager defined, please go to the host detail view and recheck system information
 endif
 ###
@@ -23,30 +23,35 @@ if <%PKG_MANAGER%> == apt or <%PKG_MANAGER%> == dnf or <%PKG_MANAGER%> == yum or
   exec: sudo mv /tmp/monit /usr/bin/
   exec: sudo chmod +x /usr/bin/monit
 
-  config file: monitrc, /tmp/monitrc
-  exec: sudo mv /tmp/monitrc /etc/monit/monitrc
+  config file: monitrc, /etc/monit/monitrc
   exec: sudo chown -R root:root /etc/monit
 
   # sysvinit:
   if <%SVC_MANAGER%> == update-rc.d or <%SVC_MANAGER%> == chkconfig
-    config file: initscript, /tmp/monit
-    exec: sudo mv /tmp/monit /etc/init.d/monit
+    config file: initscript, /etc/init.d/monit
     exec: sudo chmod +x /etc/init.d/monit
   endif
 
   # systemd:
   if <%SVC_MANAGER%> == systemctl
-    config file: initscript, /tmp/monit.service
-    exec: sudo mv /tmp/monit.service /usr/lib/systemd/system/monit.service
+    config file: initscript, /usr/lib/systemd/system/monit.service
     exec: sudo chmod +x /usr/lib/systemd/system/monit.service
   endif
 
   # runit:
    if <%SVC_MANAGER%> == runit
-    config file: run, /tmp/monit-run
-    exec: sudo mkdir /etc/sv/monit
-    exec: sudo chmod +x /tmp/monit-run
-    exec: sudo mv /tmp/monit-run /etc/sv/monit/run
+   config file: initscript, /etc/sv/monit/run
+   exec: sudo chmod +x /etc/sv/monit/run
+  endif
+
+  # open monit port on red hat firewall
+  if <%PKG_MANAGER%> == dnf or <%PKG_MANAGER%> == yum
+    var fw_state = exec: firewall-cmd --state
+    if <%VAR:fw_state%> == running
+  	  var fw_zone = exec: firewall-cmd --get-default-zone
+  	  exec: sudo firewall-cmd --permanent --zone=<%VAR:fw_zone%> --add-rich-rule='rule family="ipv4" source address="<%ASYD%>/24" port protocol="tcp" port="2812" accept'
+  	  exec: sudo firewall-cmd --reload
+     endif
   endif
 
   enable service: monit
@@ -61,8 +66,7 @@ endif
 if <%DIST%> == Solaris and <%ARCH%> != sparc or <%DIST%> == OpenIndiana and <%ARCH%> != sparc
 
   # first upload the admin file for non-interactive pkgadd
-  config file: solaris-admin, /tmp/admin
-  exec: sudo mv /tmp/admin /etc/admin
+  config file: solaris-admin, /etc/admin
   exec: chmod 666 /etc/admin
 
   # install OpenCSW
@@ -81,8 +85,7 @@ if <%DIST%> == Solaris and <%ARCH%> != sparc or <%DIST%> == OpenIndiana and <%AR
   exec: sudo mv /tmp/monit /usr/bin/
   exec: sudo chmod +x /usr/bin/monit
 
-  config file: monitrc, /tmp/monitrc
-  exec: sudo mv /tmp/monitrc /etc/monit/monitrc
+  config file: monitrc, /etc/monit/monitrc
   exec: sudo chown -R root:root /etc/monit
 
   exec: cp /etc/inittab /tmp/inittab
@@ -105,11 +108,9 @@ if <%DIST%> == OpenBSD
   exec: sudo mv /tmp/monit /usr/bin/
   exec: sudo chmod +x /usr/bin/monit
 
-  config file: monitrc, /tmp/monitrc
-  exec: sudo mv /tmp/monitrc /etc/monit/monitrc
+  config file: monitrc, /etc/monit/monitrc
   exec: sudo chown root /etc/monit/monitrc
-  config file: initscript, /tmp/monit
-  exec: sudo mv /tmp/monit /etc/rc.d/monit
+  config file: initscript, /etc/rc.d/monit
   exec: sudo chmod +x /etc/rc.d/monit
 
   enable service: monit
@@ -117,6 +118,51 @@ if <%DIST%> == OpenBSD
 
 endif
 ###
+
+
+###
+# For FreeBSD:
+if <%DIST%> == FreeBSD
+	exec: sudo mkdir -p /etc/monit/conf.d
+    exec if <%ARCH%> == amd64: wget https://github.com/AsydSolutions/monit/releases/download/release-5-13-asyd/monit-freebsd-x64 -O /tmp/monit
+    exec if <%ARCH%> == i386: wget https://github.com/AsydSolutions/monit/releases/download/release-5-13-asyd/monit-freebsd-x86 -O /tmp/monit
+    exec: sudo mv /tmp/monit /usr/local/bin/
+    exec: sudo chmod +x /usr/local/bin/monit
+
+    config file: monitrc, /usr/local/etc/monitrc
+    config file: initscript, /usr/local/etc/rc.d/monit
+    exec: sudo chmod 700 /usr/local/etc/monitrc
+    exec: sudo chmod +x /usr/local/etc/rc.d/monit
+    exec: sudo chown root /usr/local/etc/rc.d/monit
+    exec: sudo chown root /usr/local/etc/monitrc
+
+    enable service: monit
+    restart service: monit
+
+endif
+
+
+###
+# For MacOSX:
+if <%DIST%> == MacOSX
+    install: wget
+    exec: sudo mkdir -p /etc/monit/conf.d
+    exec: wget https://github.com/AsydSolutions/monit/releases/download/release-5-13-asyd/monit-macosx-x64 -O /tmp/monit
+    exec: sudo mv /tmp/monit /usr/local/bin/
+    exec: sudo chmod +x /usr/local/bin/monit
+
+    config file: monitrc, /usr/local/etc/monitrc
+    config file: initscript, /Library/LaunchDaemons/org.asyd.monit.plist
+    exec: sudo chmod 700 /usr/local/etc/monitrc
+    exec: sudo chmod 755 /Library/LaunchDaemons/org.asyd.monit.plist
+    exec: sudo chown root:admin /usr/local/etc/monitrc
+    exec: sudo chown root:admin /Library/LaunchDaemons/org.asyd.monit.plist
+
+    enable service: org.asyd.monit.plist
+    restart service: org.asyd.monit.plist
+
+endif
+
 
 # Last, we set the monitored flag
 var monitored = exec: echo 1
