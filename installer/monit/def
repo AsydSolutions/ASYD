@@ -2,7 +2,7 @@
 # Will be executed on every new system added to ASYD
 # Modify accordingly to your systems (i.e. firewall rules, etc)
 # Alert: This deploy is automatically executed when a host is added, are you sure you want to manually execute it?
-# Version: 0.11
+# Version: 1.0.0
 
 ###
 # Check first if the system has a service manager
@@ -36,13 +36,21 @@ if <%PKG_MANAGER%> == apt or <%PKG_MANAGER%> == dnf or <%PKG_MANAGER%> == yum or
     config file: initscript, /usr/lib/systemd/system/monit.service
     exec: chmod +x /usr/lib/systemd/system/monit.service
   endif
-  
+
   # runit:
   if <%SVC_MANAGER%> == runit
-    config file: run, /tmp/monit-run
-    exec: mkdir /etc/sv/monit
-    exec: chmod +x /tmp/monit-run
-    exec: mv /tmp/monit-run /etc/sv/monit/run
+    config file: initscript, /etc/sv/monit/run
+    exec: chmod +x /etc/sv/monit/run
+  endif
+
+  # open monit port on red hat firewall
+  if <%PKG_MANAGER%> == dnf or <%PKG_MANAGER%> == yum
+    var fw_state = exec: firewall-cmd --state
+    if <%VAR:fw_state%> == running
+  	  var fw_zone = exec: firewall-cmd --get-default-zone
+  	  exec: firewall-cmd --permanent --zone=<%VAR:fw_zone%> --add-rich-rule='rule family="ipv4" source address="<%ASYD%>/24" port protocol="tcp" port="2812" accept'
+  	  exec: firewall-cmd --reload
+     endif
   endif
 
   enable service: monit
@@ -119,15 +127,15 @@ if <%DIST%> == FreeBSD
     exec if <%ARCH%> == i386: wget https://github.com/AsydSolutions/monit/releases/download/release-5-13-asyd/monit-freebsd-x86 -O /tmp/monit
     exec: mv /tmp/monit /usr/local/bin/
     exec: chmod +x /usr/local/bin/monit
-    
+
     config file: monitrc, /usr/local/etc/monitrc
-    config file: monit.in, /usr/local/etc/rc.d/monit
+    config file: initscript, /usr/local/etc/rc.d/monit
     exec: chmod 700 /usr/local/etc/monitrc
     exec: chmod +x /usr/local/etc/rc.d/monit
-    
+
     enable service: monit
     restart service: monit
-    
+
 endif
 
 
@@ -139,17 +147,17 @@ if <%DIST%> == MacOSX
     exec: wget https://github.com/AsydSolutions/monit/releases/download/release-5-13-asyd/monit-macosx-x64 -O /tmp/monit
     exec: mv /tmp/monit /usr/local/bin/
     exec: chmod +x /usr/local/bin/monit
-    
+
     config file: monitrc, /usr/local/etc/monitrc
-    config file: monit.plist, /Library/LaunchDaemons/org.macports.monit.plist
+    config file: initscript, /Library/LaunchDaemons/org.macports.monit.plist
     exec: chmod 700 /usr/local/etc/monitrc
     exec: chmod 755 /Library/LaunchDaemons/org.asyd.monit.plist
     exec: chown root:admin /usr/local/etc/monitrc
     exec: chown root:admin /Library/LaunchDaemons/org.asyd.monit.plist
-    
+
     enable service: org.asyd.monit.plist
     restart service: org.asyd.monit.plist
-    
+
 endif
 
 # Last, we set the monitored flag

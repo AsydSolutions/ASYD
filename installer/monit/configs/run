@@ -1,4 +1,0 @@
-#!/bin/sh
-if [ ! -f "/var/.monit.pid" ]; then
-    /usr/bin/monit -c /etc/monit/monitrc
-fi
