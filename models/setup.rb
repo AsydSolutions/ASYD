@@ -65,8 +65,8 @@ class Setup
 
   def self.update_available?
     begin
-      last_ver = Net::HTTP.get(URI 'https://www.asyd.eu/asyd.version').strip
-      return true unless last_ver.to_f <= $ASYD_VERSION
+      last_ver = Net::HTTP.get(URI 'https://raw.githubusercontent.com/AsydSolutions/ASYD/master/version').strip
+      return true unless Gem::Version.new(last_ver) <= Gem::Version.new($ASYD_VERSION)
       return false
     rescue
       return false

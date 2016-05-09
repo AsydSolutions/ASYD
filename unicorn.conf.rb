@@ -1,6 +1,6 @@
 $UNICORN = 1
 $ASYD_PID = Process.pid
-$ASYD_VERSION = 0.11
+$ASYD_VERSION = File.read('version').strip
 $DBG = 0 #debug?
 $PORT = 3000
 
