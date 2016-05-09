@@ -7,7 +7,7 @@ class Status
 
   def initialize(host, short)
     begin
-      if !Misc::is_port_open?(host.ip, 2812, pingback=true)
+      if !Misc::is_port_open?(host.ip, 2812)
         @system_status = 'down'
       else
         monit_status = Monit::Status.new({ :host => host.ip,

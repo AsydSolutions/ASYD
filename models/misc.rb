@@ -92,11 +92,11 @@ module Misc
   end
 
   # Checks if a port is open (so if the host is reachable)
-  def self.is_port_open?(ip, port, pingback=false, ssh=false, seconds=3)
+  def self.is_port_open?(ip, port, pingback=false, using_ssh=false, seconds=3)
     begin
       Timeout::timeout(seconds) do
         s = TCPSocket.new(ip, port)
-        s.write "SSH-2.0-Ruby/ASYD\r\n" if ssh
+        s.write "SSH-2.0-Ruby/ASYD\r\n" if using_ssh
         s.gets if pingback
         s.close
         true
