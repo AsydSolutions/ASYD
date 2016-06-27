@@ -63,7 +63,7 @@ class Host
             raise StandardError, "User has no admin privileges"
           end
           if need_passwd
-            cmd = "if [ -f \"/etc/sudoers.d/#{user}\" ]; then sudo cp /etc/sudoers.d/#{user} /tmp/sudoers#{user}; fi; sudo sh -c 'mkdir /etc/sudoers.d &>/dev/null'; sudo sh -c 'chown root:wheel /etc/sudoers.d'; sudo sh -c 'chmod 440 /etc/sudoers.d' ; sudo sh -c 'echo \"Defaults:#{user} !requiretty\" >> /tmp/sudoers#{user}'; sudo sh -c 'echo \"#{user} ALL=NOPASSWD: ALL\" >> /tmp/sudoers#{user}'; sudo sh -c 'uniq /tmp/sudoers#{user} > /etc/sudoers.d/#{user}'; sudo rm /tmp/sudoers#{user}"
+            cmd = "if [ -f \"/etc/sudoers.d/#{user}\" ]; then sudo cp /etc/sudoers.d/#{user} /tmp/sudoers#{user}; fi; sudo sh -c 'mkdir /etc/sudoers.d &>/dev/null'; sudo sh -c 'chown root:wheel /etc/sudoers.d'; sudo sh -c 'chmod 755 /etc/sudoers.d' ; sudo sh -c 'echo \"Defaults:#{user} !requiretty\" >> /tmp/sudoers#{user}'; sudo sh -c 'echo \"#{user} ALL=NOPASSWD: ALL\" >> /tmp/sudoers#{user}'; sudo sh -c 'uniq /tmp/sudoers#{user} > /etc/sudoers.d/#{user}'; sudo sh -c 'chmod 440 /etc/sudoers.d/#{user}'; sudo rm /tmp/sudoers#{user}"
             ssh.open_channel do |channel|
               channel.request_pty do |ch, success|
                 raise StandardError, "Could not obtain pty" unless success
@@ -99,15 +99,13 @@ class Host
           raise StandardError, "User has no admin privileges, please add '#{user} ALL=NOPASSWD: ALL' to /etc/sudoers and try again" unless ret.strip == "1"
           ssh.exec!("rm /tmp/1")
         end
-
         #upload the ssh key
         ssh.scp.upload!("data/ssh_key.pub", "/tmp/ssh_key.pub")
-        ssh.exec "mkdir -p $HOME/.ssh && touch $HOME/.ssh/authorized_keys && mv $HOME/.ssh/authorized_keys /tmp/authorized_keys && cat /tmp/ssh_key.pub >> /tmp/authorized_keys && uniq /tmp/authorized_keys > $HOME/.ssh/authorized_keys && chmod 700 $HOME/.ssh/authorized_keys && rm /tmp/ssh_key.pub && rm /tmp/authorized_keys"
+        ssh.exec "mkdir -p $HOME/.ssh && touch $HOME/.ssh/authorized_keys && mv $HOME/.ssh/authorized_keys /tmp/authorized_keys && cat /tmp/ssh_key.pub >> /tmp/authorized_keys && uniq /tmp/authorized_keys > $HOME/.ssh/authorized_keys && chmod 755 $HOME/.ssh && chmod 700 $HOME/.ssh/authorized_keys && rm /tmp/ssh_key.pub && rm /tmp/authorized_keys"
       end
 
       ret = Host.detect(host)
       raise StandardError, ret[1] if ret[0] == 5
-
       if !host.save
         raise StandardError, "Couldn't save the host" #couldn't save the object
       end
