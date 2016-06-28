@@ -63,12 +63,13 @@
         <div class="control-group" id="fields">
             <%@hostgroup.opt_vars.each do |var|%>
             <div class="controls">
-              <form class="input-prepend input-append" id="del_hostgroup_var" action='/hostgroup/del-var' method='post'>
+              <form class="input-prepend input-append" id="edit_hostgroup_var" action='/hostgroup/edit-var' method='post'>
                 <input type="hidden" name="hostgroup" value="<%=@hostgroup.name%>">
-                <input type="hidden" name="var_name" value="<%=var[0]%>">
-                <input type="text" class="span2 disabled" disabled="" name="dummy_var_name" value="<%=var[0]%>">
-                <input type="text" class="span2 disabled" disabled="" name="dummy_value" value="<%=var[1]%>">
-                <button class="btn btn-append" type="submit"><i class="icon-minus"></i></button>
+                <input type="hidden" name="old_var_name" value="<%=var[0]%>">
+                <input type="text" class="span2" name="var_name" value="<%=var[0]%>">
+                <input type="text" class="span3" name="var_value" value="<%=var[1]%>">
+                <button class="btn btn-append" type="submit" name="action" value="update"><i class="icon-save"></i></button>
+                <button class="btn btn-append" type="submit" name="action" value="delete"><i class="icon-minus"></i></button>
               </form>
             </div>
             <%end%>
@@ -78,7 +79,7 @@
             <div class="input-append">
               <input type="hidden" name="hostgroup" value="<%=@hostgroup.name%>">
               <input autocomplete="off" class="input span2" id="var_name" name="var_name" type="text" placeholder="<%=t('vars.name')%>" required/>
-              <input autocomplete="off" class="input span2" id="value" name="value" type="text" placeholder="<%=t('vars.value')%>" required/>
+              <input autocomplete="off" class="input span3" id="value" name="value" type="text" placeholder="<%=t('vars.value')%>" required/>
               <button class="btn btn-append" type="submit"><i class="icon-plus"></i></button>
             </div>
           </div>

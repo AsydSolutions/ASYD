@@ -57,10 +57,16 @@ class ASYD < Sinatra::Application
     redirect to redir
   end
 
-  post '/hostgroup/del-var' do
+  post '/hostgroup/edit-var' do
     status 200
-    hostgroup = Hostgroup.first(:name => params['hostgroup'])
-    hostgroup.del_var(params['var_name'])
+    if params['action'] == "delete"
+      hostgroup = Hostgroup.first(:name => params['hostgroup'])
+      hostgroup.del_var(params['old_var_name'])
+    else
+      hostgroup = Hostgroup.first(:name => params['hostgroup'])
+      hostgroup.del_var(params['old_var_name'])
+      hostgroup.add_var(params['var_name'], params['var_value'])
+    end
     redir = '/hostgroup/'+params['hostgroup']
     redirect to redir
   end
