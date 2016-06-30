@@ -1039,16 +1039,27 @@ class Deploy
       else
         if line.match(/<%VAR:.+%>/i)
           vars = line.scan(/<%VAR:(.+?)%>/i)
-          vars.each do |varname|
-            varname = varname[0].strip
-            if !host.opt_vars[varname].nil?
-              line.gsub!(/<%VAR:#{Regexp.escape(varname)}%>/i, host.opt_vars[varname])
+          vars.each do |varcontent|
+            varcontent = varcontent[0]
+            # Check for default variable value (<%VAR:myvar, default: value%>)
+            if varcontent.match(/^(.+),\s?default:\s?(.*)/i)
+              defvalue = varcontent.match(/^(.+),\s?default:\s?(.*)/i)
+              varname = defvalue[1].strip
+              defvalue = defvalue[2].strip
             else
+              varname = varcontent
+            end
+            if !host.opt_vars[varname].nil?
+              line.gsub!(/<%VAR:#{Regexp.escape(varcontent)}%>/i, host.opt_vars[varname])
+            else
+              use_defvalue = true unless defvalue.nil?
               host.hostgroups.each do |hostgroup|
                 if !hostgroup.opt_vars[varname].nil?
-                  line.gsub!(/<%VAR:#{Regexp.escape(varname)}%>/i, hostgroup.opt_vars[varname])
+                  line.gsub!(/<%VAR:#{Regexp.escape(varcontent)}%>/i, hostgroup.opt_vars[varname])
+                  use_defvalue = false
                 end
               end
+              line.gsub!(/<%VAR:#{Regexp.escape(varcontent)}%>/i, defvalue) if use_defvalue
             end
           end
         end
