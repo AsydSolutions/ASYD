@@ -40,7 +40,7 @@
 										<% elsif members_status[:warning] != 0 %>
 											<a data-toggle="collapse" href="#collapse<%=group.name%>" data-placement="right" data-original-title="<%=members_status[:warning]%> host(s) on this group has issues" style="font-size: 8pt; color: #ffffff;" class="badge badge-warning hint ">Crit: <%=members_status[:critical]%> / Warn: <%=members_status[:warning]%> / Total: <%=members_status[:total]%></a>
 										<% else %>
-											<a data-toggle="collapse" href="#collapse<%=group.name%>" data-placement="right" data-original-title="critical / warning / total" style="font-size: 8pt; color: #ffffff;" class="badge badge-success hint">Crit: <%=members_status[:critical]%> / Warn: <%=members_status[:warning]%> / Total: <%=members_status[:total]%></a>
+											<a data-toggle="collapse" href="#collapse<%=group.name%>" style="font-size: 8pt; color: #ffffff;" class="badge badge-success hint">Crit: <%=members_status[:critical]%> / Warn: <%=members_status[:warning]%> / Total: <%=members_status[:total]%></a>
 										<% end %>
 									</div>
 									<div id="collapse<%=group.name%>" class="accordion-body collapse accordion-invisible">
