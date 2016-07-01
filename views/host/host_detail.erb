@@ -50,12 +50,13 @@
 	  <% unless @host.opt_vars.nil? %>
             <%@host.opt_vars.each do |var|%>
             <div class="controls">
-              <form class="input-prepend input-append" id="del_host_var" action='/host/del-var' method='post'>
+              <form class="input-prepend input-append" id="edit_host_var" action='/host/edit-var' method='post'>
                 <input type="hidden" name="hostname" value="<%=@host.hostname%>">
-                <input type="hidden" name="var_name" value="<%=var[0]%>">
-                <input type="text" class="span2 disabled" disabled="" name="dummy_var_name" value="<%=var[0]%>">
-                <input type="text" class="span2 disabled" disabled="" name="dummy_value" value="<%=var[1]%>">
-                <button class="btn btn-append" type="submit"><i class="icon-minus"></i></button>
+                <input type="hidden" name="old_var_name" value="<%=var[0]%>">
+                <input type="text" class="span3" name="var_name" value="<%=var[0]%>">
+                <input type="text" class="span3" name="var_value" value="<%=var[1]%>">
+                <button class="btn btn-append" type="submit" name="action" value="update"><i class="icon-save"></i></button>
+                <button class="btn btn-append" type="submit" name="action" value="delete"><i class="icon-minus"></i></button>
               </form>
             </div>
             <%end%>
@@ -65,8 +66,8 @@
             <div class="controls">
             <div class="input-append">
               <input type="hidden" name="hostname" value="<%=@host.hostname%>">
-              <input autocomplete="off" class="input span2" id="var_name" name="var_name" type="text" placeholder="<%=t('vars.name')%>" required/>
-              <input autocomplete="off" class="input span2" id="value" name="value" type="text" placeholder="<%=t('vars.value')%>" required/>
+              <input autocomplete="off" class="input span3" id="var_name" name="var_name" type="text" placeholder="<%=t('vars.name')%>" required/>
+              <input autocomplete="off" class="input span3" id="value" name="value" type="text" placeholder="<%=t('vars.value')%>" required/>
               <button class="btn btn-append" type="submit"><i class="icon-plus"></i></button>
             </div>
           </div>
@@ -137,26 +138,26 @@
   </form>
 </div>
 
-<div id="allvars" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="All Vars" aria-hidden="true">
+<div id="allvars" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="All Vars" aria-hidden="true" style="width: 80%; margin-left:-40%;">
   <div class="modal-header">
     <a type="button" class="close" data-dismiss="modal" aria-hidden="true">×</a>
     <h3 id="allvarsLabel"><%=t('dialog.allvars.title')%></h3>
   </div>
   <div class="modal-body">
     <dl class="dl-horizontal">
-      <dt style="margin-left: 25px">Variable</dt><dd style="margin-left: 175px">Value</dd><br>
-      <dt style="margin-left: 25px"><%%ASYD%></dt><dd style="margin-left: 175px"><%=@status.system_status == "ok" ? @host.get_asyd_ip : "Host down, try again later"%></dd>
-      <dt style="margin-left: 25px"><%%HOSTNAME%></dt><dd style="margin-left: 175px"><%=@host.hostname%></dd>
-      <dt style="margin-left: 25px"><%%IP%></dt><dd style="margin-left: 175px"><%=@host.ip%></dd>
-      <dt style="margin-left: 25px"><%%SSH_PORT%></dt><dd style="margin-left: 175px"><%=@host.ssh_port%></dd>
-      <dt style="margin-left: 25px"><%%DIST%></dt><dd style="margin-left: 175px"><%=@host.dist%></dd>
-      <dt style="margin-left: 25px"><%%DIST_VER%></dt><dd style="margin-left: 175px"><%=@host.dist_ver%></dd>
-      <dt style="margin-left: 25px"><%%ARCH%></dt><dd style="margin-left: 175px"><%=@host.arch%></dd>
-      <dt style="margin-left: 15px"><%%PGK_MANAGER%></dt><dd style="margin-left: 175px"><%=@host.pkg_mgr%></dd>
-      <dt style="margin-left: 15px"><%%SVC_MANAGER%></dt><dd style="margin-left: 175px"><%= @host.svc_mgr ? @host.svc_mgr : "not set - recheck system info" %></dd><br>
+      <dt style="float: left; width: 40%;">Variable</dt><dd style="float: left; width: 50%;">Value</dd><br>
+      <dt style="float: left; width: 40%;"><%%ASYD%></dt><dd style="float: left; width: 50%;"><%=@status.system_status == "ok" ? @host.get_asyd_ip : "Host down, try again later"%></dd>
+      <dt style="float: left; width: 40%;"><%%HOSTNAME%></dt><dd style="float: left; width: 50%;"><%=@host.hostname%></dd>
+      <dt style="float: left; width: 40%;"><%%IP%></dt><dd style="float: left; width: 50%;"><%=@host.ip%></dd>
+      <dt style="float: left; width: 40%;"><%%SSH_PORT%></dt><dd style="float: left; width: 50%;"><%=@host.ssh_port%></dd>
+      <dt style="float: left; width: 40%;"><%%DIST%></dt><dd style="float: left; width: 50%;"><%=@host.dist%></dd>
+      <dt style="float: left; width: 40%;"><%%DIST_VER%></dt><dd style="float: left; width: 50%;"><%=@host.dist_ver%></dd>
+      <dt style="float: left; width: 40%;"><%%ARCH%></dt><dd style="float: left; width: 50%;"><%=@host.arch%></dd>
+      <dt style="float: left; width: 40%;"><%%PGK_MANAGER%></dt><dd style="float: left; width: 50%;"><%=@host.pkg_mgr%></dd>
+      <dt style="float: left; width: 40%;"><%%SVC_MANAGER%></dt><dd style="float: left; width: 50%;"><%= @host.svc_mgr ? @host.svc_mgr : "not set - recheck system info" %></dd><br>
       <% unless @host.opt_vars.nil? %>
 	<%@host.opt_vars.each do |var|%>
-          <dt style="margin-left: 15px">&lt;%VAR:<%=var[0]%>%&gt;</dt><dd style="margin-left: 175px"><%=var[1]%></dd>
+          <dt style="float: left; width: 40%;">&lt;%VAR:<%=var[0]%>%&gt;</dt><dd style="float: left; width: 50%;"><%=var[1]%></dd>
         <%end%>
       <%end%>
     </dl>

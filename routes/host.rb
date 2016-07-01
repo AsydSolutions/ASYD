@@ -66,11 +66,19 @@ class ASYD < Sinatra::Application
     redirect to redir
   end
 
-  post '/host/del-var' do
+  post '/host/edit-var' do
     status 200
-    HOSTEX.synchronize do
-      host = Host.first(:hostname => params['hostname'])
-      host.del_var(params['var_name'])
+    if params['action'] == "delete"
+      HOSTEX.synchronize do
+        host = Host.first(:hostname => params['hostname'])
+        host.del_var(params['old_var_name'])
+      end
+    else
+      HOSTEX.synchronize do
+        host = Host.first(:hostname => params['hostname'])
+        host.del_var(params['old_var_name'])
+        host.add_var(params['var_name'], params['var_value'])
+      end
     end
     redir = '/host/'+params['hostname']
     redirect to redir

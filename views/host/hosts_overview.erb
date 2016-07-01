@@ -35,10 +35,12 @@
 								<div class="accordion-group accordion-invisible">
 									<div class="accordion-heading accordion-invisible">
 										<% members_status = group.members_status %>
-										<% if members_status[:failed] == 0 %>
-											<a data-toggle="collapse" href="#collapse<%=group.name%>" style="font-size: 8pt; color: #ffffff;" class="badge badge-success"><%=members_status[:sane]%>/<%=members_status[:total]%></a>
+										<% if members_status[:critical] != 0 %>
+											<a data-toggle="collapse" href="#collapse<%=group.name%>" data-placement="right" data-original-title="<%=members_status[:critical]%> host(s) on this group are down" style="font-size: 8pt; color: #ffffff;" class="badge badge-error hint ">Crit: <%=members_status[:critical]%> / Warn: <%=members_status[:warning]%> / Total: <%=members_status[:total]%></a>
+										<% elsif members_status[:warning] != 0 %>
+											<a data-toggle="collapse" href="#collapse<%=group.name%>" data-placement="right" data-original-title="<%=members_status[:warning]%> host(s) on this group has issues" style="font-size: 8pt; color: #ffffff;" class="badge badge-warning hint ">Crit: <%=members_status[:critical]%> / Warn: <%=members_status[:warning]%> / Total: <%=members_status[:total]%></a>
 										<% else %>
-											<a data-toggle="collapse" href="#collapse<%=group.name%>" data-placement="right" data-original-title="<%=members_status[:failed]%> host(s) on this group has issues" style="font-size: 8pt; color: #ffffff;" class="badge badge-warning hint "><%=members_status[:sane]%>/<%=members_status[:total]%></a>
+											<a data-toggle="collapse" href="#collapse<%=group.name%>" style="font-size: 8pt; color: #ffffff;" class="badge badge-success hint">Crit: <%=members_status[:critical]%> / Warn: <%=members_status[:warning]%> / Total: <%=members_status[:total]%></a>
 										<% end %>
 									</div>
 									<div id="collapse<%=group.name%>" class="accordion-body collapse accordion-invisible">
