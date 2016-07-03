@@ -42,6 +42,7 @@ require_relative "monitor"
 DataMapper.setup(:hosts_db,  "sqlite3:data/db/hosts.db") #load the hosts database
 require_relative "host/model"
 require_relative "host/public_functions"
+require_relative "host/initializer"
 require_relative "host/analyzer"
 require_relative "hostgroup/model"
 require_relative "hostgroup/public_functions"
@@ -51,8 +52,12 @@ require_relative "user"
 require_relative "team"
 DataMapper.setup(:status_db, "sqlite3:data/db/status.db") #load the status database
 require_relative "status"
+
+# Load email routines
 DataMapper.setup(:config_db, "sqlite3:data/db/config.db") #load the config database
-require_relative "email"
+require_relative "email/model"
+require_relative "email/public_functions"
+
 DataMapper.setup(:stats_db, "sqlite3:data/db/stats.db") #load the stats database
 require_relative "stats"
 DataMapper.finalize
