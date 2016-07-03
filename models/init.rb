@@ -23,7 +23,14 @@ require_relative "lib/asyd-wal"
 require_relative "lib/dmon"
 require_relative "misc"
 require_relative "setup"
-require_relative "deploy"
+
+# Load all deployment routines
+require_relative "deploy/public_functions"
+require_relative "deploy/main_routine"
+require_relative "deploy/parser"
+require_relative "deploy/installer"
+require_relative "deploy/svc_manager"
+
 DataMapper.setup(:tasks_db,  "sqlite3:data/db/tasks.db") #load the tasks database
 require_relative "task"
 DataMapper.setup(:notifications_db,  "sqlite3:data/db/notifications.db") #load the notifications database
