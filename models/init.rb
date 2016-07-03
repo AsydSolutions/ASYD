@@ -35,8 +35,14 @@ DataMapper.setup(:tasks_db,  "sqlite3:data/db/tasks.db") #load the tasks databas
 require_relative "task"
 DataMapper.setup(:notifications_db,  "sqlite3:data/db/notifications.db") #load the notifications database
 require_relative "notification"
+
+# Load monitoring routines
 DataMapper.setup(:monitoring_db,  "sqlite3:data/db/monitoring.db") #load the monitoring database
-require_relative "monitor"
+require_relative "monitor/model"
+require_relative "monitor/host_functions"
+require_relative "monitor/hostgroup_functions"
+require_relative "monitor/public_functions"
+require_relative "monitor/background"
 
 # Load host and hostgroup routines
 DataMapper.setup(:hosts_db,  "sqlite3:data/db/hosts.db") #load the hosts database
