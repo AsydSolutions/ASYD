@@ -36,6 +36,13 @@ class Deploy
                   use_defvalue = false
                 end
               end
+              @for_loop.each do |item|
+                if item[1][:vars].length > 0
+                  var = item[1][:vars].first
+                  line.gsub!(/<%VAR:#{Regexp.escape(var.keys[0])}%>/i, var.values[0])
+                  use_defvalue = false
+                end
+              end
               line.gsub!(/<%VAR:#{Regexp.escape(varcontent)}%>/i, defvalue) if use_defvalue
             end
           end
@@ -261,5 +268,37 @@ class Deploy
       return false
     end
   end
-  
+
+  # Get all the sub-variables on a for loop
+  #
+  def self.parse_var_array(host, search_key, new_varname)
+    hash = Array.new
+    regex = "^"+search_key.match(/<%VAR:(.+?)%>/i)[1].strip
+    (regex.gsub!(/\[/, "\\["); regex.gsub!(/\*/, ".*"); regex.gsub!(/\]/, "?\\]"))
+    matching_vars = host.opt_vars.select { |key, value| key.to_s.match(Regexp.new(regex)) }
+    if !matching_vars.nil? and !matching_vars.empty?
+      i = 0
+      matching_vars.each {|key, value|
+        hash[i] = {}
+        hash[i][new_varname+key.gsub(Regexp.new(regex), "")] = value
+        i = i+1
+      }
+      return hash
+    else
+      host.hostgroups.each do |hostgroup|
+        matching_vars = hostgroup.opt_vars.select { |key, value| key.to_s.match(/^regex/) }
+        if !matching_vars.nil? and !matching_vars.empty?
+          i = 0
+          matching_vars.each {|key, value|
+            hash[i] = {}
+            hash[i][new_varname+key.gsub(Regexp.new(regex), "")] = value
+            i = i+1
+          }
+          return hash
+        end
+      end
+      return {:error => "Variable "+search_key+" not found on host of hostgroup"}
+    end
+  end
+
 end
