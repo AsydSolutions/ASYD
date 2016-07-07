@@ -3,12 +3,19 @@ source "https://rubygems.org"
 Encoding.default_external = Encoding::UTF_8
 Encoding.default_internal = Encoding::UTF_8
 
+if Gem::Version.new(RUBY_VERSION) >= Gem::Version.new('2.2.2')
+  gem "activesupport"
+  gem "unicorn"
+else
+  gem "activesupport", "4.2.6"
+  gem "unicorn", "5.0.1"
+end
+
 gem "sinatra"
 gem "net-ssh"
 gem "net-scp"
 gem "nokogiri"
 gem "sqlite3"
-gem "unicorn"
 gem "bcrypt"
 gem "redcarpet"
 gem "data_mapper"
@@ -20,6 +27,5 @@ gem "mail"
 gem "htmlentities"
 gem "chartkick"
 gem "i18n"
-gem "activesupport"
 gem "unicorn-worker-killer"
 gem "erubis"
