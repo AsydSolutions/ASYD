@@ -7,7 +7,7 @@ class Deploy
     begin
       level_if = 0
       level_nodoit = 0
-      @level_for = 0
+      level_for = 0
       @for_loop = {}
       gdoit = true #global doit, used for conditional blocks
       skip = false
@@ -25,20 +25,20 @@ class Deploy
           if gdoit
             new_varname = m[1].strip
             search_key = m[2].strip
-            @level_for = @level_for + 1
-            @for_loop[@level_for] = {}
-            @for_loop[@level_for][:line] = line_nr
-            @for_loop[@level_for][:vars] = parse_var_array(host, search_key, new_varname)
+            level_for = level_for + 1
+            @for_loop[level_for] = {}
+            @for_loop[level_for][:line] = line_nr
+            @for_loop[level_for][:vars] = parse_var_array(host, search_key, new_varname)
           end
           skip = true
         end
         # check for endfors
         if line.match(/^endfor$/i)
-          @for_loop[@level_for][:vars].shift if @for_loop[@level_for][:vars].length > 0 #consume first element after reaching endfor
-          if @for_loop[@level_for][:vars].length > 0
-            line_nr = @for_loop[@level_for][:line]
+          @for_loop[level_for][:vars].shift if @for_loop[level_for][:vars].length > 0 #consume first element after reaching endfor
+          if @for_loop[level_for][:vars].length > 0
+            line_nr = @for_loop[level_for][:line]
           else
-            @level_for = @level_for - 1
+            level_for = level_for - 1
           end
           skip = true
         end
