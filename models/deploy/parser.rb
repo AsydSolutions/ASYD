@@ -6,7 +6,7 @@ class Deploy
   # @param host [String] host to take the data from
   # @param line [String] line to be parsed
   # @return line [String] parsed line
-  def self.parse(host, line)
+  def self.parse(host, line, for_loop = nil)
     asyd = host.get_asyd_ip
     if !line.start_with?("#") #the line is a comment
       if line.match(/^<%MONITOR:.+%>/i)
@@ -36,7 +36,8 @@ class Deploy
                   use_defvalue = false
                 end
               end
-              @for_loop.each do |item|
+              the_loop = for_loop.nil? ? @for_loop : for_loop
+              the_loop.each do |item|
                 if item[1][:vars].length > 0
                   var = item[1][:vars].first
                   line.gsub!(/<%VAR:#{Regexp.escape(var.keys[0])}%>/i, var.values[0])
@@ -72,12 +73,19 @@ class Deploy
       noparse = false
       level_if = 0
       level_nodoit = 0
+      level_for = 0
+      for_loop = {}
+      line_nr = 0
       doit = true
       skip = false
       newconf = Tempfile.new('conf')
-      File.open(cfg, "r").each do |line|
+      f = IO.readlines(cfg)
+      total_lines = f.count
+      while line_nr < total_lines do
+        line = f[line_nr].strip
+        # Check for "if" statements
         if !noparse
-          m = line.strip.match(/^<% ?if (.+)%>$/)
+          m = line.strip.match(/^<% ?if (.+)%>$/i)
           if !m.nil?
             # ignore conditions if you are on a nodoit
             if doit
@@ -88,7 +96,7 @@ class Deploy
             skip = true
           end
           # check for endifs
-          if line.strip.match(/^<% ?endif ?%>$/)
+          if line.strip.match(/^<% ?endif ?%>$/i)
             level_if = level_if - 1
             if level_nodoit == level_if
               doit = true
@@ -96,22 +104,50 @@ class Deploy
             skip = true
           end
         end
+        # Check for "for" statements
         if !noparse
-          if line.strip.match(/^<% ?noparse ?%>$/)
+          m = line.match(/^<% ?for (.+) in (.+)%>$/i)
+          if !m.nil?
+            if doit
+              new_varname = m[1].strip
+              search_key = m[2].strip
+              level_for = level_for + 1
+              for_loop[level_for] = {}
+              for_loop[level_for][:line] = line_nr
+              for_loop[level_for][:vars] = parse_var_array(host, search_key, new_varname)
+            end
+            skip = true
+          end
+          if line.match(/^<% ?endfor ?%>$/i)
+            for_loop[level_for][:vars].shift if for_loop[level_for][:vars].length > 0 #consume first element after reaching endfor
+            if for_loop[level_for][:vars].length > 0
+              line_nr = for_loop[level_for][:line]
+            else
+              level_for = level_for - 1
+            end
+            skip = true
+          end
+        end
+        # Check for "noparse" statements
+        if !noparse
+          if line.strip.match(/^<% ?noparse ?%>$/i)
             noparse = true
             skip = true
           end
         else
-          if line.strip.match(/^<% ?\/noparse ?%>$/)
+          if line.strip.match(/^<% ?\/noparse ?%>$/i)
             noparse = false
             skip = true
           end
         end
+        # Parse the configuration line
         if doit && !skip
-          line = parse(host, line) unless noparse
-          newconf << line
+          line = parse(host, line, for_loop) unless noparse
+          newconf << line+"\n"
         end
         skip = false
+        #Increase line_nr to read next line
+        line_nr = line_nr + 1
       end
     ensure
       newconf.close
