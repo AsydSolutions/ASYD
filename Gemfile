@@ -8,7 +8,7 @@ if Gem::Version.new(RUBY_VERSION) >= Gem::Version.new('2.2.2')
   gem "unicorn"
 else
   gem "activesupport", "4.2.6"
-  gem "unicorn", "5.0.1"
+  gem "unicorn", "4.9.0"
 end
 
 gem "sinatra"

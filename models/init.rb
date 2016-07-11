@@ -23,23 +23,47 @@ require_relative "lib/asyd-wal"
 require_relative "lib/dmon"
 require_relative "misc"
 require_relative "setup"
-require_relative "deploy"
+
+# Load all deployment routines
+require_relative "deploy/public_functions"
+require_relative "deploy/main_routine"
+require_relative "deploy/parser"
+require_relative "deploy/installer"
+require_relative "deploy/svc_manager"
+
 DataMapper.setup(:tasks_db,  "sqlite3:data/db/tasks.db") #load the tasks database
 require_relative "task"
 DataMapper.setup(:notifications_db,  "sqlite3:data/db/notifications.db") #load the notifications database
 require_relative "notification"
+
+# Load monitoring routines
 DataMapper.setup(:monitoring_db,  "sqlite3:data/db/monitoring.db") #load the monitoring database
-require_relative "monitor"
+require_relative "monitor/model"
+require_relative "monitor/host_functions"
+require_relative "monitor/hostgroup_functions"
+require_relative "monitor/public_functions"
+require_relative "monitor/background"
+
+# Load host and hostgroup routines
 DataMapper.setup(:hosts_db,  "sqlite3:data/db/hosts.db") #load the hosts database
-require_relative "host"
-require_relative "hostgroup"
+require_relative "host/model"
+require_relative "host/public_functions"
+require_relative "host/initializer"
+require_relative "host/analyzer"
+require_relative "hostgroup/model"
+require_relative "hostgroup/public_functions"
+
 DataMapper.setup(:users_db,  "sqlite3:data/db/users.db") #load the users database
 require_relative "user"
 require_relative "team"
 DataMapper.setup(:status_db, "sqlite3:data/db/status.db") #load the status database
 require_relative "status"
+
+# Load email routines
 DataMapper.setup(:config_db, "sqlite3:data/db/config.db") #load the config database
-require_relative "email"
+require_relative "email/model"
+require_relative "email/public_functions"
+
 DataMapper.setup(:stats_db, "sqlite3:data/db/stats.db") #load the stats database
 require_relative "stats"
 DataMapper.finalize
