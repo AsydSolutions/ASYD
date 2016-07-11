@@ -17,6 +17,9 @@ class Deploy
       total_lines = f.count
       while line_nr < total_lines do
         line = f[line_nr].strip
+        varname = nil
+        json_vars = nil
+        xml_vars = nil
 
         # Check for deploy "for" (foreach) loops
         m = line.match(/^for (.+) in (.+)$/i)
