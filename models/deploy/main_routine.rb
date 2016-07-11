@@ -388,19 +388,31 @@ class Deploy
         # DEPLOY BLOCK
         elsif line.start_with?("deploy")
           doit = true
-          m = line.match(/^deploy if (.+)(?<!var):/i)
+          dep_host = host
+          m = line.match(/^deploy.* if (.+)(?<!var):/i)
           if !m.nil?
-            doit = check_condition(m, host)
+            dep_host = Host.first(:hostname => line.match(/^deploy (.+) if/i)[1].strip) if line.match(/^deploy (.+) if/i)
+            if dep_host.nil?  #the defined host doesn't exists
+              error = "Host "+line.match(/^deploy (.+) if/i)[1].strip+" not found"
+              raise FormatException, error
+            end
+            doit = check_condition(m, dep_host)
+          else
+            dep_host = Host.first(:hostname => line.match(/^deploy (.+):/i)[1].strip) if line.match(/^deploy (.+):/i)
+            if dep_host.nil?  #the defined host doesn't exists
+              error = "Host "+line.match(/^deploy (.+):/i)[1].strip+" not found"
+              raise FormatException, error
+            end
           end
           if doit
             line = line.split(/(?<!var):/i, 2)
             deploys = line[1].split(' ')
             deploys.each do |deploy|
-              ret = Deploy.launch(host, deploy, task, dry_run, true)
+              ret = Deploy.launch(dep_host, deploy, task, dry_run, true)
               if ret == 1 and !dry_run
-                msg = "Deploy "+deploy+" successfully deployed on "+host.hostname
+                msg = "Deploy "+deploy+" successfully deployed on "+dep_host.hostname
                 NOTEX.synchronize do
-                  Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
+                  Notification.create(:type => :info, :dismiss => true, :host => dep_host.hostname, :message => msg, :task => task)
                 end
               elsif ret[0] == 5
                 raise FormatException, ret[1]
@@ -414,19 +426,31 @@ class Deploy
         # UNDEPLOY BLOCK
         elsif line.start_with?("undeploy")
           doit = true
-          m = line.match(/^undeploy if (.+)(?<!var):/i)
+          dep_host = host
+          m = line.match(/^undeploy.* if (.+)(?<!var):/i)
           if !m.nil?
-            doit = check_condition(m, host)
+            dep_host = Host.first(:hostname => line.match(/^undeploy (.+) if/i)[1].strip) if line.match(/^undeploy (.+) if/i)
+            if dep_host.nil?  #the defined host doesn't exists
+              error = "Host "+line.match(/^undeploy (.+) if/i)[1].strip+" not found"
+              raise FormatException, error
+            end
+            doit = check_condition(m, dep_host)
+          else
+            dep_host = Host.first(:hostname => line.match(/^undeploy (.+):/i)[1].strip) if line.match(/^undeploy (.+):/i)
+            if dep_host.nil?  #the defined host doesn't exists
+              error = "Host "+line.match(/^undeploy (.+):/i)[1].strip+" not found"
+              raise FormatException, error
+            end
           end
           if doit
             line = line.split(/(?<!var):/i, 2)
             deploys = line[1].split(' ')
             deploys.each do |deploy|
-              ret = Deploy.undeploy(host, deploy, task, dry_run, true)
+              ret = Deploy.undeploy(dep_host, deploy, task, dry_run, true)
               if ret == 1 and !dry_run
-                msg = "Deploy "+deploy+" undeployed from "+host.hostname
+                msg = "Deploy "+deploy+" undeployed from "+dep_host.hostname
                 NOTEX.synchronize do
-                  Notification.create(:type => :info, :dismiss => true, :host => host.hostname, :message => msg, :task => task)
+                  Notification.create(:type => :info, :dismiss => true, :host => dep_host.hostname, :message => msg, :task => task)
                 end
               elsif ret[0] == 5
                 raise FormatException, ret[1]
