@@ -5,10 +5,8 @@ Encoding.default_internal = Encoding::UTF_8
 
 if Gem::Version.new(RUBY_VERSION) >= Gem::Version.new('2.2.2')
   gem "activesupport"
-  gem "unicorn"
 else
   gem "activesupport", "4.2.6"
-  gem "unicorn", "4.9.0"
 end
 
 gem "sinatra"
@@ -27,5 +25,6 @@ gem "mail"
 gem "htmlentities"
 gem "chartkick"
 gem "i18n"
+gem "unicorn"
 gem "unicorn-worker-killer"
 gem "erubis"
