@@ -27,7 +27,7 @@ class Deploy
               varname = varcontent
             end
             if !host.opt_vars[varname].nil?
-              line.gsub!(/<%VAR:#{Regexp.escape(varcontent)}%>/i, host.opt_vars[varname])
+		line.gsub!(/<%VAR:#{Regexp.escape(varcontent)}%>/i, host.opt_vars[varname])
             else
               use_defvalue = true unless defvalue.nil?
               host.hostgroups.each do |hostgroup|
@@ -265,7 +265,7 @@ class Deploy
   def self.evaluate_condition(st, host)
     st = parse(host, st)
 
-    condition = st.match(/(.+)(==|!=|>=|<=)(.+)/)
+    condition = st.match(/(.*)(==|!=|>=|<=)(.*)/)
     case condition[2]
     when "=="
       if condition[1].nan? || condition[3].nan?
