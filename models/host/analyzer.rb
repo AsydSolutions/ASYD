@@ -131,6 +131,7 @@ class Host
 
       end
     rescue => e
+      e.backtrace.each { |etrace| puts etrace }
       return [5, e.message]
     end
   end

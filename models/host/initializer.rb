@@ -111,6 +111,7 @@ class Host
       NOTEX.synchronize do
         Notification.create(:type => :error, :sticky => false, :message => error)
       end
+      e.backtrace.each { |etrace| puts etrace }
       host.delete(false) unless host.nil?
       return false
     end
