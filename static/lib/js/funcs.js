@@ -332,7 +332,7 @@ var getTaskNotifications = function (task_id, refreshing) {
     });
     $('#taskNotifications').html(data);
     for (var index in accordions){
-      $( '.accordion-body' ).eq(index).attr('class', accordions[index]);
+      $('.accordion-body').eq(index).attr('class', accordions[index]);
     }
     if (document.getElementById('finished') !== null) {
       if (refreshing) {
@@ -411,5 +411,5 @@ var acknowledgeMonitoringNotification = function (msg_id) {
 };
 
 var load_spinner = function () {
-  $('body').append( '<div class="spinner-container"><div class="spinner"></div></div>' );
+  $('body').append('<div class="spinner-container"><div class="spinner"></div></div>');
 };
