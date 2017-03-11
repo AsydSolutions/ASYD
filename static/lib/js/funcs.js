@@ -326,12 +326,12 @@ var getTaskNotifications = function (task_id, refreshing) {
   $.get('/notifications/bytask/' + task_id, function (data) {
     var accordions = [];
     $('.accordion-body').each(function(index) {
-      if ($(this).attr('id') !== 'nocollapse'){
+      if ($(this).attr('id') !== 'nocollapse') {
         accordions[index] = $(this).attr('class');
       }
     });
     $('#taskNotifications').html(data);
-    for (var index in accordions){
+    for (var index in accordions) {
       $('.accordion-body').eq(index).attr('class', accordions[index]);
     }
     if (document.getElementById('finished') !== null) {
@@ -351,7 +351,7 @@ var reloadTasks = function () {
     if ($('#active tr .dataTables_empty').length !== 0) {
       currlength = 0;
     }
-    if (currlength !== newDoc.find('#active tr').length){
+    if (currlength !== newDoc.find('#active tr').length) {
       location.reload();
     }
   });
