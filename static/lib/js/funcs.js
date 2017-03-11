@@ -4,7 +4,7 @@ $(function () {
     var scroller_anchor = $('.scroller_anchor').offset().top;
 
     // Check if the user has scrolled and the current position is after the scroller start location and if its not already fixed at the top
-    if ($(this).scrollTop() >= scroller_anchor && $('.subnavbar-fixed-top').css('position') != 'fixed') {
+    if ($(this).scrollTop() >= scroller_anchor && $('.subnavbar-fixed-top').css('position') !== 'fixed') {
       // Change the CSS of the scroller to hilight it and fix it at the top of the screen.
       $('.subnavbar-fixed-top').css({
         'left': '0',
@@ -15,7 +15,7 @@ $(function () {
       });
       // Changing the height of the scroller anchor to that of scroller so that there is no change in the overall height of the page.
       $('.scroller_anchor').css('height', '50px');
-    } else if ($(this).scrollTop() < scroller_anchor && $('.subnavbar-fixed-top').css('position') != 'relative') {
+    } else if ($(this).scrollTop() < scroller_anchor && $('.subnavbar-fixed-top').css('position') !== 'relative') {
       // If the user has scrolled back to the location above the scroller anchor place it back into the content.
 
       // Change the height of the scroller anchor to 0 and now we will be adding the scroller back to the content.
@@ -42,7 +42,7 @@ $(function () {
   });
 
   $('.hint').tooltip();
-  if (location.pathname == '/') {
+  if (location.pathname === '/') {
     $('.update-asyd').tooltip('show');
   }
 
@@ -149,7 +149,7 @@ $(function () {
       $('.modal').removeClass('fade');
     }
     var hash = window.location.hash;
-    if (hash.substring(1) == 'addServer') {
+    if (hash.substring(1) === 'addServer') {
       $('#addServer').modal('show');
       window.location.hash = '';
     }
@@ -249,7 +249,7 @@ $(function () {
       button.live('click', function () {
           hidden.val($(this).val());
       });
-      if(button.val() == hidden.val()) {
+      if(button.val() === hidden.val()) {
         button.addClass('active');
       }
     });
