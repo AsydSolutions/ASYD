@@ -9,7 +9,9 @@ end
 
 require 'rubygems'
 require 'i18n'
-
+require 'bundler'
+# Load gems in Gemfile
+Bundler.require
 # Unicorn self-process killer
 require 'unicorn/worker_killer'
 # Max requests per worker
