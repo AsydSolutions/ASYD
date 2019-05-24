@@ -1,2 +1,4 @@
 data
+log
+.asyd.pid
 Gemfile.lock
