@@ -1,5 +1,5 @@
 module Dmon
-  DAEMONS = ['monitoring', 'awal', 'dmon']
+  DAEMONS = ['monitoring', 'awal', 'dmon', 'gitfetch']
 
   def self.init
     DAEMONS.each do |daemon|
@@ -103,6 +103,20 @@ module Dmon
           # STDOUT.reopen '/dev/null', 'a'
           # STDERR.reopen STDOUT
           Dmon::handler
+        end
+        setpid(daemon, pid)
+        exit
+      end
+    elsif daemon == 'gitfetch'
+      # The Git Deploy fetcher
+      Spork.spork do
+        Process.setsid
+        pid = Spork.spork do
+          $0='ASYD Git Fetcher'
+          # STDIN.reopen '/dev/null'
+          # STDOUT.reopen '/dev/null', 'a'
+          # STDERR.reopen STDOUT
+          GitFetch::background
         end
         setpid(daemon, pid)
         exit

@@ -1,6 +1,11 @@
 class ASYD < Sinatra::Application
   get '/settings' do
     if user.is_admin?
+      git = File.file?('data/git_settings') ? JSON.parse(File.read('data/git_settings')) : {}
+      @git_url = git['url'].nil? ? "" : git['url']
+      @git_branch = git['branch'].nil? ? "master" : git['branch']
+      @git_path = git['path'].nil? ? "/" : git['path']
+      @git_ssh_key = git['ssh_key'].nil? ? "" : git['ssh_key']
       cfg = Email.first_or_create
       @method = cfg.method
       @path = cfg.path
@@ -62,6 +67,15 @@ class ASYD < Sinatra::Application
     else
       not_found
     end
+  end
+
+  post '/settings/git' do
+    git_settings = {'url' => params['git_url'], 'path' => params['git_path'], 'branch' => params['git_branch']}
+    git_settings['ssh_key'] = params['git_ssh_key'].nil? ? "" : params['git_ssh_key']
+    File.open('data/git_settings', "w") do |f|
+        f.write(git_settings.to_json)
+    end
+    redirect to "/settings"    
   end
 
   get '/settings/user' do
